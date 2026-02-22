@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Azul",
-  description: "Made with love for my love",
+  description: "Azul online game",
 };
 
 export default function RootLayout({

@@ -1,0 +1,17 @@
+.snowflakes {
+    position: relative;
+    width: 570px;
+    height: 570px;
+    border: 6px solid rgba(88, 45, 4, 0.62);
+    border-radius: 50%;
+}
+
+.snowflake {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+.rhombus {
+    position: absolute;
+}

@@ -1,0 +1,72 @@
+.scoreline {
+    background:
+        linear-gradient(
+            135deg,
+            #f5e6c8 0%,
+            #ebd5a7 25%,
+            #f0deb5 50%,
+            #e8cfa0 75%,
+            #f2ddb3 100%
+        );
+    color: #5c3d1a;
+    font-weight: bold;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+
+    border: 3px solid #c4a265;
+    outline: 2px solid #d4b87c;
+    outline-offset: 2px;
+
+    box-shadow:
+        inset 0 0 15px rgba(139, 90, 43, 0.15),
+        inset 0 0 4px rgba(139, 90, 43, 0.1),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+
+    padding: 3px 7px;
+    position: relative;
+}
+
+.scoreline::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(139, 90, 43, 0.03) 3px,
+            rgba(139, 90, 43, 0.03) 4px
+        );
+    pointer-events: none;
+}
+
+.score-cell {
+    position: relative;
+    z-index: 1;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.current_score {
+    position: relative;
+    font-weight: 900;
+    color: #9c2a00;
+}
+
+.current_score::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 14px solid #0f0f0f;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    z-index: 10;
+}

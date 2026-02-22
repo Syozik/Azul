@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import { ANGLE, RHOMBUS_SIZE } from "../consts";
 import "./rhombus.css";
 
@@ -16,6 +18,8 @@ export function Rhombus({
     points: pointsCount,
     transformAngle = -30,
 }: RhombusProps) {
+    const [used, setUsed] = useState(false);
+
     const stroke = "#ffffff";
     const strokeWidth = 2;
 
@@ -44,7 +48,7 @@ export function Rhombus({
 
     return (
         <div
-            className={`rhombus points-${pointsCount}`}
+            className={`rhombus points-${pointsCount} ${used ? "rhombus_used" : ""}`}
             style={{
                 transform: `rotate(${transformAngle}rad)`,
                 transformOrigin: `${cx + strokeWidth / 2}px 0px`,
@@ -64,19 +68,29 @@ export function Rhombus({
                     stroke={stroke}
                     strokeWidth={strokeWidth}
                     transform={`translate(${strokeWidth / 2}, ${strokeWidth / 2})`}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                        setUsed(!used);
+                    }}
                 />
-                <text
-                    x={centerX}
-                    y={centerY}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill="#000000ff"
-                    fontSize={20}
-                    fontWeight="bold"
-                    transform={`rotate(180, ${centerX}, ${centerY})`}
-                >
-                    {pointsCount}
-                </text>
+                {!used && (
+                    <text
+                        x={centerX}
+                        y={centerY}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fill="#000000ff"
+                        fontSize={20}
+                        fontWeight="bold"
+                        transform={`rotate(180, ${centerX}, ${centerY})`}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                            setUsed(!used);
+                        }}
+                    >
+                        {pointsCount}
+                    </text>
+                )}
             </svg>
         </div>
     );

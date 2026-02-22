@@ -20,7 +20,12 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: #f6f3eb; /* fallback */
+  background-image: 
+    linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(200,190,170,0.1) 100%),
+    radial-gradient(circle at center, #fdfbf7 0%, #f0e9d8 100%);
+  color: #3b352b; 
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
 }

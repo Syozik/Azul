@@ -14,7 +14,7 @@ export const RHOMBUS_HALF_SHORT = RHOMBUS_SIZE * Math.cos(ANGLE);
 export const RHOMBUS_HALF_LONG = RHOMBUS_SIZE * Math.sin(ANGLE);
 
 export type ColorKey = keyof typeof COLORS;
-export const STAR_POSITIONS: Record<ColorKey, { x: number; y: number, rotate: number }> = {
+export const SNOWFLAKE_POSITIONS: Record<ColorKey, { x: number; y: number, rotate: number }> = {
     CENTER: { x: 0, y: 0, rotate: 3},
     RED: { x: 0, y: -(2 * RHOMBUS_SIZE + 2 * RHOMBUS_HALF_SHORT), rotate: 5 },
     BLUE: { x: 3*RHOMBUS_HALF_LONG, y: -RHOMBUS_SIZE - RHOMBUS_HALF_SHORT, rotate: 0},
