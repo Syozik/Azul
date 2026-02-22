@@ -1,34 +1,36 @@
+import { ANGLE, RHOMBUS_SIZE } from "../consts";
 import "./rhombus.css";
 
 interface RhombusProps {
     size?: number;
-    color?: string;
+    angle?: number;
     points: number;
+    color?: string;
     transformAngle?: number;
 }
 
 export function Rhombus({
-    size = 150,
+    size = RHOMBUS_SIZE,
+    angle = ANGLE,
     color = "#0f1038ff",
     points: pointsCount,
     transformAngle = -30,
 }: RhombusProps) {
     const stroke = "#ffffff";
     const strokeWidth = 2;
-    const angle = Math.PI / 6;
 
     const side = size / (2 * Math.cos(angle));
-    const halfShort = side * Math.sin(angle);
-    const halfLong = side * Math.cos(angle);
+    const halfShort = side * Math.cos(angle);
+    const halfLong = side * Math.sin(angle);
 
     const cx = halfShort;
     const cy = halfLong;
 
     const polygonPoints = [
-        [0, cy], // left  – acute angle (30°)
-        [cx, 0], // top   – obtuse angle (150°)
-        [2 * cx, cy], // right – acute angle (30°)
-        [cx, 2 * cy], // bottom– obtuse angle (150°)
+        [0, cy], // left
+        [cx, 0], // top
+        [2 * cx, cy], // right
+        [cx, 2 * cy], // bottom
     ]
         .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
         .join(" ");
@@ -44,7 +46,7 @@ export function Rhombus({
         <div
             className={`rhombus points-${pointsCount}`}
             style={{
-                transform: `rotate(${transformAngle}deg)`,
+                transform: `rotate(${transformAngle}rad)`,
                 transformOrigin: `${cx + strokeWidth / 2}px 0px`,
                 left: `${-(cx + strokeWidth / 2)}px`,
                 top: `0px`,
@@ -71,7 +73,7 @@ export function Rhombus({
                     fill="#000000ff"
                     fontSize={20}
                     fontWeight="bold"
-                    transform={`rotate(${-(transformAngle ?? -30)}, ${centerX}, ${centerY})`}
+                    transform={`rotate(180, ${centerX}, ${centerY})`}
                 >
                     {pointsCount}
                 </text>
