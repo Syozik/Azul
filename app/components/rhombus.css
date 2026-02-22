@@ -1,0 +1,9 @@
+.star {
+  position: relative;
+}
+
+.rhombus {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
