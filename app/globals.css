@@ -5,13 +5,6 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -20,12 +13,16 @@
 }
 
 body {
-  background-color: #f6f3eb; /* fallback */
-  background-image: 
+  background-color: #f6f3eb;
+  background-image:
     linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(200,190,170,0.1) 100%),
     radial-gradient(circle at center, #fdfbf7 0%, #f0e9d8 100%);
-  color: #3b352b; 
+  color: #3b352b;
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   min-height: 100vh;
+}
+
+button {
+    cursor: pointer;
 }

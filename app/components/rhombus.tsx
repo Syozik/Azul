@@ -1,25 +1,21 @@
 "use client";
-import { useState } from "react";
-import { ANGLE, RHOMBUS_SIZE } from "../consts";
+import { MouseEventHandler } from "react";
+import { ANGLE as angle, RHOMBUS_SIZE as size } from "../consts";
 import "./rhombus.css";
 
 interface RhombusProps {
-    size?: number;
-    angle?: number;
-    points: number;
+    points?: number;
     color?: string;
     transformAngle?: number;
+    onClickHandler: MouseEventHandler;
 }
 
 export function Rhombus({
-    size = RHOMBUS_SIZE,
-    angle = ANGLE,
     color = "#0f1038ff",
     points: pointsCount,
     transformAngle = -30,
+    onClickHandler,
 }: RhombusProps) {
-    const [used, setUsed] = useState(false);
-
     const stroke = "#ffffff";
     const strokeWidth = 2;
 
@@ -48,7 +44,7 @@ export function Rhombus({
 
     return (
         <div
-            className={`rhombus points-${pointsCount} ${used ? "rhombus_used" : ""}`}
+            className={`rhombus ${pointsCount ? "points" + pointsCount : ""}`}
             style={{
                 transform: `rotate(${transformAngle}rad)`,
                 transformOrigin: `${cx + strokeWidth / 2}px 0px`,
@@ -69,11 +65,9 @@ export function Rhombus({
                     strokeWidth={strokeWidth}
                     transform={`translate(${strokeWidth / 2}, ${strokeWidth / 2})`}
                     style={{ cursor: "pointer" }}
-                    onClick={() => {
-                        setUsed(!used);
-                    }}
+                    onClick={onClickHandler}
                 />
-                {!used && (
+                {pointsCount && (
                     <text
                         x={centerX}
                         y={centerY}
@@ -84,9 +78,7 @@ export function Rhombus({
                         fontWeight="bold"
                         transform={`rotate(180, ${centerX}, ${centerY})`}
                         style={{ cursor: "pointer" }}
-                        onClick={() => {
-                            setUsed(!used);
-                        }}
+                        onClick={onClickHandler}
                     >
                         {pointsCount}
                     </text>

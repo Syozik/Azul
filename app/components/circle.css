@@ -1,0 +1,7 @@
+.circle_with_tiles {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    border: 3px solid darkred;
+    border-radius: 50%;
+}

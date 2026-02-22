@@ -1,6 +1,6 @@
 import { COLORS } from "../consts";
 import { Snowflake } from "./snowflake";
-import "./desk.css";
+import "./player_desk.css";
 import { Scoreline } from "./scoreline";
 
 interface deskProps {
