@@ -9,7 +9,7 @@ export const COLORS = {
 } as const;
 
 export const ANGLE = Math.PI / 3;
-export const RHOMBUS_SIZE = 50;
+export const RHOMBUS_SIZE = 40;
 export const RHOMBUS_HALF_SHORT = RHOMBUS_SIZE * Math.cos(ANGLE);
 export const RHOMBUS_HALF_LONG = RHOMBUS_SIZE * Math.sin(ANGLE);
 
@@ -44,9 +44,9 @@ export const SNOWFLAKE_POSITIONS: Record<
 };
 
 export const CIRCLE_POSITIONS = [
-    { top: "10%", left: "45%" },
-    { top: "35%", left: "70%" },
-    { top: "60%", left: "60%" },
-    { top: "60%", left: "30%" },
-    { top: "35%", left: "20%" },
+    { top: "2%", left: "42%" },
+    { top: "25%", left: "75%" },
+    { top: "56%", left: "65%" },
+    { top: "56%", left: "20%" },
+    { top: "25%", left: "10%" },
 ];
