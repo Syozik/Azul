@@ -1,7 +1,7 @@
 "use client";
 import { MouseEventHandler } from "react";
 import { ANGLE as angle, RHOMBUS_SIZE as size } from "../consts";
-import "./rhombus.css";
+import "@/app/static/style/rhombus.css";
 
 interface RhombusProps {
     points?: number;

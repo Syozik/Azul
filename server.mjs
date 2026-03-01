@@ -3,10 +3,9 @@ import next from "next";
 import { Server } from "socket.io";
 import {
     initGameState,
-    applyPickFromFactory,
-    applyPickFromCenter,
+    applyPickAction,
     toClientState,
-    isPickingPhaseOver,
+    updatePhase,
 } from "./app/game/game-logic.mjs";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -111,15 +110,10 @@ app.prepare().then(() => {
 
             let result;
 
-            if (data.type === "pick-from-factory") {
-                result = applyPickFromFactory(
-                    state,
-                    info.playerNumber,
-                    data.factoryIndex,
-                    data.color,
-                );
-            } else if (data.type === "pick-from-center") {
-                result = applyPickFromCenter(state, info.playerNumber, data.color);
+            if (data.type === "pick") {
+                result = applyPickAction(state, info.playerNumber, data.color, {
+                    factoryIndex: data.factoryIndex,
+                });
             } else {
                 console.log(`[Game] Unknown action type: ${data.type}`);
                 return;
@@ -133,6 +127,7 @@ app.prepare().then(() => {
             }
 
             // Update the room's game state
+            updatePhase(result.newState);
             roomGameStates.set(info.roomId, result.newState);
 
             // Broadcast the new state to both players
@@ -142,14 +137,6 @@ app.prepare().then(() => {
             console.log(
                 `[Game] P${info.playerNumber} picked ${data.color} from ${data.type === "pick-from-factory" ? `factory ${data.factoryIndex}` : "center"}`,
             );
-
-            // Check if picking phase is over
-            if (isPickingPhaseOver(result.newState)) {
-                console.log(`[Game] Picking phase is over in ${info.roomId}!`);
-                io.to(info.roomId).emit("phase-over", {
-                    message: "All tiles have been picked!",
-                });
-            }
         });
 
         socket.on("disconnect", () => {

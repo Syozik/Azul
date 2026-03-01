@@ -1,10 +1,10 @@
-const TILE_COLORS = ["RED", "BLUE", "YELLOW", "PURPLE", "ORANGE"];
-const TILES_PER_COLOR = 20;
+const TILE_COLORS = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
+const TILES_PER_COLOR = 22;
 const NUM_FACTORIES = 5;
 const TILES_PER_FACTORY = 4;
 
 /**
- * Create a shuffled tile bag: 20 tiles of each of the 5 colors = 100 total
+ * Create a shuffled tile bag: 22 tiles of each of the 6 colors = 132 total
  */
 function createTileBag() {
     const bag = [];
@@ -44,12 +44,12 @@ export function initGameState() {
         factories,
         centerPool: [],
         players: [
-            { pickedTiles: [] },
-            { pickedTiles: [] },
+            { pickedTiles: [], score: 5 },
+            { pickedTiles: [], score: 5 },
         ],
         currentPlayer: 1,
         round: 1,
-        phase: "pick",
+        phase: 1,
         _bag: bag, // keep the bag on the server (not sent to clients)
     };
 }
@@ -59,90 +59,66 @@ export function initGameState() {
  * Returns { newState, error } — error is a string if invalid action.
  *
  * Rules:
- * - Player picks ALL tiles of the chosen color from the factory
+ * - Player picks ALL tiles of the chosen color from the factory / center pool
  * - Remaining tiles in that factory go to the center pool
  * - Turn passes to the other player
  */
-export function applyPickFromFactory(state, playerNumber, factoryIndex, color) {
+export function applyPickAction(state, playerNumber, color, { factoryIndex } = {}) {
     if (state.currentPlayer !== playerNumber) {
         return { error: "Not your turn" };
     }
-    if (factoryIndex < 0 || factoryIndex >= state.factories.length) {
-        return { error: "Invalid factory index" };
+    let pool;
+    if (factoryIndex !== undefined) {
+        if (factoryIndex < 0 || factoryIndex >= state.factories.length)
+            return { error: "Invalid factory index" };
+        pool = state.factories[factoryIndex];
+    } else {
+        pool = state.centerPool;
     }
-
-    const factory = state.factories[factoryIndex];
-    if (factory.length === 0) {
-        return { error: "Factory is empty" };
+    if (!pool.length) {
+        return { error: "Selected pool is empty" };
     }
-    if (!factory.includes(color)) {
-        return { error: `Color ${color} not in factory ${factoryIndex}` };
+    if (!pool.includes(color)) {
+        return { error: `Color ${color} not in the selected pool` };
+    }
+    const joker = TILE_COLORS[state.round];
+    // TODO: case when there's no other piles
+    if (color === joker) {
+        return { error: `Can't choose the current joker` };
     }
 
     // Split tiles: picked (matching color) vs remaining (go to center)
-    const picked = factory.filter((t) => t === color);
-    const remaining = factory.filter((t) => t !== color);
+    const picked = pool.filter((t) => t === color);
+    const remaining = pool.filter((t) => t !== color);
 
-    // Update state
-    const newFactories = [...state.factories];
-    newFactories[factoryIndex] = []; // factory is now empty
+    const jokerIdx = pool.indexOf(joker);
+    if (jokerIdx !== -1) {
+        picked.push(joker);
+        remaining.splice(jokerIdx, 1);
+    }
 
-    const newCenterPool = [...state.centerPool, ...remaining];
-
-    const playerIdx = playerNumber - 1;
-    const newPlayers = [...state.players];
-    newPlayers[playerIdx] = {
-        ...newPlayers[playerIdx],
-        pickedTiles: [...newPlayers[playerIdx].pickedTiles, ...picked],
+    const playerIdx = state.currentPlayer - 1;
+    state.players[playerIdx]["pickedTiles"].push(...picked);
+    if (factoryIndex !== undefined) {
+        state.factories[factoryIndex] = [];
+        state.centerPool.push(...remaining);
+    } else {
+        state.centerPool = remaining;
+    }
+    return {
+        newState: {
+            ...state,
+            currentPlayer: playerNumber === 1 ? 2 : 1,
+        },
     };
-
-    const newState = {
-        ...state,
-        factories: newFactories,
-        centerPool: newCenterPool,
-        players: newPlayers,
-        currentPlayer: playerNumber === 1 ? 2 : 1,
-    };
-
-    return { newState };
 }
 
-/**
- * Apply a "pick from center" action.
- * Player picks ALL tiles of the chosen color from the center pool.
- * Turn passes to the other player.
- */
-export function applyPickFromCenter(state, playerNumber, color) {
-    if (state.currentPlayer !== playerNumber) {
-        return { error: "Not your turn" };
+export function updatePhase(state) {
+    if (isPickingPhaseOver(state)) {
+        state.phase = 2;
     }
-    if (state.centerPool.length === 0) {
-        return { error: "Center pool is empty" };
-    }
-    if (!state.centerPool.includes(color)) {
-        return { error: `Color ${color} not in center pool` };
-    }
-
-    const picked = state.centerPool.filter((t) => t === color);
-    const remaining = state.centerPool.filter((t) => t !== color);
-
-    const playerIdx = playerNumber - 1;
-    const newPlayers = [...state.players];
-    newPlayers[playerIdx] = {
-        ...newPlayers[playerIdx],
-        pickedTiles: [...newPlayers[playerIdx].pickedTiles, ...picked],
-    };
-
-    const newState = {
-        ...state,
-        centerPool: remaining,
-        players: newPlayers,
-        currentPlayer: playerNumber === 1 ? 2 : 1,
-    };
-
-    return { newState };
+    return state;
 }
-
 /**
  * Check if the picking phase is over (all factories and center pool are empty)
  */

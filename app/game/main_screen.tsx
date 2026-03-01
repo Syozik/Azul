@@ -1,13 +1,12 @@
-"use client";
-import { useState } from "react";
 import { useSocket } from "../socket-context";
 import { Lobby } from "./lobby";
 import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";
+import { COLORS, JOKERS } from "../consts";
+import "@/app/static/style/main_screen.css";
 
 export function MainScreen() {
-    const { connectionStatus } = useSocket();
-    const [isPhaseOne, setPhase] = useState(true);
+    const { gameState, connectionStatus } = useSocket();
 
     // Show the lobby until both players are connected and game starts
     if (connectionStatus !== "playing") {
@@ -17,34 +16,26 @@ export function MainScreen() {
     return (
         <>
             <div
-                className="game-header"
+                className="game-header flex gap-10 items-center justify-center"
                 style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
                     padding: "0.75rem 1.5rem",
                     background:
                         "linear-gradient(135deg, rgba(92,61,26,0.08), rgba(196,162,101,0.12))",
                     borderBottom: "2px solid rgba(196,162,101,0.3)",
                 }}
             >
-                <button
-                    onClick={() => setPhase(!isPhaseOne)}
-                    style={{
-                        padding: "0.4rem 1rem",
-                        background: "linear-gradient(135deg, #5c3d1a, #8b6a3e)",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontWeight: 600,
-                        fontSize: "0.85rem",
-                        cursor: "pointer",
-                    }}
-                >
-                    Switch Phase
-                </button>
+                <div className="flex items-center">
+                    <span>Round: {gameState?.round}</span>
+                    <div className="ml-2 flex items-center gap-1">
+                        Joker:
+                        <span
+                            className="tile"
+                            style={{ backgroundColor: COLORS[JOKERS[gameState?.round || 1 - 1]] }}
+                        />
+                    </div>
+                </div>
             </div>
-            {isPhaseOne ? <PhaseOne /> : <PhaseTwo />}
+            {gameState?.phase !== 2 ? <PhaseOne /> : <PhaseTwo />}
         </>
     );
 }

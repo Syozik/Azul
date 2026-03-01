@@ -1,7 +1,7 @@
 "use client";
 import { COLORS, RHOMBUS_HALF_LONG } from "../consts";
 import type { TileColor, GameAction } from "../game/types";
-import "./circle.css";
+import "@/app/static/style/circle.css";
 import { Rhombus } from "./rhombus";
 
 interface CircleProps {
@@ -24,9 +24,9 @@ export function CircleWithTiles({
     const onClickHandler = (color: TileColor) => {
         if (isMyTurn && !isEmpty) {
             sendGameAction({
-                type: "pick-from-factory",
-                factoryIndex,
+                type: "pick",
                 color,
+                factoryIndex,
             });
         }
     };

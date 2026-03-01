@@ -1,7 +1,7 @@
 "use client";
-import { CIRCLE_POSITIONS } from "../consts";
+import { CIRCLE_POSITIONS, COLORS } from "../consts";
 import { CircleWithTiles } from "../components/circle";
-import "./phase_one.css";
+import "@/app/static/style/phase_one.css";
 import { useSocket } from "../socket-context";
 
 export function PhaseOne() {
@@ -23,7 +23,7 @@ export function PhaseOne() {
                 </p>
                 <div className="picked-tiles">
                     {gameState.players[myIndex].pickedTiles.map((color, i) => (
-                        <span key={i} className={`picked-tile tile-${color}`} />
+                        <span key={i} className="tile" style={{ backgroundColor: COLORS[color] }} />
                     ))}
                     {gameState.players[myIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>
@@ -47,11 +47,12 @@ export function PhaseOne() {
                     {gameState.centerPool.map((color, i) => (
                         <span
                             key={i}
-                            className={`center-tile tile-${color} ${isMyTurn ? "clickable" : ""}`}
+                            className={`tile ${isMyTurn ? "clickable" : ""}`}
+                            style={{ backgroundColor: COLORS[color] }}
                             onClick={() => {
                                 if (isMyTurn) {
                                     sendGameAction({
-                                        type: "pick-from-center",
+                                        type: "pick",
                                         color,
                                     });
                                 }
@@ -68,7 +69,7 @@ export function PhaseOne() {
                 </p>
                 <div className="picked-tiles">
                     {gameState.players[opponentIndex].pickedTiles.map((color, i) => (
-                        <span key={i} className={`picked-tile tile-${color}`} />
+                        <span key={i} className="tile" style={{ backgroundColor: COLORS[color] }} />
                     ))}
                     {gameState.players[opponentIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>

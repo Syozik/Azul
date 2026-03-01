@@ -1,31 +1,25 @@
-// Tile colors that can appear on factories (excludes CENTER which is only for the snowflake)
-export const TILE_COLORS = ["RED", "BLUE", "YELLOW", "PURPLE", "ORANGE"] as const;
-export type TileColor = (typeof TILE_COLORS)[number];
+import { ColorKey } from "../consts";
 
 export interface GameState {
-    factories: TileColor[][];   // 5 factories, each with 0-4 tiles
-    centerPool: TileColor[];    // tiles pushed to the center
+    factories: ColorKey[][];
+    centerPool: ColorKey[];
     players: [PlayerState, PlayerState];
-    currentPlayer: 1 | 2;       // whose turn it is
+    currentPlayer: 1 | 2;
     round: number;
-    phase: "pick";              // for now just the picking phase
+    phase: 1 | 2;
 }
 
 export interface PlayerState {
-    pickedTiles: TileColor[];   // tiles the player has picked this round
+    pickedTiles: ColorKey[]; // tiles the player has picked this round
+    score: number,
 }
 
 // The action a player sends when clicking a tile color on a factory
-export interface PickFromFactoryAction {
-    type: "pick-from-factory";
-    factoryIndex: number;
-    color: TileColor;
+export interface PickTilesAction {
+    type: "pick";
+    color: ColorKey;
+    factoryIndex: number | undefined;
 }
 
-// The action a player sends when clicking a tile color in the center pool
-export interface PickFromCenterAction {
-    type: "pick-from-center";
-    color: TileColor;
-}
-
-export type GameAction = PickFromFactoryAction | PickFromCenterAction;
+export type GameAction = Partial<PickTilesAction>;
+export type TileColor = ColorKey;
