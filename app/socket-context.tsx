@@ -4,69 +4,83 @@ import {
     createContext,
     useContext,
     useEffect,
-    useState,
     useCallback,
     ReactNode,
     useRef,
     useReducer,
 } from "react";
 import { io, Socket } from "socket.io-client";
+import type { GameState, GameAction } from "./game/types";
 
-type GameStatus = "idle" | "searching" | "waiting" | "playing" | "disconnected";
+type ConnectionStatus = "idle" | "searching" | "waiting" | "playing" | "disconnected";
 
 interface SocketContextType {
-    // socket: Socket | null;
-    gameStatus: GameStatus;
+    connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2 | null;
     roomId: string | null;
+    gameState: GameState | null;
     findGame: () => void;
-    sendGameAction: (action: Record<string, unknown>) => void;
-    onGameAction: (handler: (data: Record<string, unknown>) => void) => () => void;
+    sendGameAction: (action: GameAction) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
-    // socket: null,
-    gameStatus: "idle",
+    connectionStatus: "idle",
     playerNumber: null,
     roomId: null,
+    gameState: null,
     findGame: () => {},
     sendGameAction: () => {},
-    onGameAction: () => () => {},
 });
 
 export function useSocket() {
     return useContext(SocketContext);
 }
 
-type GameState = {
-    status: GameStatus;
+type State = {
+    connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2 | null;
     roomId: string | null;
+    gameState: GameState | null;
 };
 
-type GameAction =
+type Action =
     | { type: "WAITING" }
     | { type: "SEARCHING" }
     | { type: "GAME_START"; playerNumber: 1 | 2; roomId: string }
+    | { type: "GAME_STATE"; gameState: GameState }
     | { type: "OPPONENT_DISCONNECTED" }
     | { type: "DISCONNECT" };
 
-const initialState: GameState = {
-    status: "idle",
+const initialState: State = {
+    connectionStatus: "idle",
     playerNumber: null,
     roomId: null,
+    gameState: null,
 };
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+function reducer(state: State, action: Action): State {
     switch (action.type) {
         case "SEARCHING":
-            return { ...state, status: "searching" };
+            return { ...state, connectionStatus: "searching" };
         case "WAITING":
-            return { ...state, status: "waiting" };
+            return { ...state, connectionStatus: "waiting" };
         case "GAME_START":
-            return { status: "playing", playerNumber: action.playerNumber, roomId: action.roomId };
+            return {
+                ...state,
+                connectionStatus: "playing",
+                playerNumber: action.playerNumber,
+                roomId: action.roomId,
+            };
+        case "GAME_STATE":
+            return { ...state, gameState: action.gameState };
         case "OPPONENT_DISCONNECTED":
-            return { status: "disconnected", playerNumber: null, roomId: null };
+            return {
+                ...state,
+                connectionStatus: "disconnected",
+                playerNumber: null,
+                roomId: null,
+                gameState: null,
+            };
         case "DISCONNECT":
             return initialState;
         default:
@@ -76,7 +90,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
 export function SocketProvider({ children }: { children: ReactNode }) {
     const socketRef = useRef<Socket | null>(null);
-    const [gameState, dispatch] = useReducer(gameReducer, initialState);
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
         const socket = io({ path: "/socket.io" });
@@ -90,6 +104,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         });
         socket.on("game-start", (data: { playerNumber: 1 | 2; roomId: string }) => {
             dispatch({ type: "GAME_START", playerNumber: data.playerNumber, roomId: data.roomId });
+        });
+        socket.on("game-state", (gameState: GameState) => {
+            dispatch({ type: "GAME_STATE", gameState });
+        });
+        socket.on("game-error", (data: { error: string }) => {
+            console.warn("Game error:", data.error);
         });
         socket.on("opponent-disconnected", () => {
             dispatch({ type: "OPPONENT_DISCONNECTED" });
@@ -110,27 +130,19 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    const sendGameAction = useCallback((action: Record<string, unknown>) => {
+    const sendGameAction = useCallback((action: GameAction) => {
         socketRef.current?.emit("game-action", action);
-    }, []);
-
-    const onGameAction = useCallback((handler: (data: Record<string, unknown>) => void) => {
-        if (!socketRef.current) return () => {};
-        socketRef.current.on("game-action", handler);
-        return () => {
-            socketRef.current?.off("game-action", handler);
-        };
     }, []);
 
     return (
         <SocketContext.Provider
             value={{
-                gameStatus: gameState.status,
-                playerNumber: gameState.playerNumber,
-                roomId: gameState.roomId,
+                connectionStatus: state.connectionStatus,
+                playerNumber: state.playerNumber,
+                roomId: state.roomId,
+                gameState: state.gameState,
                 findGame,
                 sendGameAction,
-                onGameAction,
             }}
         >
             {children}

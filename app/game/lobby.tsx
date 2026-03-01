@@ -4,7 +4,7 @@ import { useSocket } from "../socket-context";
 import "./lobby.css";
 
 export function Lobby() {
-    const { gameStatus, findGame } = useSocket();
+    const { connectionStatus, findGame } = useSocket();
 
     return (
         <div className="lobby-container">
@@ -20,9 +20,13 @@ export function Lobby() {
 
                 <div className="lobby-divider" />
 
-                {(gameStatus === "idle" || gameStatus === "waiting") && (
+                {(connectionStatus === "idle" || connectionStatus === "waiting") && (
                     <div className="lobby-action">
-                        <p className="lobby-instruction">{gameStatus === "idle" ? "Press Play to find an opponent" : "Press Play to join an opponent"}</p>
+                        <p className="lobby-instruction">
+                            {connectionStatus === "idle"
+                                ? "Press Play to find an opponent"
+                                : "Press Play to join an opponent"}
+                        </p>
                         <button className="lobby-play-btn" onClick={findGame} id="play-button">
                             <span className="btn-text">Play</span>
                             <span className="btn-icon">→</span>
@@ -30,14 +34,14 @@ export function Lobby() {
                     </div>
                 )}
 
-                {gameStatus === "searching" && (
+                {connectionStatus === "searching" && (
                     <div className="lobby-action">
                         <div className="lobby-spinner" />
                         <p className="lobby-status">Connecting...</p>
                     </div>
                 )}
 
-                {gameStatus === "disconnected" && (
+                {connectionStatus === "disconnected" && (
                     <div className="lobby-action">
                         <p className="lobby-status lobby-status-error">Opponent disconnected</p>
                         <button
@@ -55,26 +59,26 @@ export function Lobby() {
                     <div className="lobby-player-slot">
                         <div
                             className={`player-avatar ${
-                                gameStatus !== "idle" ? "player-connected" : ""
+                                connectionStatus !== "idle" ? "player-connected" : ""
                             }`}
                         >
                             P1
                         </div>
                         <span className="player-label">
-                            {gameStatus !== "idle" ? "Connected" : "Waiting..."}
+                            {connectionStatus !== "idle" ? "Connected" : "Waiting..."}
                         </span>
                     </div>
                     <span className="lobby-vs">vs</span>
                     <div className="lobby-player-slot">
                         <div
                             className={`player-avatar ${
-                                gameStatus === "playing" ? "player-connected" : ""
+                                connectionStatus === "playing" ? "player-connected" : ""
                             }`}
                         >
                             P2
                         </div>
                         <span className="player-label">
-                            {gameStatus === "playing" ? "Connected" : "Waiting..."}
+                            {connectionStatus === "playing" ? "Connected" : "Waiting..."}
                         </span>
                     </div>
                 </div>

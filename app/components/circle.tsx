@@ -1,28 +1,45 @@
-import { MouseEventHandler } from "react";
-import { ColorKey, COLORS, RHOMBUS_HALF_LONG } from "../consts";
+"use client";
+import { COLORS, RHOMBUS_HALF_LONG } from "../consts";
+import type { TileColor, GameAction } from "../game/types";
 import "./circle.css";
 import { Rhombus } from "./rhombus";
 
 interface CircleProps {
-    colors: Array<ColorKey>;
+    colors: TileColor[];
+    factoryIndex: number;
     position: { top: string; left: string };
-    onClickHandler: MouseEventHandler;
+    isMyTurn: boolean;
+    sendGameAction: (action: GameAction) => void;
 }
 
 export function CircleWithTiles({
     colors,
     position,
-    onClickHandler,
+    factoryIndex,
+    isMyTurn,
+    sendGameAction,
 }: CircleProps) {
+    const isEmpty = colors.length === 0;
+
+    const onClickHandler = (color: TileColor) => {
+        if (isMyTurn && !isEmpty) {
+            sendGameAction({
+                type: "pick-from-factory",
+                factoryIndex,
+                color,
+            });
+        }
+    };
+
     return (
         <div
-            className="circle_with_tiles"
+            className={`circle_with_tiles ${isEmpty ? "circle-empty" : ""} ${isMyTurn && !isEmpty ? "circle-active" : ""}`}
             style={{
                 position: "absolute",
                 top: position.top,
                 left: position.left,
-                width: 4 * RHOMBUS_HALF_LONG+10,
-                height: 4 * RHOMBUS_HALF_LONG+10,
+                width: 4 * RHOMBUS_HALF_LONG + 10,
+                height: 4 * RHOMBUS_HALF_LONG + 10,
             }}
         >
             <div style={{ position: "absolute", top: "50%", left: "50%" }}>
@@ -30,7 +47,7 @@ export function CircleWithTiles({
                     <Rhombus
                         color={COLORS[color]}
                         transformAngle={(idx * Math.PI) / 2}
-                        onClickHandler={onClickHandler}
+                        onClickHandler={() => onClickHandler(color)}
                         key={idx}
                     />
                 ))}

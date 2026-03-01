@@ -1,6 +1,13 @@
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
+import {
+    initGameState,
+    applyPickFromFactory,
+    applyPickFromCenter,
+    toClientState,
+    isPickingPhaseOver,
+} from "./app/game/game-logic.mjs";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -14,6 +21,9 @@ let waitingSocketId = null;
 
 /** @type {Map<string, { roomId: string; playerNumber: 1 | 2 }>} */
 const playerInfo = new Map();
+
+/** @type {Map<string, object>} */
+const roomGameStates = new Map();
 
 let roomCounter = 0;
 const connectedPlayers = new Set();
@@ -29,19 +39,19 @@ app.prepare().then(() => {
 
     io.on("connection", (socket) => {
         console.log(`[Socket] Connected: ${socket.id}`);
-        if (connectedPlayers.length) {
+        if (connectedPlayers.size > 0) {
             socket.emit("waiting", {
                 message: "Somebody's waiting",
             });
         }
         connectedPlayers.add(socket.id);
+
         socket.on("find-game", () => {
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = `room-${++roomCounter}`;
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
 
                 if (!waitingSocket) {
-                    // Waiting socket disconnected, this player becomes the new waiter
                     waitingSocketId = socket.id;
                     socket.emit("waiting", {
                         message: "Waiting for Player 2...",
@@ -61,13 +71,26 @@ app.prepare().then(() => {
 
                 waitingSocketId = null;
 
+                // Initialize game state for this room
+                const gameState = initGameState();
+                roomGameStates.set(roomId, gameState);
+
+                // Notify both players the game is starting + send initial state
+                const clientState = toClientState(gameState);
                 waitingSocket.emit("game-start", {
                     playerNumber: 1,
                     roomId,
                 });
                 socket.emit("game-start", { playerNumber: 2, roomId });
 
+                // Send initial game state to both
+                io.to(roomId).emit("game-state", clientState);
+
                 console.log(`[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`);
+                console.log(
+                    `[Game] Initial factories:`,
+                    gameState.factories.map((f) => f.join(",")),
+                );
             } else {
                 waitingSocketId = socket.id;
                 for (const id of Array.from(connectedPlayers)) {
@@ -83,35 +106,73 @@ app.prepare().then(() => {
             const info = playerInfo.get(socket.id);
             if (!info) return;
 
-            // Broadcast the action to the other player in the room
-            socket.to(info.roomId).emit("game-action", {
-                ...data,
-                fromPlayer: info.playerNumber,
-            });
+            const state = roomGameStates.get(info.roomId);
+            if (!state) return;
+
+            let result;
+
+            if (data.type === "pick-from-factory") {
+                result = applyPickFromFactory(
+                    state,
+                    info.playerNumber,
+                    data.factoryIndex,
+                    data.color,
+                );
+            } else if (data.type === "pick-from-center") {
+                result = applyPickFromCenter(state, info.playerNumber, data.color);
+            } else {
+                console.log(`[Game] Unknown action type: ${data.type}`);
+                return;
+            }
+
+            if (result.error) {
+                // Send error back to the player who made the invalid action
+                socket.emit("game-error", { error: result.error });
+                console.log(`[Game] Error for P${info.playerNumber}: ${result.error}`);
+                return;
+            }
+
+            // Update the room's game state
+            roomGameStates.set(info.roomId, result.newState);
+
+            // Broadcast the new state to both players
+            const clientState = toClientState(result.newState);
+            io.to(info.roomId).emit("game-state", clientState);
+
+            console.log(
+                `[Game] P${info.playerNumber} picked ${data.color} from ${data.type === "pick-from-factory" ? `factory ${data.factoryIndex}` : "center"}`,
+            );
+
+            // Check if picking phase is over
+            if (isPickingPhaseOver(result.newState)) {
+                console.log(`[Game] Picking phase is over in ${info.roomId}!`);
+                io.to(info.roomId).emit("phase-over", {
+                    message: "All tiles have been picked!",
+                });
+            }
         });
 
         socket.on("disconnect", () => {
             console.log(`[Socket] Disconnected: ${socket.id}`);
 
             connectedPlayers.delete(socket.id);
-            // If the waiting player disconnects, clear them
             if (waitingSocketId === socket.id) {
                 waitingSocketId = null;
             }
 
-            // If a player in a room disconnects, notify the other player
             const info = playerInfo.get(socket.id);
             if (info) {
                 socket.to(info.roomId).emit("opponent-disconnected");
                 playerInfo.delete(socket.id);
 
-                // Also clean up the other player's info
+                // Clean up the other player's info and the room's game state
                 for (const [id, pInfo] of playerInfo.entries()) {
                     if (pInfo.roomId === info.roomId) {
                         playerInfo.delete(id);
                         break;
                     }
                 }
+                roomGameStates.delete(info.roomId);
             }
         });
     });

@@ -6,24 +6,28 @@ import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";
 
 export function MainScreen() {
-    const { gameStatus, playerNumber } = useSocket();
+    const { connectionStatus } = useSocket();
     const [isPhaseOne, setPhase] = useState(true);
 
     // Show the lobby until both players are connected and game starts
-    if (gameStatus !== "playing") {
+    if (connectionStatus !== "playing") {
         return <Lobby />;
     }
 
     return (
         <>
-            <div className="game-header" style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "0.75rem 1.5rem",
-                background: "linear-gradient(135deg, rgba(92,61,26,0.08), rgba(196,162,101,0.12))",
-                borderBottom: "2px solid rgba(196,162,101,0.3)",
-            }}>
+            <div
+                className="game-header"
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "0.75rem 1.5rem",
+                    background:
+                        "linear-gradient(135deg, rgba(92,61,26,0.08), rgba(196,162,101,0.12))",
+                    borderBottom: "2px solid rgba(196,162,101,0.3)",
+                }}
+            >
                 <button
                     onClick={() => setPhase(!isPhaseOne)}
                     style={{
