@@ -1,6 +1,6 @@
 import { COLORS } from "../consts";
 import { Snowflake } from "./snowflake";
-import "./player_desk.css";
+import "@/app/static/style/player_desk.css";
 import { Scoreline } from "./scoreline";
 
 interface deskProps {
@@ -10,7 +10,7 @@ interface deskProps {
 
 export function PlayerDesk({ playerName, isOwn = false }: deskProps) {
     return (
-        <div className="desk flex flex-col items-center h-full mt-[200] gap-10 text-center mx-28">
+        <div className="desk flex flex-col items-center h-full mt-[50] gap-10 text-center mx-28">
             <p className="player-name font-bold text-2xl">
                 {isOwn ? "Your" : playerName + "'s"} Desk
             </p>
