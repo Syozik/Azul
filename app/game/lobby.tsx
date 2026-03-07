@@ -1,6 +1,6 @@
 "use client";
 
-import { useSocket } from "../socket-context";
+import { useSocket } from "../utils/socket-context";
 import "@/app/static/style/lobby.css";
 
 export function Lobby() {

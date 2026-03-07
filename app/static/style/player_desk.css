@@ -1,7 +1,7 @@
 .snowflakes {
     position: relative;
-    width: 570px;
-    height: 570px;
+    width: 400px;
+    height: 400px;
     border: 6px solid rgba(88, 45, 4, 0.62);
     border-radius: 50%;
 }
@@ -10,4 +10,20 @@
     position: absolute;
     left: 50%;
     top: 50%;
+}
+
+.own-desk .available-tiles .box-tile {
+    cursor: pointer;
+}
+
+@keyframes tile-select-pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1.15); }
+}
+
+.available-tiles .box-tile.selected {
+    transform: scale(1.15);
+    border: 2px solid #5c3d1a;
+    animation: tile-select-pop 0.18s ease-out forwards;
 }

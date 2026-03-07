@@ -2,10 +2,10 @@ import "@/app/static/style/scoreline.css";
 
 interface ScorelineProps {
     range: { start: number; end: number; step: number };
-    currentScore: number;
+    currentScore: number | undefined;
 }
 
-export function Scoreline({ range, currentScore }: ScorelineProps) {
+export function Scoreline({ range, currentScore = 5 }: ScorelineProps) {
     const scores = [];
     for (let i = range.start; i <= range.end; i += range.step) {
         scores.push(i);

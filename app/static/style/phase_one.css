@@ -78,7 +78,7 @@
     gap: 4px;
     padding: 12px;
 
-    & .tile.clickable {
+    & .box-tile.clickable {
         cursor: pointer;
 
         &:hover {
