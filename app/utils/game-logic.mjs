@@ -162,6 +162,7 @@ export function updatePhase(state) {
             state.isGameOver = true;
         } else {
             state.phase = 1;
+            // TODO: handle the case when there's not enough tiles in the bag
             state.factories = fillFactories(state._bag);
             state.round += 1;
         }

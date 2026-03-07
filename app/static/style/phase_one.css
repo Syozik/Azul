@@ -88,30 +88,6 @@
     }
 }
 
-.turn-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #4a8c3f, #6ab55e);
-    color: #fff;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    letter-spacing: 0.5px;
-    vertical-align: middle;
-    margin-left: 6px;
-    animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-    0%,
-    100% {
-        box-shadow: 0 0 4px rgba(74, 140, 63, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 12px rgba(74, 140, 63, 0.6);
-    }
-}
-
 .picked-tiles {
     display: flex;
     flex-wrap: wrap;

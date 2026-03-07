@@ -7,7 +7,7 @@ import type { ColorKey } from "../utils/types";
 import "@/app/static/style/main_screen.css";
 
 export function MainScreen() {
-    const { gameState, connectionStatus } = useSocket();
+    const { gameState, playerNumber, connectionStatus } = useSocket();
 
     // Show the lobby until both players are connected and game starts
     if (connectionStatus !== "playing") {
@@ -39,6 +39,45 @@ export function MainScreen() {
                             }}
                         />
                     </div>
+                    <span
+                        className={`turn-badge ${gameState.currentPlayer === playerNumber ? "turn-badge--yours" : "turn-badge--theirs"}`}
+                    >
+                        {gameState.currentPlayer === playerNumber ? (
+                            <>
+                                <svg
+                                    className="turn-arrow turn-arrow--left"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="19" y1="12" x2="5" y2="12" />
+                                    <polyline points="12 19 5 12 12 5" />
+                                </svg>
+                                Your Turn
+                            </>
+                        ) : (
+                            <>
+                                Opponent&apos;s Turn
+                                <svg
+                                    className="turn-arrow turn-arrow--right"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                    <polyline points="12 5 19 12 12 19" />
+                                </svg>
+                            </>
+                        )}
+                    </span>
                 </div>
             </div>
             {gameState.phase === 1 ? <PhaseOne /> : <PhaseTwo />}
