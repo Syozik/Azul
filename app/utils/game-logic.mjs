@@ -143,20 +143,32 @@ export function applyCoverAction(
 
     const joker = TILE_COLORS[state.round - 1];
     usedTiles = usedTiles.filter((tile) => tile === color || tile === joker);
-    if (usedTiles.length < points) {
-        return { error: "Not enough tiles" };
+    if (usedTiles.length !== points) {
+        return { error: "Not the right number of tiles" };
     }
     const pickedTilesCopy = [...playerState.pickedTiles];
     for (const tile of usedTiles) {
         const tileIdx = pickedTilesCopy.indexOf(tile);
         if (tileIdx === -1) {
-            return { error: "You don't have all used tiles" };
+            return { error: "You don't have the tiles you just used" };
         }
         pickedTilesCopy.splice(tileIdx, 1);
     }
     playerState.pickedTiles = pickedTilesCopy;
     state._base.push(...usedTiles);
     playerState.coveredTiles[color][points - 1] = true;
+    let bonus = 1;
+    let i = points - 2;
+    while (i >= 0 && playerState.coveredTiles[color][i]) {
+        bonus += 1;
+        i -= 1;
+    }
+    i = points;
+    while (i < 5 && playerState.coveredTiles[color][i]) {
+        bonus += 1;
+        i += 1;
+    }
+    playerState.score += bonus;
     return state;
 }
 
