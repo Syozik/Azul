@@ -64,3 +64,13 @@
         opacity: 0.7;
     }
 }
+
+.pass-button {
+    padding: 3px 26px;
+    background-color: skyblue;
+    border-radius: 20px;
+    position: absolute;
+    top: 7%;
+    left: 47.5%;
+    font-weight: bold;
+}

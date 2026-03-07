@@ -9,9 +9,15 @@ export function usePlayerDesk() {
 }
 
 export function PhaseTwo() {
-    const { playerNumber } = useSocket();
+    const { playerNumber, sendGameAction } = useSocket();
     return (
         <div className="flex h-screen items-center justify-between font-sans text-[#2c2a26]">
+            <button
+                className="pass-button"
+                onClick={() => sendGameAction({ type: "pass" })}
+            >
+                Pass
+            </button>
             <PlayerDeskContext.Provider value={playerNumber}>
                 <PlayerDesk />
             </PlayerDeskContext.Provider>

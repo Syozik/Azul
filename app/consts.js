@@ -53,4 +53,4 @@ export const CIRCLE_POSITIONS = [
     { top: "25%", left: "10%" },
 ];
 
-export const allowedGameActions = ["pick", "cover"];
+export const allowedGameActions = ["pick", "cover", "pass"];

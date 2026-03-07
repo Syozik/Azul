@@ -29,5 +29,10 @@ export interface CoverTileAction {
     points: number;
     usedTiles: ColorKey[];
 }
-export type GameAction = Partial<PickTilesAction> | CoverTileAction;
+
+export interface PassAction {
+    type: "pass";
+}
+
+export type GameAction = Partial<PickTilesAction> | CoverTileAction | PassAction;
 export type TileColor = ColorKey;

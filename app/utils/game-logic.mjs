@@ -34,29 +34,45 @@ export function initGameState() {
 }
 
 export function applyAction(state, playerNumber, data) {
+    let res;
     switch (data.type) {
         case "pick":
-            return applyPickAction(
+            res = applyPickAction(
                 state,
                 playerNumber,
                 data.color,
                 data.factoryIndex,
             );
+            break;
         case "cover":
-            return applyCoverAction(
+            res = applyCoverAction(
                 state,
                 playerNumber,
                 data.color,
                 data.points,
                 data.usedTiles,
             );
+            break;
+        case "pass":
+            res = applyPassAction(state, playerNumber);
+            break;
+        default:
+            return {
+                error:
+                    "Wrong game action type. Allowed actions: " +
+                    allowedGameActions.join(", "),
+            };
+    }
+    if (res.error) return res;
+    const nextPlayer = res.currentPlayer === 1 ? 2 : 1;
+    if (!res.players[nextPlayer - 1].hasPassed) {
+        res.currentPlayer = nextPlayer;
     }
     return {
-        error:
-            "Wrong game action type. Allowed actions: " +
-            allowedGameActions.join(", "),
+        newState: { ...res },
     };
 }
+
 /**
  * Apply a "pick from factory" action.
  * Returns { newState, error } — error is a string if invalid action.
@@ -107,12 +123,7 @@ export function applyPickAction(state, playerNumber, color, factoryIndex) {
     } else {
         state.centerPool = remaining;
     }
-    return {
-        newState: {
-            ...state,
-            currentPlayer: playerNumber === 1 ? 2 : 1,
-        },
-    };
+    return state;
 }
 
 export function applyCoverAction(
@@ -146,12 +157,16 @@ export function applyCoverAction(
     playerState.pickedTiles = pickedTilesCopy;
     state._base.push(...usedTiles);
     playerState.coveredTiles[color][points - 1] = true;
-    return {
-        newState: {
-            ...state,
-            currentPlayer: playerNumber === 1 ? 2 : 1,
-        },
-    };
+    return state;
+}
+
+export function applyPassAction(state, playerNumber) {
+    if (state.players[playerNumber - 1].hasPassed) {
+        return { error: "Player has already passed" };
+    }
+    state.players[playerNumber - 1].hasPassed = true;
+
+    return state;
 }
 
 export function updatePhase(state) {
