@@ -45,12 +45,14 @@ export const SNOWFLAKE_POSITIONS = {
     },
 };
 
-export const CIRCLE_POSITIONS = [
-    { top: "2%", left: "42%" },
-    { top: "25%", left: "75%" },
-    { top: "56%", left: "65%" },
-    { top: "56%", left: "20%" },
-    { top: "25%", left: "10%" },
-];
+
+const PENTAGON_RADIUS = 33; // % of board
+const CIRCLE_HALF = 8.5;    // half of the 17% circle diameter
+const PENTAGON_ANGLES = [-90, -18, 54, 126, 198].map(deg => (deg * Math.PI) / 180);
+
+export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map(angle => ({
+    top:  `${(50 + PENTAGON_RADIUS * Math.sin(angle) - CIRCLE_HALF).toFixed(2)}%`,
+    left: `${(50 + PENTAGON_RADIUS * Math.cos(angle) - CIRCLE_HALF).toFixed(2)}%`,
+}));
 
 export const allowedGameActions = ["pick", "cover", "pass"];
