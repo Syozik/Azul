@@ -85,8 +85,7 @@ export function applyPickAction(state, playerNumber, color, factoryIndex) {
         return { error: `Color ${color} not in the selected pool` };
     }
     const joker = TILE_COLORS[state.round - 1];
-    // TODO: handle the case when there's no other piles
-    if (color === joker) {
+    if (color === joker && pool.some((color) => color !== joker)) {
         return { error: `Can't choose the current joker` };
     }
 
