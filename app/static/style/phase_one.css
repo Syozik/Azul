@@ -1,13 +1,19 @@
 .phase-one {
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.75rem, 2vw, 2rem);
     min-height: calc(100vh - 52px);
-    gap: 0;
-    padding-inline: 30px;
+    padding: clamp(0.75rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 2rem);
+    box-sizing: border-box;
+    align-items: start;
 }
 
 .tiles-box {
-    padding: 1.5rem 1rem;
+    flex: 0 0 clamp(140px, 18vw, 240px);
+    width: clamp(140px, 18vw, 240px);
+    min-width: 0;
+    padding: 1rem 0.75rem;
     background: linear-gradient(
         180deg,
         rgba(245, 230, 200, 0.4) 0%,
@@ -15,77 +21,17 @@
     );
     border: 2px solid rgba(196, 162, 101, 0.25);
     border-radius: 15px;
-    width: 20vw;
-    height: 45vh;
-    margin-top: 5vh;
 }
 
 .tiles-box-title {
     font-weight: 800;
-    font-size: 1.2rem;
+    font-size: clamp(0.8rem, 1.2vw, 1.2rem);
     color: #5c3d1a;
     text-align: center;
     letter-spacing: 1.5px;
     padding-bottom: 0.6rem;
     border-bottom: 2px solid rgba(196, 162, 101, 0.3);
     margin: 0;
-}
-
-.game-board {
-    flex: 1;
-    position: relative;
-    min-height: 600px;
-    overflow: hidden;
-    background: radial-gradient(ellipse at 50% 45%, rgba(245, 230, 200, 0.45) 0%, transparent 65%);
-}
-
-.center-pool {
-    position: absolute;
-    top: 39%;
-    left: 49.4%;
-    transform: translate(-50%, -50%);
-    width: 46%;
-    height: 35%;
-    border-radius: 50%;
-    border: 3px solid #c4a265;
-    background: radial-gradient(
-        ellipse at center,
-        rgba(255, 253, 245, 0.9) 0%,
-        rgba(245, 230, 200, 0.7) 60%,
-        rgba(232, 207, 160, 0.5) 100%
-    );
-    box-shadow:
-        inset 0 0 20px rgba(139, 90, 43, 0.1),
-        0 4px 16px rgba(100, 70, 30, 0.12),
-        0 1px 4px rgba(100, 70, 30, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-}
-
-.center-pool::before {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-    border: 1px solid rgba(196, 162, 101, 0.3);
-    pointer-events: none;
-}
-
-.center-pool {
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 12px;
-
-    & .box-tile.clickable {
-        cursor: pointer;
-
-        &:hover {
-            transform: scale(1.2);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-    }
 }
 
 .picked-tiles {
@@ -102,4 +48,71 @@
     font-size: 0.8rem;
     color: #b0996e;
     font-style: italic;
+}
+
+.game-board {
+    flex: 1 1 0;
+    min-width: 0;
+    aspect-ratio: 1 / 1;
+    max-height: calc(100vh - 52px - clamp(1.5rem, 4vw, 3rem));
+    max-width: calc(100vh - 52px - clamp(1.5rem, 4vw, 3rem));
+    position: relative;
+    background: radial-gradient(
+        ellipse at 50% 45%,
+        rgba(245, 230, 200, 0.45) 0%,
+        transparent 65%
+    );
+}
+
+.circle_with_tiles {
+    width: 17%;
+    height: 17%;
+}
+
+
+.center-pool {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 38%;
+    height: 38%;
+    border-radius: 50%;
+    border: 3px solid #c4a265;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(255, 253, 245, 0.9) 0%,
+        rgba(245, 230, 200, 0.7) 60%,
+        rgba(232, 207, 160, 0.5) 100%
+    );
+    box-shadow:
+        inset 0 0 20px rgba(139, 90, 43, 0.1),
+        0 4px 16px rgba(100, 70, 30, 0.12),
+        0 1px 4px rgba(100, 70, 30, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10%;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.center-pool::before {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(196, 162, 101, 0.3);
+    pointer-events: none;
+}
+
+.center-pool .box-tile.clickable {
+    cursor: pointer;
+}
+
+.center-pool .box-tile.clickable:hover {
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

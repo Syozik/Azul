@@ -189,6 +189,7 @@ export function updatePhase(state) {
             state.isGameOver = true;
         } else {
             state.phase = 1;
+            state.players.forEach((player) => (player.hasPassed = false));
             // TODO: handle the case when there's not enough tiles in the bag
             state.factories = fillFactories(state._bag);
             state.round += 1;
