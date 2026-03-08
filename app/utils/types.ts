@@ -1,4 +1,11 @@
-export type ColorKey = "PURPLE" | "GREEN" | "ORANGE" | "YELLOW" | "BLUE" | "RED" | "CENTER";
+export type ColorKey =
+    | "PURPLE"
+    | "GREEN"
+    | "ORANGE"
+    | "YELLOW"
+    | "BLUE"
+    | "RED"
+    | "CENTER";
 
 export interface GameState {
     factories: ColorKey[][];
@@ -10,8 +17,8 @@ export interface GameState {
 }
 
 export interface PlayerState {
-    pickedTiles: ColorKey[]; // tiles the player has picked this round
-    coveredTiles: Record<ColorKey, boolean[]>;
+    pickedTiles: ColorKey[]; // tiles the player has picked
+    coveredTiles: Record<ColorKey, (boolean | string)[]>;
     score: number;
     hasPassed: boolean;
 }
@@ -34,5 +41,8 @@ export interface PassAction {
     type: "pass";
 }
 
-export type GameAction = Partial<PickTilesAction> | CoverTileAction | PassAction;
+export type GameAction =
+    | Partial<PickTilesAction>
+    | CoverTileAction
+    | PassAction;
 export type TileColor = ColorKey;
