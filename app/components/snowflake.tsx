@@ -1,12 +1,36 @@
-import { Tile } from "./tile";
-import { ANGLE, COLORS, SNOWFLAKE_POSITIONS } from "../consts";
-import { TileColor } from "../utils/types";
-import { useSocket } from "../utils/socket-context";
+import Image from "next/image";
+import {
+    ANGLE,
+    COLORS,
+    SNOWFLAKE_POSITIONS,
+    TILE_SIZE,
+    DESK_IMAGE,
+} from "../consts";
 import { usePlayerDesk } from "../game/phase_two";
+import { useSocket } from "../utils/socket-context";
+import { TileColor } from "../utils/types";
+import { Tile } from "./tile";
 
 interface SnowflakeProps {
     color: TileColor;
     onTileSelect: (color: TileColor, points: number) => void;
+}
+
+function getStatueTransform(rotate: number): string {
+    const angle = ANGLE * (1.5 + rotate);
+    const x = 1.5 * TILE_SIZE * Math.cos(angle) - DESK_IMAGE.width / 2;
+    const y = 1.5 * TILE_SIZE * Math.sin(angle) - DESK_IMAGE.height / 2;
+    return `translate(${x}px, ${y}px) rotate(${angle}rad) `;
+}
+
+function getMirrorTransform(rotate: number): string {
+    const angle = ANGLE * (rotate + 1);
+    return `translate(-50%, -50%) rotate(${angle}rad) translate(0, -${TILE_SIZE + DESK_IMAGE.height / 2}px)`;
+}
+
+function getFontaineTransform(rotate: number): string {
+    const angle = ANGLE * (rotate + 1);
+    return `translate(-50%, -50%) rotate(${angle}rad) translate(0, ${TILE_SIZE + DESK_IMAGE.height / 2}px)`;
 }
 
 export function Snowflake({ color, onTileSelect }: SnowflakeProps) {
@@ -42,6 +66,45 @@ export function Snowflake({ color, onTileSelect }: SnowflakeProps) {
                     onClickHandler={() => onTileSelect(color, idx + 1)}
                 />
             ))}
+            {color !== "CENTER" && (
+                <>
+                    <Image
+                        width={DESK_IMAGE.width}
+                        height={DESK_IMAGE.height}
+                        src="/statue.png"
+                        alt="statue"
+                        style={{
+                            position: "absolute",
+                            transformOrigin: "center",
+                            transform: getStatueTransform(starPosition.rotate),
+                        }}
+                    />
+                    <Image
+                        width={DESK_IMAGE.width}
+                        height={DESK_IMAGE.height}
+                        src="/mirror.png"
+                        alt="mirror"
+                        style={{
+                            position: "absolute",
+                            transformOrigin: "center",
+                            transform: getMirrorTransform(starPosition.rotate),
+                        }}
+                    />
+                    <Image
+                        width={DESK_IMAGE.width}
+                        height={DESK_IMAGE.height}
+                        src="/fontaine.png"
+                        alt="fontaine"
+                        style={{
+                            position: "absolute",
+                            transformOrigin: "center",
+                            transform: getFontaineTransform(
+                                starPosition.rotate,
+                            ),
+                        }}
+                    />
+                </>
+            )}
         </div>
     );
 }

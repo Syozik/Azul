@@ -14,7 +14,7 @@ export const NUM_FACTORIES = 5;
 export const TILES_PER_FACTORY = 4;
 
 export const ANGLE = Math.PI / 3;
-export const TILE_SIZE = 40;
+export const TILE_SIZE = 50;
 export const TILE_HALF_SHORT = TILE_SIZE * Math.cos(ANGLE);
 export const TILE_HALF_LONG = TILE_SIZE * Math.sin(ANGLE);
 
@@ -45,6 +45,10 @@ export const SNOWFLAKE_POSITIONS = {
     },
 };
 
+export const DESK_IMAGE = {
+    width: 30,
+    height: 40,
+}
 
 const PENTAGON_RADIUS = 33; // % of board
 const CIRCLE_HALF = 8.5;    // half of the 17% circle diameter
