@@ -26,11 +26,19 @@ export function Snowflake({ color, onTileSelect }: SnowflakeProps) {
         >
             {angles.map((angle, idx) => (
                 <Tile
-                    color={COLORS[color]}
+                    color={
+                        (color === "CENTER" &&
+                            (gameState.players[player - 1].coveredTiles[color][
+                                idx
+                            ] as string)) ||
+                        COLORS[color]
+                    }
                     points={idx + 1}
                     transformAngle={angle}
                     key={angle}
-                    isCovered={gameState.players[player - 1].coveredTiles[color][idx]}
+                    isCovered={
+                        !!gameState.players[player - 1].coveredTiles[color][idx]
+                    }
                     onClickHandler={() => onTileSelect(color, idx + 1)}
                 />
             ))}

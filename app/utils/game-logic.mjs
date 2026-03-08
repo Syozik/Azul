@@ -142,13 +142,34 @@ export function applyCoverAction(
     }
 
     const joker = TILE_COLORS[state.round - 1];
-    usedTiles = usedTiles.filter((tile) => tile === color || tile === joker);
+    const isCenter = color === "CENTER";
+    let res = true;
+    if (!isCenter) {
+        usedTiles = usedTiles.filter(
+            (tile) => tile === color || tile === joker,
+        );
+    } else {
+        const usedTilesSet = new Set(usedTiles);
+        if (
+            usedTilesSet.length > 2 ||
+            (usedTilesSet.length == 2 && !usedTilesSet.has(joker))
+        ) {
+            return { error: "You can't use these tiles" };
+        }
+        const centerColor = usedTiles.find((tile) => tile !== joker);
+        res = centerColor;
+        if (playerState.coveredTiles[color].includes(centerColor)) {
+            return {
+                error: `You can place ${centerColor} in the center only once.`,
+            };
+        }
+    }
     if (usedTiles.length !== points) {
         return { error: "Not the right number of tiles" };
     }
     const pickedTilesCopy = [...playerState.pickedTiles];
-    for (const tile of usedTiles) {
-        const tileIdx = pickedTilesCopy.indexOf(tile);
+    for (const usedTile of usedTiles) {
+        const tileIdx = pickedTilesCopy.indexOf(usedTile);
         if (tileIdx === -1) {
             return { error: "You don't have the tiles you just used" };
         }
@@ -156,7 +177,9 @@ export function applyCoverAction(
     }
     playerState.pickedTiles = pickedTilesCopy;
     state._base.push(...usedTiles);
-    playerState.coveredTiles[color][points - 1] = true;
+    // res is true if it's not a colored tile, and a color if it's center
+    playerState.coveredTiles[color][points - 1] = res;
+
     let bonus = 1;
     let i = points - 2;
     while (i >= 0 && playerState.coveredTiles[color][i]) {
@@ -169,6 +192,7 @@ export function applyCoverAction(
         i += 1;
     }
     playerState.score += bonus;
+
     return state;
 }
 
