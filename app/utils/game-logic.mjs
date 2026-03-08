@@ -54,7 +54,7 @@ export function applyAction(state, playerNumber, data) {
     if (res.error) return res;
     const nextPlayer = res.currentPlayer === 1 ? 2 : 1;
     if (
-        !res.players[res.currentPlayer - 1].canTakeBaseTiles ||
+        !res.players[res.currentPlayer - 1].canTakeBaseTiles &&
         !res.players[nextPlayer - 1].hasPassed
     ) {
         res.currentPlayer = nextPlayer;
@@ -95,7 +95,7 @@ function applyPickAction(state, playerNumber, color, factoryIndex) {
     const picked = pool.filter((t) => t === color);
     const remaining = pool.filter((t) => t !== color);
 
-    const jokerIdx = pool.indexOf(joker);
+    const jokerIdx = remaining.indexOf(joker);
     if (jokerIdx !== -1) {
         picked.push(joker);
         remaining.splice(jokerIdx, 1);
@@ -224,9 +224,6 @@ function checkForCombinations(coveredTiles, color, points) {
 }
 
 function applyPassAction(state, playerNumber) {
-    if (state.players[playerNumber - 1].hasPassed) {
-        return { error: "Player has already passed" };
-    }
     state.players[playerNumber - 1].hasPassed = true;
 
     return state;
@@ -280,7 +277,7 @@ export function updatePhase(state) {
 
 export function isCoveringPhaseOver(state) {
     return state.players.every(
-        (player) => player.hasPassed || !player.pickedTiles.length,
+        (player) => !player.canTakeBaseTiles && (player.hasPassed || !player.pickedTiles.length),
     );
 }
 

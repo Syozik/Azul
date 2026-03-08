@@ -23,7 +23,7 @@ export function PlayerDesk() {
         if (
             !isOwner ||
             !isMyTurn ||
-            playerState.coveredTiles[tile][points] ||
+            playerState.coveredTiles[tile][points-1] ||
             selectedTiles.length < points
         ) {
             return;
