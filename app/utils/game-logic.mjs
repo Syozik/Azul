@@ -41,6 +41,9 @@ export function applyAction(state, playerNumber, data) {
         case "pass":
             res = applyPassAction(state, playerNumber);
             break;
+        case "base-pick":
+            res = applyBasePickAction(state, playerNumber, data.selectedTiles);
+            break;
         default:
             return {
                 error:
@@ -50,7 +53,10 @@ export function applyAction(state, playerNumber, data) {
     }
     if (res.error) return res;
     const nextPlayer = res.currentPlayer === 1 ? 2 : 1;
-    if (!res.players[nextPlayer - 1].hasPassed) {
+    if (
+        !res.players[res.currentPlayer - 1].canTakeBaseTiles ||
+        !res.players[nextPlayer - 1].hasPassed
+    ) {
         res.currentPlayer = nextPlayer;
     }
     return {
@@ -61,13 +67,8 @@ export function applyAction(state, playerNumber, data) {
 /**
  * Apply a "pick from factory" action.
  * Returns { newState, error } — error is a string if invalid action.
- *
- * Rules:
- * - Player picks ALL tiles of the chosen color from the factory / center pool
- * - Remaining tiles in that factory go to the center pool
- * - Turn passes to the other player
  */
-export function applyPickAction(state, playerNumber, color, factoryIndex) {
+function applyPickAction(state, playerNumber, color, factoryIndex) {
     if (state.currentPlayer !== playerNumber) {
         return { error: "Not your turn" };
     }
@@ -111,13 +112,7 @@ export function applyPickAction(state, playerNumber, color, factoryIndex) {
     return state;
 }
 
-export function applyCoverAction(
-    state,
-    playerNumber,
-    color,
-    points,
-    usedTiles,
-) {
+function applyCoverAction(state, playerNumber, color, points, usedTiles) {
     if (state.currentPlayer !== playerNumber) {
         return { error: "Not your turn" };
     }
@@ -228,12 +223,37 @@ function checkForCombinations(coveredTiles, color, points) {
     return numberOfPilesToTake;
 }
 
-export function applyPassAction(state, playerNumber) {
+function applyPassAction(state, playerNumber) {
     if (state.players[playerNumber - 1].hasPassed) {
         return { error: "Player has already passed" };
     }
     state.players[playerNumber - 1].hasPassed = true;
 
+    return state;
+}
+
+function applyBasePickAction(state, playerNumber, selectedTiles) {
+    if (state.currentPlayer !== playerNumber) {
+        return { error: "It's not your turn" };
+    }
+    const playerState = state.players[playerNumber - 1];
+
+    if (playerState.canTakeBaseTiles < selectedTiles.length) {
+        return { error: "You can't take this many tiles" };
+    }
+
+    if (state._bag.length < selectedTiles.length) {
+        state._bag.push(...state._trash);
+        state._trash = [];
+        shuffle(state._bag);
+    }
+
+    for (const tile of selectedTiles) {
+        const [i, j, color] = tile.split("_");
+        playerState.pickedTiles.push(color);
+        state.baseTiles[Number(i)][Number(j)] = state._bag.splice(0, 1);
+    }
+    playerState.canTakeBaseTiles = 0;
     return state;
 }
 

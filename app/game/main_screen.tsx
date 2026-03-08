@@ -1,3 +1,4 @@
+import { GameOverScreen } from "../components/game_over_screen";
 import { useSocket } from "../utils/socket-context";
 import { Lobby } from "./lobby";
 import { PhaseOne } from "./phase_one";
@@ -7,13 +8,11 @@ import "@/app/static/style/main_screen.css";
 export function MainScreen() {
     const { gameState, playerNumber, connectionStatus } = useSocket();
 
-    // Show the lobby until both players are connected and game starts
-    if (connectionStatus !== "playing") {
-        return <Lobby />;
-    }
-
     return (
         <>
+            {connectionStatus !== "playing" && <Lobby />}
+            {gameState.isGameOver && <GameOverScreen />}
+
             <div
                 className="game-header flex gap-10 items-center justify-center"
                 style={{
