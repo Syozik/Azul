@@ -15,6 +15,7 @@ export interface GameState {
     round: number;
     phase: 1 | 2;
     baseTiles: [ColorKey[], ColorKey[]];
+    isGameOver: boolean;
 }
 
 export interface PlayerState {
@@ -22,7 +23,7 @@ export interface PlayerState {
     coveredTiles: Record<ColorKey, (boolean | string)[]>;
     score: number;
     hasPassed: boolean;
-    canTakeBaseTiles?: number;
+    canTakeBaseTiles: number;
 }
 
 // The action a player sends when clicking a tile color on a factory
@@ -43,8 +44,15 @@ export interface PassAction {
     type: "pass";
 }
 
+export interface BasePickAction {
+    type: "base-pick";
+    selectedTiles: string[];
+}
+
 export type GameAction =
     | Partial<PickTilesAction>
     | CoverTileAction
-    | PassAction;
+    | PassAction
+    | BasePickAction;
+
 export type TileColor = ColorKey;

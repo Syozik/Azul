@@ -4,6 +4,113 @@
     border: thick double #d4d4d4;
     border-radius: 15px;
     background-color: antiquewhite;
+
+    &.active {
+        animation: animate-glow 4s infinite alternate;
+        border-color: #4caf50;
+    }
+}
+
+@keyframes animate-glow {
+    0% {
+        box-shadow:
+            0 0 5px #4caf50,
+            0 0 10px #4caf50,
+            0 0 15px #4caf50;
+    }
+    50% {
+        box-shadow:
+            0 0 10px #69f0ae,
+            0 0 20px #69f0ae,
+            0 0 30px #69f0ae;
+    }
+    100% {
+        box-shadow:
+            0 0 5px #4caf50,
+            0 0 10px #4caf50,
+            0 0 15px #4caf50;
+    }
+}
+
+.base-message {
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    padding: 0 12px;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 10px;
+}
+
+.base-message::before {
+    content: "";
+}
+
+.checkmark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a8c3f, #6ab55e);
+    border: 2px solid #3a7030;
+    box-shadow: 0 2px 8px rgba(74, 140, 63, 0.4);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.checkmark::after {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 6px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.checkmark:not(.disabled):hover {
+    transform: scale(1.08);
+    background: linear-gradient(135deg, #3a7030, #5aa04e);
+    box-shadow: 0 4px 14px rgba(74, 140, 63, 0.55);
+}
+
+.checkmark:not(.disabled):active {
+    transform: scale(0.93);
+    box-shadow: 0 1px 4px rgba(74, 140, 63, 0.3);
+}
+
+.checkmark.disabled {
+    background: linear-gradient(135deg, #b0b0b0, #d0d0d0);
+    border-color: #999;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.checkmark.disabled::after {
+    border-color: #eee;
+}
+
+.jokers-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #c4a265,
+        #d4b87c,
+        #c4a265,
+        transparent
+    );
+    margin: 8px 12px 0;
 }
 
 .jokers-order {

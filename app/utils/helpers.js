@@ -59,7 +59,7 @@ export function initState() {
                     coveredTiles: initCoveredTiles(),
                     score: 5,
                     hasPassed: false,
-                    canTakeBaseTiles: 0,
+                    canTakeBaseTiles: 1,
                 },
                 {
                     pickedTiles: [],
@@ -72,7 +72,8 @@ export function initState() {
         currentPlayer: /** @type {1 | 2} */ (1),
         round: 1,
         phase: /** @type {1 | 2} */ (1),
-        baseTiles: [[], []]
+        baseTiles: [[], []],
+        isGameOver: false,
     });
 }
 

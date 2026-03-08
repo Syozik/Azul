@@ -69,4 +69,4 @@ export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
     left: `${(50 + PENTAGON_RADIUS * Math.cos(angle) - CIRCLE_HALF).toFixed(2)}%`,
 }));
 
-export const allowedGameActions = ["pick", "cover", "pass"];
+export const allowedGameActions = ["pick", "cover", "pass", "base-pick"];
