@@ -1,4 +1,4 @@
-import { allowedGameActions, TILE_COLORS } from "../consts.js";
+import { allowedGameActions, JOKERS, TILE_COLORS } from "../consts.js";
 import { createTileBag, fillFactories, initState } from "./helpers.js";
 
 /**
@@ -85,7 +85,7 @@ export function applyPickAction(state, playerNumber, color, factoryIndex) {
     if (!pool.includes(color)) {
         return { error: `Color ${color} not in the selected pool` };
     }
-    const joker = TILE_COLORS[state.round - 1];
+    const joker = JOKERS[state.round - 1];
     if (color === joker && pool.some((color) => color !== joker)) {
         return { error: `Can't choose the current joker` };
     }
@@ -126,7 +126,7 @@ export function applyCoverAction(
         return { error: "This tile has already been closed" };
     }
 
-    const joker = TILE_COLORS[state.round - 1];
+    const joker = JOKERS[state.round - 1];
     const isCenter = color === "CENTER";
     let res = true;
     if (!isCenter) {
@@ -177,8 +177,55 @@ export function applyCoverAction(
         i += 1;
     }
     playerState.score += bonus;
-
+    playerState.canTakeBaseTiles += checkForCombinations(
+        playerState.coveredTiles,
+        color,
+        points,
+    );
     return state;
+}
+
+function checkForCombinations(coveredTiles, color, points) {
+    let numberOfPilesToTake = 0;
+    if (color !== "CENTER") {
+        if (points === 5 || points === 6) {
+            if (coveredTiles[color][4] && coveredTiles[color][5]) {
+                numberOfPilesToTake += 3;
+                return numberOfPilesToTake;
+            }
+        }
+        if (points === 3 || points === 4) {
+            if (coveredTiles[color][2] && coveredTiles[color][3]) {
+                const previousColor =
+                    TILE_COLORS[(5 + TILE_COLORS.indexOf(color)) % 6];
+                if (
+                    coveredTiles[previousColor][0] &&
+                    coveredTiles[previousColor][1]
+                ) {
+                    numberOfPilesToTake += 2;
+                }
+            }
+        }
+        if (points === 1 || points === 2) {
+            if (coveredTiles[color][0] && coveredTiles[color][1]) {
+                const nextColor =
+                    TILE_COLORS[(1 + TILE_COLORS.indexOf(color)) % 6];
+                if (coveredTiles[nextColor][2] && coveredTiles[nextColor][3]) {
+                    numberOfPilesToTake += 2;
+                }
+            }
+        }
+    } else {
+        const checkColor = (color) =>
+            coveredTiles[color][1] && coveredTiles[color][2];
+        if (coveredTiles[color][points]) {
+            numberOfPilesToTake += checkColor(TILE_COLORS[points - 1]);
+        }
+        if (coveredTiles[color][(5 + points) % 6]) {
+            numberOfPilesToTake += checkColor(TILE_COLORS[(5 + points) % 6]);
+        }
+    }
+    return numberOfPilesToTake;
 }
 
 export function applyPassAction(state, playerNumber) {

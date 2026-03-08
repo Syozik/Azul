@@ -1,8 +1,16 @@
-export const TILE_COLORS = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
+export const TILE_COLORS = [
+    "RED",
+    "BLUE",
+    "YELLOW",
+    "GREEN",
+    "PURPLE",
+    "ORANGE",
+];
+
 export const COLORS = {
-    BLUE:   "#1A4C9EFF",
-    GREEN:  "#27AE60FF",
-    RED:    "#E84545FF",
+    BLUE: "#1A4C9EFF",
+    GREEN: "#27AE60FF",
+    RED: "#E84545FF",
     YELLOW: "#E8B84BFF",
     PURPLE: "#8E44ADFF",
     ORANGE: "#E8762AFF",
@@ -48,14 +56,16 @@ export const SNOWFLAKE_POSITIONS = {
 export const DESK_IMAGE = {
     width: 30,
     height: 40,
-}
+};
 
 const PENTAGON_RADIUS = 33; // % of board
-const CIRCLE_HALF = 8.5;    // half of the 17% circle diameter
-const PENTAGON_ANGLES = [-90, -18, 54, 126, 198].map(deg => (deg * Math.PI) / 180);
+const CIRCLE_HALF = 8.5; // half of the 17% circle diameter
+const PENTAGON_ANGLES = [-90, -18, 54, 126, 198].map(
+    (deg) => (deg * Math.PI) / 180,
+);
 
-export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map(angle => ({
-    top:  `${(50 + PENTAGON_RADIUS * Math.sin(angle) - CIRCLE_HALF).toFixed(2)}%`,
+export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
+    top: `${(50 + PENTAGON_RADIUS * Math.sin(angle) - CIRCLE_HALF).toFixed(2)}%`,
     left: `${(50 + PENTAGON_RADIUS * Math.cos(angle) - CIRCLE_HALF).toFixed(2)}%`,
 }));
 
