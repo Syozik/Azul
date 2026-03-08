@@ -64,7 +64,7 @@ export function MainScreen() {
                     </span>
                 </div>
             </div>
-            {gameState.phase === 1 ? <PhaseTwo /> : <PhaseTwo />}
+            {gameState.phase === 1 ? <PhaseOne /> : <PhaseTwo />}
         </>
     );
 }

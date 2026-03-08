@@ -59,7 +59,7 @@ export function initState() {
                     coveredTiles: initCoveredTiles(),
                     score: 5,
                     hasPassed: false,
-                    canTakeBaseTiles: 1,
+                    canTakeBaseTiles: 0,
                 },
                 {
                     pickedTiles: [],
