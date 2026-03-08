@@ -2,8 +2,6 @@ import { useSocket } from "../utils/socket-context";
 import { Lobby } from "./lobby";
 import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";
-import { COLORS, JOKERS } from "../consts";
-import type { ColorKey } from "../utils/types";
 import "@/app/static/style/main_screen.css";
 
 export function MainScreen() {
@@ -26,19 +24,6 @@ export function MainScreen() {
                 }}
             >
                 <div className="flex items-center">
-                    <span>Round: {gameState.round}</span>
-                    <div className="ml-2 flex items-center gap-1">
-                        Joker:
-                        <span
-                            className="box-tile"
-                            style={{
-                                backgroundColor:
-                                    COLORS[
-                                        JOKERS[gameState.round - 1] as ColorKey
-                                    ],
-                            }}
-                        />
-                    </div>
                     <span
                         className={`turn-badge ${gameState.currentPlayer === playerNumber ? "turn-badge--yours" : "turn-badge--theirs"}`}
                     >

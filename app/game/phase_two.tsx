@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { PlayerDesk } from "../components/player_desk";
 import { useSocket } from "../utils/socket-context";
+import { Base } from "../components/base";
 
 const PlayerDeskContext = createContext(0);
 
@@ -11,7 +12,7 @@ export function usePlayerDesk() {
 export function PhaseTwo() {
     const { playerNumber, sendGameAction } = useSocket();
     return (
-        <div className="flex h-screen items-center justify-between font-sans text-[#2c2a26]">
+        <div className="flex h-full items-center justify-between font-sans text-[#2c2a26]">
             <button
                 className="pass-button"
                 onClick={() => sendGameAction({ type: "pass" })}
@@ -22,7 +23,7 @@ export function PhaseTwo() {
                 <PlayerDesk />
             </PlayerDeskContext.Provider>
 
-            <div className="h-3/4 w-px bg-gray-500" />
+            <Base />
 
             <PlayerDeskContext.Provider value={playerNumber === 1 ? 2 : 1}>
                 <PlayerDesk />

@@ -1,5 +1,5 @@
 import { allowedGameActions, TILE_COLORS } from "../consts.js";
-import { createTileBag, fillFactories, initCoveredTiles } from "./helpers.js";
+import { createTileBag, fillFactories, initState } from "./helpers.js";
 
 /**
  * Initialize a new game state
@@ -7,29 +7,14 @@ import { createTileBag, fillFactories, initCoveredTiles } from "./helpers.js";
 export function initGameState() {
     const bag = createTileBag();
     const factories = fillFactories(bag);
+    const state = initState();
 
     return {
+        ...state,
         factories,
-        centerPool: [],
-        players: [
-            {
-                pickedTiles: [],
-                coveredTiles: initCoveredTiles(),
-                score: 5,
-                hasPassed: false,
-            },
-            {
-                pickedTiles: [],
-                score: 5,
-                coveredTiles: initCoveredTiles(),
-                hasPassed: false,
-            },
-        ],
-        currentPlayer: 1,
-        round: 1,
-        phase: 1,
-        _base: [],
+        baseTiles: [bag.splice(0, 5), bag.splice(0, 5)],
         _bag: bag, // keep the bag on the server (not sent to clients)
+        _trash: [],
     };
 }
 
@@ -176,7 +161,7 @@ export function applyCoverAction(
         pickedTilesCopy.splice(tileIdx, 1);
     }
     playerState.pickedTiles = pickedTilesCopy;
-    state._base.push(...usedTiles);
+    state._trash.push(...usedTiles);
     // res is true if it's not a colored tile, and a color if it's center
     playerState.coveredTiles[color][points - 1] = res;
 
@@ -214,7 +199,11 @@ export function updatePhase(state) {
         } else {
             state.phase = 1;
             state.players.forEach((player) => (player.hasPassed = false));
-            // TODO: handle the case when there's not enough tiles in the bag
+            if (state._bag.length <= 20) {
+                state._bag.push(...state._trash);
+                state._trash = [];
+                shuffle(state._bag);
+            }
             state.factories = fillFactories(state._bag);
             state.round += 1;
         }
@@ -240,8 +229,8 @@ export function isPickingPhaseOver(state) {
  * Strip server-only fields before sending state to clients
  */
 export function toClientState(state) {
-    const { _bag: _unused_bag, _base: _unused_base, ...clientState } = state;
+    const { _bag: _unused_bag, _trash: _unused_trash, ...clientState } = state;
     void _unused_bag;
-    void _unused_base;
+    void _unused_trash;
     return clientState;
 }

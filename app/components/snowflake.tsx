@@ -34,7 +34,7 @@ function getFontaineTransform(rotate: number): string {
 }
 
 export function Snowflake({ color, onTileSelect }: SnowflakeProps) {
-    const { gameState } = useSocket();
+    const { gameState, playerNumber } = useSocket();
     const player = usePlayerDesk();
     const starPosition = SNOWFLAKE_POSITIONS[color];
     const angles = [];
@@ -63,7 +63,11 @@ export function Snowflake({ color, onTileSelect }: SnowflakeProps) {
                     isCovered={
                         !!gameState.players[player - 1].coveredTiles[color][idx]
                     }
-                    onClickHandler={() => onTileSelect(color, idx + 1)}
+                    onClickHandler={
+                        player === playerNumber
+                            ? () => onTileSelect(color, idx + 1)
+                            : undefined
+                    }
                 />
             ))}
             {color !== "CENTER" && (
