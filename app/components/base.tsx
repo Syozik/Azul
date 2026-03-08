@@ -1,6 +1,6 @@
 import "@/app/static/style/base.css";
 import { BaseSnowflakes } from "./base_snowflakes";
-import { COLORS, TILE_COLORS } from "../consts";
+import { COLORS, JOKERS } from "../consts";
 import { Tile } from "./tile";
 import { ColorKey } from "../utils/types";
 import { useSocket } from "../utils/socket-context";
@@ -11,7 +11,7 @@ export function Base() {
     return (
         <div className="base">
             <div className="jokers-order">
-                {TILE_COLORS.map((color, idx) => (
+                {JOKERS.map((color, idx) => (
                     <div className="base-round" key={color}>
                         <Tile
                             color={COLORS[color as ColorKey]}
