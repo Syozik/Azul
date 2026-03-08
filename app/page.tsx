@@ -1,7 +1,7 @@
 "use client";
 
 import { MainScreen } from "./game/main_screen";
-import { SocketProvider } from "./socket-context";
+import { SocketProvider } from "./utils/socket-context";
 
 export default function Home() {
     return (

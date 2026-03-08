@@ -2,14 +2,14 @@ import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
 import {
+    applyAction,
     initGameState,
-    applyPickAction,
     toClientState,
     updatePhase,
-} from "./app/game/game-logic.mjs";
+} from "./app/utils/game-logic.mjs";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
+const hostname = process.env.HOST || "0.0.0.0";
 const port = parseInt(process.env.PORT || "3000", 10);
 
 const app = next({ dev, hostname, port });
@@ -85,10 +85,8 @@ app.prepare().then(() => {
                 // Send initial game state to both
                 io.to(roomId).emit("game-state", clientState);
 
-                console.log(`[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`);
                 console.log(
-                    `[Game] Initial factories:`,
-                    gameState.factories.map((f) => f.join(",")),
+                    `[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`,
                 );
             } else {
                 waitingSocketId = socket.id;
@@ -108,21 +106,14 @@ app.prepare().then(() => {
             const state = roomGameStates.get(info.roomId);
             if (!state) return;
 
-            let result;
-
-            if (data.type === "pick") {
-                result = applyPickAction(state, info.playerNumber, data.color, {
-                    factoryIndex: data.factoryIndex,
-                });
-            } else {
-                console.log(`[Game] Unknown action type: ${data.type}`);
-                return;
-            }
+            const result = applyAction(state, info.playerNumber, data);
 
             if (result.error) {
                 // Send error back to the player who made the invalid action
                 socket.emit("game-error", { error: result.error });
-                console.log(`[Game] Error for P${info.playerNumber}: ${result.error}`);
+                console.log(
+                    `[Game] Error for P${info.playerNumber}: ${result.error}`,
+                );
                 return;
             }
 
@@ -133,10 +124,6 @@ app.prepare().then(() => {
             // Broadcast the new state to both players
             const clientState = toClientState(result.newState);
             io.to(info.roomId).emit("game-state", clientState);
-
-            console.log(
-                `[Game] P${info.playerNumber} picked ${data.color} from ${data.type === "pick-from-factory" ? `factory ${data.factoryIndex}` : "center"}`,
-            );
         });
 
         socket.on("disconnect", () => {

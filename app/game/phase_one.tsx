@@ -2,7 +2,7 @@
 import { CIRCLE_POSITIONS, COLORS } from "../consts";
 import { CircleWithTiles } from "../components/circle";
 import "@/app/static/style/phase_one.css";
-import { useSocket } from "../socket-context";
+import { useSocket } from "../utils/socket-context";
 
 export function PhaseOne() {
     const { gameState, playerNumber, sendGameAction } = useSocket();
@@ -18,12 +18,14 @@ export function PhaseOne() {
     return (
         <div className="phase-one">
             <div className="tiles-box">
-                <p className="tiles-box-title">
-                    Your Tiles {isMyTurn && <span className="turn-badge">Your Turn</span>}
-                </p>
+                <p className="tiles-box-title">Your Tiles</p>
                 <div className="picked-tiles">
                     {gameState.players[myIndex].pickedTiles.map((color, i) => (
-                        <span key={i} className="tile" style={{ backgroundColor: COLORS[color] }} />
+                        <span
+                            key={i}
+                            className="box-tile"
+                            style={{ backgroundColor: COLORS[color] }}
+                        />
                     ))}
                     {gameState.players[myIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>
@@ -47,7 +49,7 @@ export function PhaseOne() {
                     {gameState.centerPool.map((color, i) => (
                         <span
                             key={i}
-                            className={`tile ${isMyTurn ? "clickable" : ""}`}
+                            className={`box-tile ${isMyTurn ? "clickable" : ""}`}
                             style={{ backgroundColor: COLORS[color] }}
                             onClick={() => {
                                 if (isMyTurn) {
@@ -63,15 +65,19 @@ export function PhaseOne() {
             </div>
 
             <div className="tiles-box">
-                <p className="tiles-box-title">
-                    Opponent
-                    {!isMyTurn && <span className="turn-badge">{"Opponent's Turn"}</span>}
-                </p>
+                <p className="tiles-box-title">Opponent</p>
                 <div className="picked-tiles">
-                    {gameState.players[opponentIndex].pickedTiles.map((color, i) => (
-                        <span key={i} className="tile" style={{ backgroundColor: COLORS[color] }} />
-                    ))}
-                    {gameState.players[opponentIndex].pickedTiles.length === 0 && (
+                    {gameState.players[opponentIndex].pickedTiles.map(
+                        (color, i) => (
+                            <span
+                                key={i}
+                                className="box-tile"
+                                style={{ backgroundColor: COLORS[color] }}
+                            />
+                        ),
+                    )}
+                    {gameState.players[opponentIndex].pickedTiles.length ===
+                        0 && (
                         <span className="no-tiles">No tiles picked yet</span>
                     )}
                 </div>

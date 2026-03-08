@@ -2,11 +2,12 @@
     "name": "azul",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "node server.mjs",
         "dev:socket": "node server.mjs",
         "build": "next build",
-        "start": "next start",
+        "start": "NODE_ENV=production node server.mjs",
         "lint": "eslint"
     },
     "dependencies": {

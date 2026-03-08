@@ -1,21 +1,23 @@
 "use client";
 import { MouseEventHandler } from "react";
-import { ANGLE as angle, RHOMBUS_SIZE as size } from "../consts";
-import "@/app/static/style/rhombus.css";
+import { ANGLE as angle, TILE_SIZE as size } from "../consts";
+import "@/app/static/style/tile.css";
 
-interface RhombusProps {
+interface TileProps {
     points?: number;
     color?: string;
     transformAngle?: number;
     onClickHandler: MouseEventHandler;
+    isCovered?: boolean;
 }
 
-export function Rhombus({
+export function Tile({
     color = "#0f1038ff",
     points: pointsCount,
     transformAngle = -30,
+    isCovered,
     onClickHandler,
-}: RhombusProps) {
+}: TileProps) {
     const stroke = "#ffffff";
     const strokeWidth = 2;
 
@@ -35,7 +37,7 @@ export function Rhombus({
         .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
         .join(" ");
 
-    // Center of the rhombus within the viewBox (accounting for stroke offset)
+    // Center of the tile within the viewBox (accounting for stroke offset)
     const centerX = cx + strokeWidth / 2;
     const centerY = cy + strokeWidth / 2;
 
@@ -44,7 +46,7 @@ export function Rhombus({
 
     return (
         <div
-            className={`rhombus ${pointsCount ? "points" + pointsCount : ""}`}
+            className={`tile` + (isCovered ? ` tile_covered` : ``)}
             style={{
                 transform: `rotate(${transformAngle}rad)`,
                 transformOrigin: `${cx + strokeWidth / 2}px 0px`,
@@ -67,7 +69,7 @@ export function Rhombus({
                     style={{ cursor: "pointer" }}
                     onClick={onClickHandler}
                 />
-                {pointsCount && (
+                {pointsCount && !isCovered && (
                     <text
                         x={centerX}
                         y={centerY}

@@ -1,4 +1,4 @@
-import { ColorKey } from "../consts";
+export type ColorKey = "PURPLE" | "GREEN" | "ORANGE" | "YELLOW" | "BLUE" | "RED" | "CENTER";
 
 export interface GameState {
     factories: ColorKey[][];
@@ -11,7 +11,9 @@ export interface GameState {
 
 export interface PlayerState {
     pickedTiles: ColorKey[]; // tiles the player has picked this round
-    score: number,
+    coveredTiles: Record<ColorKey, boolean[]>;
+    score: number;
+    hasPassed: boolean;
 }
 
 // The action a player sends when clicking a tile color on a factory
@@ -21,5 +23,16 @@ export interface PickTilesAction {
     factoryIndex: number | undefined;
 }
 
-export type GameAction = Partial<PickTilesAction>;
+export interface CoverTileAction {
+    type: "cover";
+    color: ColorKey;
+    points: number;
+    usedTiles: ColorKey[];
+}
+
+export interface PassAction {
+    type: "pass";
+}
+
+export type GameAction = Partial<PickTilesAction> | CoverTileAction | PassAction;
 export type TileColor = ColorKey;

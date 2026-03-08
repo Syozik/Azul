@@ -2,20 +2,18 @@ import type { Metadata } from "next";
 import "@/app/static/style/globals.css";
 
 export const metadata: Metadata = {
-  title: "Azul",
-  description: "Azul online game",
+    title: "Azul",
+    description: "Azul online game",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en">
+            <body>{children}</body>
+        </html>
+    );
 }

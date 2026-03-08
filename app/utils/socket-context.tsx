@@ -10,24 +10,30 @@ import {
     useReducer,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import type { GameState, GameAction } from "./game/types";
+import type { GameState, GameAction } from "./types";
+import { initState } from "./helpers";
 
-type ConnectionStatus = "idle" | "searching" | "waiting" | "playing" | "disconnected";
+type ConnectionStatus =
+    | "idle"
+    | "searching"
+    | "waiting"
+    | "playing"
+    | "disconnected";
 
 interface SocketContextType {
     connectionStatus: ConnectionStatus;
-    playerNumber: 1 | 2 | null;
+    playerNumber: 1 | 2;
     roomId: string | null;
-    gameState: GameState | null;
+    gameState: GameState;
     findGame: () => void;
     sendGameAction: (action: GameAction) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
     connectionStatus: "idle",
-    playerNumber: null,
+    playerNumber: 1,
     roomId: null,
-    gameState: null,
+    gameState: initState(),
     findGame: () => {},
     sendGameAction: () => {},
 });
@@ -38,9 +44,9 @@ export function useSocket() {
 
 type State = {
     connectionStatus: ConnectionStatus;
-    playerNumber: 1 | 2 | null;
+    playerNumber: 1 | 2;
     roomId: string | null;
-    gameState: GameState | null;
+    gameState: GameState;
 };
 
 type Action =
@@ -53,9 +59,9 @@ type Action =
 
 const initialState: State = {
     connectionStatus: "idle",
-    playerNumber: null,
+    playerNumber: 1,
     roomId: null,
-    gameState: null,
+    gameState: initState(),
 };
 
 function reducer(state: State, action: Action): State {
@@ -77,9 +83,9 @@ function reducer(state: State, action: Action): State {
             return {
                 ...state,
                 connectionStatus: "disconnected",
-                playerNumber: null,
+                playerNumber: 1,
                 roomId: null,
-                gameState: null,
+                gameState: initState(),
             };
         case "DISCONNECT":
             return initialState;
@@ -102,9 +108,16 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socket.on("waiting", () => {
             dispatch({ type: "WAITING" });
         });
-        socket.on("game-start", (data: { playerNumber: 1 | 2; roomId: string }) => {
-            dispatch({ type: "GAME_START", playerNumber: data.playerNumber, roomId: data.roomId });
-        });
+        socket.on(
+            "game-start",
+            (data: { playerNumber: 1 | 2; roomId: string }) => {
+                dispatch({
+                    type: "GAME_START",
+                    playerNumber: data.playerNumber,
+                    roomId: data.roomId,
+                });
+            },
+        );
         socket.on("game-state", (gameState: GameState) => {
             dispatch({ type: "GAME_STATE", gameState });
         });
