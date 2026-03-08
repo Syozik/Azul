@@ -1,5 +1,5 @@
-import { allowedGameActions, JOKERS, TILE_COLORS } from "../consts.js";
-import { createTileBag, fillFactories, initState } from "./helpers.js";
+import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts.js";
+import { createTileBag, fillFactories, initState, shuffle } from "./helpers.js";
 
 /**
  * Initialize a new game state
@@ -160,24 +160,39 @@ function applyCoverAction(state, playerNumber, color, points, usedTiles) {
     // res is true if it's not a colored tile, and a color if it's center
     playerState.coveredTiles[color][points - 1] = res;
 
-    let bonus = 1;
-    let i = points - 2;
-    while (i >= 0 && playerState.coveredTiles[color][i]) {
-        bonus += 1;
-        i -= 1;
-    }
-    i = points;
-    while (i < 5 && playerState.coveredTiles[color][i]) {
-        bonus += 1;
-        i += 1;
-    }
-    playerState.score += bonus;
+    playerState.score += getBonus(playerState.coveredTiles, color, points);
     playerState.canTakeBaseTiles += checkForCombinations(
         playerState.coveredTiles,
         color,
         points,
     );
     return state;
+}
+
+function getBonus(coveredTiles, color, points) {
+    let bonus = 1;
+    let i = points - 2;
+    while (i >= 0 && coveredTiles[color][i]) {
+        bonus += 1;
+        i -= 1;
+    }
+    i = points;
+    while (i < 5 && coveredTiles[color][i]) {
+        bonus += 1;
+        i += 1;
+    }
+
+    if (1 <= points <= 4) {
+        if (Object.values(coveredTiles).every((color) => !!color[points - 1])) {
+            bonus += points * 4;
+        }
+    }
+
+    if (coveredTiles[color].every((point) => !!point)) {
+        bonus += BONUSES[color];
+    }
+
+    return bonus;
 }
 
 function checkForCombinations(coveredTiles, color, points) {

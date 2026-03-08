@@ -70,3 +70,13 @@ export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
 }));
 
 export const allowedGameActions = ["pick", "cover", "pass", "base-pick"];
+
+export const BONUSES = {
+    "CENTER": 12,
+    "RED": 14,
+    "BLUE": 15,
+    "YELLOW": 16,
+    "ORANGE": 17,
+    "GREEN": 18,
+    "PURPLE": 20,
+}
