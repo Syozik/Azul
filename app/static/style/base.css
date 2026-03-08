@@ -1,0 +1,48 @@
+.base {
+    align-self: start;
+    margin-top: 100px;
+    border: thick double #d4d4d4;
+    border-radius: 15px;
+    background-color: antiquewhite;
+}
+
+.jokers-order {
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+    padding-left: 35px;
+    .tile {
+        position: relative;
+    }
+}
+
+.round-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #d4d4d4;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+.round-number.active {
+    background: #4caf50;
+    border-color: #388e3c;
+    color: white;
+}
+
+.base-snowflake {
+    position: relative;
+    &.base-snowflake-0 {
+        margin: 100px 0 0 100px;
+    }
+
+    &.base-snowflake-1 {
+        margin: 220px 0 300px 170px;
+    }
+}

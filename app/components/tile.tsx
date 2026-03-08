@@ -1,20 +1,22 @@
 "use client";
 import { MouseEventHandler } from "react";
-import { ANGLE as angle, TILE_SIZE as size } from "../consts";
+import { ANGLE as angle, TILE_SIZE } from "../consts";
 import "@/app/static/style/tile.css";
 
 interface TileProps {
     points?: number;
     color?: string;
     transformAngle?: number;
-    onClickHandler: MouseEventHandler;
+    onClickHandler?: MouseEventHandler;
     isCovered?: boolean;
+    size?: number;
 }
 
 export function Tile({
     color = "#0f1038ff",
     points: pointsCount,
-    transformAngle = -30,
+    size = TILE_SIZE,
+    transformAngle = -Math.PI / 6,
     isCovered,
     onClickHandler,
 }: TileProps) {
@@ -66,7 +68,7 @@ export function Tile({
                     stroke={stroke}
                     strokeWidth={strokeWidth}
                     transform={`translate(${strokeWidth / 2}, ${strokeWidth / 2})`}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: onClickHandler ? "pointer" : "auto" }}
                     onClick={onClickHandler}
                 />
                 {pointsCount && !isCovered && (
@@ -79,7 +81,7 @@ export function Tile({
                         fontSize={20}
                         fontWeight="bold"
                         transform={`rotate(180, ${centerX}, ${centerY})`}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: onClickHandler ? "pointer" : "auto" }}
                         onClick={onClickHandler}
                     >
                         {pointsCount}

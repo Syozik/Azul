@@ -1,12 +1,12 @@
 export const TILE_COLORS = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
 export const COLORS = {
-    BLUE: "#3f42d8ff",
-    GREEN: "#3b9418ff",
-    RED: "#e77878ff",
-    YELLOW: "#e7d778ff",
-    PURPLE: "#c678e7ff",
-    ORANGE: "#e7a678ff",
-    CENTER: "#4bc3b5ff",
+    BLUE:   "#1A4C9EFF",
+    GREEN:  "#27AE60FF",
+    RED:    "#E84545FF",
+    YELLOW: "#E8B84BFF",
+    PURPLE: "#8E44ADFF",
+    ORANGE: "#E8762AFF",
+    CENTER: "#0E6B5EFF",
 };
 
 export const TILES_PER_COLOR = 22;

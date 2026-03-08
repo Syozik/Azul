@@ -16,12 +16,16 @@ export function createTileBag() {
             bag.push(color);
         }
     }
-    // Fisher-Yates shuffle
-    for (let i = bag.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
+    shuffle(bag);
     return bag;
+}
+
+// Fisher-Yates shuffle
+export function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
 }
 
 /**
@@ -48,23 +52,27 @@ export function initState() {
     return /** @type {import('./types').GameState} */ ({
         factories: [[]],
         centerPool: [],
-        players: /** @type {[import('./types').PlayerState, import('./types').PlayerState]} */ ([
-            {
-                pickedTiles: [],
-                coveredTiles: initCoveredTiles(),
-                score: 5,
-                hasPassed: false,
-            },
-            {
-                pickedTiles: [],
-                coveredTiles: initCoveredTiles(),
-                score: 5,
-                hasPassed: false,
-            },
-        ]),
+        players:
+            /** @type {[import('./types').PlayerState, import('./types').PlayerState]} */ ([
+                {
+                    pickedTiles: [],
+                    coveredTiles: initCoveredTiles(),
+                    score: 5,
+                    hasPassed: false,
+                    canTakeBaseTiles: 0,
+                },
+                {
+                    pickedTiles: [],
+                    coveredTiles: initCoveredTiles(),
+                    score: 5,
+                    hasPassed: false,
+                    canTakeBaseTiles: 0,
+                },
+            ]),
         currentPlayer: /** @type {1 | 2} */ (1),
         round: 1,
         phase: /** @type {1 | 2} */ (1),
+        baseTiles: [[], []]
     });
 }
 
