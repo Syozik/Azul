@@ -74,6 +74,8 @@ export function initState() {
         phase: /** @type {1 | 2} */ (1),
         baseTiles: [[], []],
         isGameOver: false,
+        firstPlayer: /** @type {1 | 2} */ (1),
+        isFirstCenterPick: true,
     });
 }
 

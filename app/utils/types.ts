@@ -16,6 +16,8 @@ export interface GameState {
     phase: 1 | 2;
     baseTiles: [ColorKey[], ColorKey[]];
     isGameOver: boolean;
+    firstPlayer: 1 | 2;
+    isFirstCenterPick: boolean;
 }
 
 export interface PlayerState {
