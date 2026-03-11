@@ -102,12 +102,20 @@ function applyPickAction(state, playerNumber, color, factoryIndex) {
     }
 
     const playerIdx = state.currentPlayer - 1;
-    state.players[playerIdx]["pickedTiles"].push(...picked);
+    state.players[playerIdx].pickedTiles.push(...picked);
     if (factoryIndex !== undefined) {
         state.factories[factoryIndex] = [];
         state.centerPool.push(...remaining);
     } else {
         state.centerPool = remaining;
+        if (state.isFirstCenterPick) {
+            state.firstPlayer = playerNumber;
+            state.players[playerIdx].score = Math.max(
+                state.players[playerIdx].score - picked.length,
+                0,
+            );
+            state.isFirstCenterPick = false;
+        }
     }
     return state;
 }
@@ -281,22 +289,27 @@ function applyBasePickAction(state, playerNumber, selectedTiles) {
 export function updatePhase(state) {
     if (state.phase === 1 && isPickingPhaseOver(state)) {
         state.phase = 2;
-    } else if (state.phase === 2 && isCoveringPhaseOver(state)) {
+        state.currentPlayer = state.firstPlayer;
+        return;
+    }
+
+    if (state.phase === 2 && isCoveringPhaseOver(state)) {
         if (state.round === 6) {
             state.isGameOver = true;
-        } else {
-            state.phase = 1;
-            state.players.forEach((player) => (player.hasPassed = false));
-            if (state._bag.length <= 20) {
-                state._bag.push(...state._trash);
-                state._trash = [];
-                shuffle(state._bag);
-            }
-            state.factories = fillFactories(state._bag);
-            state.round += 1;
+            return;
         }
+        state.phase = 1;
+        state.players.forEach((player) => (player.hasPassed = false));
+        if (state._bag.length <= 20) {
+            state._bag.push(...state._trash);
+            state._trash = [];
+            shuffle(state._bag);
+        }
+        state.factories = fillFactories(state._bag);
+        state.isFirstCenterPick = true;
+        state.currentPlayer = state.firstPlayer;
+        state.round += 1;
     }
-    return state;
 }
 
 export function isCoveringPhaseOver(state) {
