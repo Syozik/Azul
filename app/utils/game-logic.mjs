@@ -216,6 +216,15 @@ function checkForCombinations(coveredTiles, color, points) {
                 }
             }
         }
+        if (points === 2 || points === 3) {
+            if (coveredTiles[color][1] && coveredTiles[color][2]) {
+                const idx = TILE_COLORS.indexOf(color);
+                numberOfPilesToTake += !!(
+                    coveredTiles["CENTER"][idx] &&
+                    coveredTiles["CENTER"[(idx + 1) % 6]]
+                );
+            }
+        }
         if (points === 1 || points === 2) {
             if (coveredTiles[color][0] && coveredTiles[color][1]) {
                 const nextColor =
@@ -231,8 +240,8 @@ function checkForCombinations(coveredTiles, color, points) {
         if (coveredTiles[color][points]) {
             numberOfPilesToTake += checkColor(TILE_COLORS[points - 1]);
         }
-        if (coveredTiles[color][(5 + points) % 6]) {
-            numberOfPilesToTake += checkColor(TILE_COLORS[(5 + points) % 6]);
+        if (coveredTiles[color][(4 + points) % 6]) {
+            numberOfPilesToTake += checkColor(TILE_COLORS[(4 + points) % 6]);
         }
     }
     return numberOfPilesToTake;
@@ -292,7 +301,9 @@ export function updatePhase(state) {
 
 export function isCoveringPhaseOver(state) {
     return state.players.every(
-        (player) => !player.canTakeBaseTiles && (player.hasPassed || !player.pickedTiles.length),
+        (player) =>
+            !player.canTakeBaseTiles &&
+            (player.hasPassed || !player.pickedTiles.length),
     );
 }
 
