@@ -1,4 +1,5 @@
 #### Azul online game
 
-##### Rules
+---
+##### Rules:
 To be added later...
