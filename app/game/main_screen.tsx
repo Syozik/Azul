@@ -8,11 +8,11 @@ import "@/app/static/style/main_screen.css";
 export function MainScreen() {
     const { gameState, playerNumber, connectionStatus } = useSocket();
 
+    if (connectionStatus !== "playing") return <Lobby />;
+    if (gameState.isGameOver) return <GameOverScreen />;
+
     return (
         <>
-            {connectionStatus !== "playing" && <Lobby />}
-            {gameState.isGameOver && <GameOverScreen />}
-
             <div
                 className="game-header flex gap-10 items-center justify-center"
                 style={{

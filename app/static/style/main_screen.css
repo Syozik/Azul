@@ -79,3 +79,44 @@
         border: 2px solid #1a8fb5;
     }
 }
+
+.phase-two {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    font-family: system-ui, sans-serif;
+    color: #2c2a26;
+}
+
+
+@media (max-width: 768px) {
+    .game-header {
+        gap: 0.5rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    .phase-two {
+        flex-direction: column;
+        height: auto;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    .phase-two-panel {
+        padding: 0.75rem 0.5rem;
+        border-bottom: 2px solid rgba(196, 162, 101, 0.3);
+    }
+
+    .phase-two-panel:last-child {
+        border-bottom: none;
+    }
+
+    .pass-button {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        align-self: center;
+        margin: 0.5rem 0;
+    }
+}

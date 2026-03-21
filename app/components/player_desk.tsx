@@ -5,14 +5,33 @@ import "@/app/static/style/player_desk.css";
 import { Scoreline } from "./scoreline";
 import { useSocket } from "../utils/socket-context";
 import { groupTilesByColor } from "../utils/helpers";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TileColor } from "../utils/types";
 import { usePlayerDesk } from "../game/phase_two";
+
+const SNOWFLAKE_NATURAL_SIZE = 500;
 
 export function PlayerDesk() {
     const { gameState, playerNumber, sendGameAction } = useSocket();
     const player = usePlayerDesk();
     const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const [snowflakeScale, setSnowflakeScale] = useState(1);
+
+    useEffect(() => {
+        const el = wrapperRef.current;
+        if (!el) return;
+
+        const observer = new ResizeObserver(([entry]) => {
+            const width = entry.contentRect.width;
+            if (width > 0) {
+                setSnowflakeScale(Math.min(1, width / SNOWFLAKE_NATURAL_SIZE));
+            }
+        });
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
 
     const playerState = gameState.players[player - 1];
     const playerTiles = groupTilesByColor(playerState.pickedTiles);
@@ -55,9 +74,9 @@ export function PlayerDesk() {
 
     return (
         <div
-            className={`${isOwner ? "own-desk" : ""} desk flex flex-col items-center h-full mt-[50] gap-10 text-center mx-28`}
+            className={`${isOwner ? "own-desk" : ""} desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-[50px] gap-3 md:gap-10 text-center mx-1 md:mx-28`}
         >
-            <p className="player-name font-bold text-2xl">
+            <p className="player-name font-bold text-lg md:text-2xl">
                 {isOwner ? "Your" : "Opponent's"} Desk
             </p>
             <Scoreline
@@ -68,18 +87,27 @@ export function PlayerDesk() {
                 range={{ start: 0, end: 9, step: 1 }}
                 currentScore={playerState.score}
             />
-            <div className="snowflakes mt-12">
-                {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map(
-                    (color) => (
-                        <Snowflake
-                            color={color}
-                            key={color}
-                            onTileSelect={onSnowflakeSelect}
-                        />
-                    ),
-                )}
+            <div ref={wrapperRef} className="snowflakes-wrapper">
+                <div
+                    className="snowflakes"
+                    style={snowflakeScale < 1 ? {
+                        transform: `scale(${snowflakeScale})`,
+                        transformOrigin: 'top center',
+                        marginBottom: `${-(SNOWFLAKE_NATURAL_SIZE * (1 - snowflakeScale))}px`,
+                    } : undefined}
+                >
+                    {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map(
+                        (color) => (
+                            <Snowflake
+                                color={color}
+                                key={color}
+                                onTileSelect={onSnowflakeSelect}
+                            />
+                        ),
+                    )}
+                </div>
             </div>
-            <div className="available-tiles flex flex-row gap-5">
+            <div className="available-tiles flex flex-row flex-wrap gap-2 md:gap-5 justify-center">
                 {playerTiles.map((group) => (
                     <div key={group[0]} className="groupedTiles">
                         {group.map((tile, idx) => (

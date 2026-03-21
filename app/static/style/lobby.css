@@ -264,3 +264,45 @@
     text-transform: uppercase;
     letter-spacing: 2px;
 }
+
+@media (max-width: 768px) {
+    .lobby-container {
+        padding: 1rem;
+    }
+
+    .lobby-card {
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+    }
+
+    .lobby-title {
+        font-size: 2.5rem;
+        letter-spacing: 4px;
+    }
+
+    .lobby-subtitle {
+        font-size: 0.85rem;
+        letter-spacing: 2px;
+    }
+
+    .lobby-play-btn {
+        padding: 0.8rem 2rem;
+        font-size: 1.05rem;
+    }
+
+    .lobby-players {
+        gap: 1.2rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+    }
+
+    .player-avatar {
+        width: 46px;
+        height: 46px;
+        font-size: 0.85rem;
+    }
+
+    .lobby-vs {
+        font-size: 1.1rem;
+    }
+}

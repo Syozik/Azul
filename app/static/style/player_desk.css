@@ -5,6 +5,7 @@
     border: 5px solid rgba(88, 45, 4, 0.62);
     background-color:antiquewhite;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .snowflake {
@@ -14,6 +15,12 @@
     width: 100px;
     /*height: 100px;*/
     overflow: visible;
+}
+
+.snowflakes-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .own-desk .available-tiles .box-tile {

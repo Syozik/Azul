@@ -114,6 +114,9 @@ export class Game {
         if (this.state.currentPlayer !== playerNumber) {
             throw new Error("Not your turn");
         }
+        if (this.state.players[playerNumber - 1].canTakeBaseTiles) {
+            throw new Error("You need to pick from the base first");
+        }
         const playerState = this.state.players[playerNumber - 1];
         if (playerState.coveredTiles[color][points - 1]) {
             throw new Error("This tile has already been closed");
