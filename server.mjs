@@ -1,12 +1,7 @@
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
-import {
-    applyAction,
-    initGameState,
-    toClientState,
-    updatePhase,
-} from "./app/utils/game-logic.mjs";
+import { Game } from "./app/utils/game-logic.mjs";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOST || "0.0.0.0";
@@ -71,11 +66,11 @@ app.prepare().then(() => {
                 waitingSocketId = null;
 
                 // Initialize game state for this room
-                const gameState = initGameState();
-                roomGameStates.set(roomId, gameState);
+                const game = new Game();
+                roomGameStates.set(roomId, game);
 
                 // Notify both players the game is starting + send initial state
-                const clientState = toClientState(gameState);
+                const clientState = game.clientState;
                 waitingSocket.emit("game-start", {
                     playerNumber: 1,
                     roomId,
@@ -103,10 +98,10 @@ app.prepare().then(() => {
             const info = playerInfo.get(socket.id);
             if (!info) return;
 
-            const state = roomGameStates.get(info.roomId);
-            if (!state) return;
+            const game = roomGameStates.get(info.roomId);
+            if (!game) return;
 
-            const result = applyAction(state, info.playerNumber, data);
+            const result = game.applyAction(info.playerNumber, data);
 
             if (result.error) {
                 // Send error back to the player who made the invalid action
@@ -118,12 +113,11 @@ app.prepare().then(() => {
             }
 
             // Update the room's game state
-            updatePhase(result.newState);
-            roomGameStates.set(info.roomId, result.newState);
+            game.updatePhase();
+            // roomGameStates.set(info.roomId, result.newState);
 
             // Broadcast the new state to both players
-            const clientState = toClientState(result.newState);
-            io.to(info.roomId).emit("game-state", clientState);
+            io.to(info.roomId).emit("game-state", game.clientState);
         });
 
         socket.on("disconnect", () => {
