@@ -45,18 +45,20 @@ export class Game {
             }
         } catch (error) {
             console.log(error);
+            this.pushNotification(playerNumber - 1, "error", error.message);
             return { error: error.message };
         }
         const nextPlayer = this.state.currentPlayer === 1 ? 2 : 1;
         if (
-            !this.state.players[this.state.currentPlayer - 1].canTakeBaseTiles &&
+            !this.state.players[this.state.currentPlayer - 1]
+                .canTakeBaseTiles &&
             !this.state.players[nextPlayer - 1].hasPassed
         ) {
             this.state.currentPlayer = nextPlayer;
         }
         return {
             success: "Action done!",
-        }
+        };
     }
 
     applyPickAction(playerNumber, color, factoryIndex) {
@@ -108,6 +110,12 @@ export class Game {
                 this.state.isFirstCenterPick = false;
             }
         }
+        this.pushNotification(
+            playerNumber - 1,
+            "success",
+            `You picked up ${picked.join(" ")} tiles`,
+            true,
+        );
     }
 
     applyCoverAction(playerNumber, color, points, usedTiles) {
@@ -140,7 +148,9 @@ export class Game {
             const centerColor = usedTiles.find((tile) => tile !== joker);
             res = centerColor;
             if (playerState.coveredTiles[color].includes(centerColor)) {
-                throw new Error(`You can place ${centerColor} in the center only once.`);
+                throw new Error(
+                    `You can place ${centerColor} in the center only once.`,
+                );
             }
         }
         if (usedTiles.length !== points) {
@@ -150,7 +160,7 @@ export class Game {
         for (const usedTile of usedTiles) {
             const tileIdx = pickedTilesCopy.indexOf(usedTile);
             if (tileIdx === -1) {
-                throw new Error("You don't have the tiles you just used");
+                throw new Error("You don't have the tiles you tried to use.");
             }
             pickedTilesCopy.splice(tileIdx, 1);
         }
@@ -159,15 +169,26 @@ export class Game {
         // res is true if it's not a colored tile, and a color if it's center
         playerState.coveredTiles[color][points - 1] = res;
 
-        playerState.score += this.getBonus(playerState.coveredTiles, color, points);
-        playerState.canTakeBaseTiles += this.checkForCombinations(
-            playerState.coveredTiles,
+        playerState.score += this.getBonus(
+            playerNumber,
             color,
             points,
         );
+        playerState.canTakeBaseTiles += this.checkForCombinations(
+            playerNumber,
+            color,
+            points,
+        );
+        this.pushNotification(
+            playerNumber - 1,
+            "success",
+            `You covered ${points} ${color} tile`,
+            true,
+        );
     }
 
-    getBonus(coveredTiles, color, points) {
+    getBonus(playerNumber, color, points) {
+        const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let bonus = 1;
         let i = points - 2;
         while (i >= 0 && coveredTiles[color][i]) {
@@ -192,16 +213,29 @@ export class Game {
 
         if (coveredTiles[color].every((point) => !!point)) {
             bonus += BONUSES[color];
+            this.pushNotification(
+                playerNumber - 1,
+                "success",
+                `You covered all ${color} tiles`,
+                true,
+            );
         }
 
         return bonus;
     }
 
-    checkForCombinations(coveredTiles, color, points) {
+    checkForCombinations(playerNumber, color, points) {
+        const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let numberOfPilesToTake = 0;
         if (color !== "CENTER") {
             if (points === 5 || points === 6) {
                 if (coveredTiles[color][4] && coveredTiles[color][5]) {
+                    this.pushNotification(
+                        playerNumber - 1,
+                        "success",
+                        `You covered ${color} mirror tiles!`,
+                        true,
+                    );
                     numberOfPilesToTake += 3;
                     return numberOfPilesToTake;
                 }
@@ -214,6 +248,12 @@ export class Game {
                         coveredTiles[previousColor][0] &&
                         coveredTiles[previousColor][1]
                     ) {
+                        this.pushNotification(
+                            playerNumber - 1,
+                            "success",
+                            `You covered a statue!`,
+                            true,
+                        );
                         numberOfPilesToTake += 2;
                     }
                 }
@@ -221,10 +261,18 @@ export class Game {
             if (points === 2 || points === 3) {
                 if (coveredTiles[color][1] && coveredTiles[color][2]) {
                     const idx = TILE_COLORS.indexOf(color);
-                    numberOfPilesToTake += !!(
+                    if (
                         coveredTiles["CENTER"][idx] &&
                         coveredTiles["CENTER"[(idx + 1) % 6]]
-                    );
+                    ) {
+                        this.pushNotification(
+                            playerNumber - 1,
+                            "success",
+                            `You covered a fountain!`,
+                            true,
+                        );
+                        numberOfPilesToTake += 1;
+                    }
                 }
             }
             if (points === 1 || points === 2) {
@@ -235,6 +283,12 @@ export class Game {
                         coveredTiles[nextColor][2] &&
                         coveredTiles[nextColor][3]
                     ) {
+                        this.pushNotification(
+                            playerNumber - 1,
+                            "success",
+                            `You covered a statue!`,
+                            true,
+                        );
                         numberOfPilesToTake += 2;
                     }
                 }
@@ -243,12 +297,26 @@ export class Game {
             const checkColor = (color) =>
                 coveredTiles[color][1] && coveredTiles[color][2];
             if (coveredTiles[color][points]) {
-                numberOfPilesToTake += checkColor(TILE_COLORS[points - 1]);
+                if (checkColor(TILE_COLORS[points - 1])) {
+                    numberOfPilesToTake += 1;
+                    this.pushNotification(
+                        playerNumber - 1,
+                        "success",
+                        `You covered ${color} a fountain!`,
+                        true,
+                    );
+                }
             }
             if (coveredTiles[color][(4 + points) % 6]) {
-                numberOfPilesToTake += checkColor(
-                    TILE_COLORS[(4 + points) % 6],
-                );
+                if (checkColor(TILE_COLORS[(4 + points) % 6])) {
+                    numberOfPilesToTake += 1;
+                    this.pushNotification(
+                        playerNumber - 1,
+                        "success",
+                        `You covered ${color} a fountain!`,
+                        true,
+                    );
+                }
             }
         }
         return numberOfPilesToTake;
@@ -256,6 +324,7 @@ export class Game {
 
     applyPassAction(playerNumber) {
         this.state.players[playerNumber - 1].hasPassed = true;
+        this.pushNotification(playerNumber - 1, "success", `You passed!`, true);
     }
 
     applyBasePickAction(playerNumber, selectedTiles) {
@@ -282,6 +351,12 @@ export class Game {
                 1,
             );
         }
+        this.pushNotification(
+            playerNumber - 1,
+            "success",
+            `You took ${selectedTiles.join(" ")} tiles from the base.`,
+            true,
+        );
         playerState.canTakeBaseTiles = 0;
     }
 
@@ -341,5 +416,25 @@ export class Game {
         void _unused_bag;
         void _unused_trash;
         return clientState;
+    }
+
+    pushNotification(player, type, message, pushToOpponent = false) {
+        this.state.players[player].notifications.push({
+            type,
+            message,
+            id: this.getNewNotificationId(player),
+        });
+        if (pushToOpponent) {
+            const idx = player === 1 ? 0 : 1;
+            this.state.players[idx].notifications.push({
+                type: "info",
+                message: message.replace("You", "Opponent"),
+                id: this.getNewNotificationId(idx),
+            });
+        }
+    }
+
+    getNewNotificationId(player) {
+        return this.state.players[player].notifications.length + 1;
     }
 }

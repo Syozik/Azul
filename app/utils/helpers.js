@@ -60,6 +60,8 @@ export function initState() {
                     score: 5,
                     hasPassed: false,
                     canTakeBaseTiles: 0,
+                    notifications:
+                        /** @type {import('./types').NotificationType[]} */ ([]),
                 },
                 {
                     pickedTiles: [],
@@ -67,6 +69,8 @@ export function initState() {
                     score: 5,
                     hasPassed: false,
                     canTakeBaseTiles: 0,
+                    notifications:
+                        /** @type {import('./types').NotificationType[]} */ ([]),
                 },
             ]),
         currentPlayer: /** @type {1 | 2} */ (1),

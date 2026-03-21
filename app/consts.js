@@ -58,6 +58,8 @@ export const DESK_IMAGE = {
     height: 40,
 };
 
+export const NOTIFICATION_DURATION = 3500;
+
 const PENTAGON_RADIUS = 33; // % of board
 const CIRCLE_HALF = 8.5; // half of the 17% circle diameter
 const PENTAGON_ANGLES = [-90, -18, 54, 126, 198].map(

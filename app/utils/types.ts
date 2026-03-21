@@ -26,6 +26,13 @@ export interface PlayerState {
     score: number;
     hasPassed: boolean;
     canTakeBaseTiles: number;
+    notifications: NotificationType[];
+}
+
+export interface NotificationType {
+    message: string;
+    type: "error" | "success" | "info";
+    id: number;
 }
 
 // The action a player sends when clicking a tile color on a factory

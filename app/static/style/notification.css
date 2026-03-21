@@ -1,0 +1,174 @@
+.notification-container {
+    position: fixed;
+    top: 60px;
+    left: 16px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    pointer-events: none;
+    max-height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+.notification-toast {
+    position: relative;
+    width: 300px;
+    padding: 14px 20px 18px 24px;
+    background:
+        linear-gradient(168deg, #f5eed6 0%, #efe4c8 35%, #e8d9b4 70%, #e2d0a6 100%);
+    border-radius: 6px;
+    border-left: 5px solid var(--notif-accent);
+    box-shadow:
+        0 2px 10px rgba(60, 45, 20, 0.18),
+        inset 0 1px 0 rgba(255, 255, 240, 0.6),
+        inset 0 -1px 0 rgba(139, 119, 72, 0.12);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #3b352b;
+    overflow: hidden;
+    pointer-events: auto;
+    animation: notif-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-origin: left center;
+}
+
+.notification-toast.exiting {
+    animation: notif-slide-out 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+.notification-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: 6px;
+}
+
+.notification-corner {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 22px;
+    height: 22px;
+    background:
+        linear-gradient(135deg, transparent 50%, rgba(139, 119, 72, 0.15) 50%, rgba(139, 119, 72, 0.08) 100%);
+    border-top-left-radius: 4px;
+    pointer-events: none;
+}
+
+.notification-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+}
+
+.notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 5px;
+    right: 0;
+    height: 3px;
+    background: var(--notif-accent);
+    opacity: 0.45;
+    border-bottom-right-radius: 6px;
+    transform-origin: left center;
+    animation: notif-progress var(--notif-duration, 3s) linear forwards;
+}
+
+.notification-toast.exiting .notification-progress {
+    animation-play-state: paused;
+}
+
+.notification-toast.error {
+    --notif-accent: #c0392b;
+}
+
+.notification-toast.info {
+    --notif-accent: #2471a3;
+}
+
+.notification-toast.success {
+    --notif-accent: #27ae60;
+}
+
+@keyframes notif-slide-in {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%) scale(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes notif-slide-out {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-110%) scale(0.92);
+    }
+}
+
+@keyframes notif-progress {
+    0% {
+        transform: scaleX(1);
+    }
+    100% {
+        transform: scaleX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .notification-container {
+        left: 8px;
+        right: 8px;
+        top: 50px;
+    }
+
+    .notification-toast {
+        width: auto;
+        padding: 10px 14px 14px 16px;
+        border-left-width: 4px;
+        border-radius: 5px;
+    }
+
+    .notification-body {
+        gap: 7px;
+    }
+
+    .notification-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .notification-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .notification-progress {
+        height: 2px;
+        left: 4px;
+    }
+
+    .notification-corner {
+        width: 16px;
+        height: 16px;
+    }
+}

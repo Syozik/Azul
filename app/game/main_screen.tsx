@@ -1,12 +1,55 @@
+import "@/app/static/style/main_screen.css";
+import { useEffect, useRef, useState } from "react";
 import { GameOverScreen } from "../components/game_over_screen";
+import { NotificationContainer } from "../components/notification";
+import { NOTIFICATION_DURATION } from "../consts";
 import { useSocket } from "../utils/socket-context";
+import { NotificationType } from "../utils/types";
 import { Lobby } from "./lobby";
 import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";
-import "@/app/static/style/main_screen.css";
 
 export function MainScreen() {
     const { gameState, playerNumber, connectionStatus } = useSocket();
+    const [visibleNotifs, setVisibleNotifs] = useState<NotificationType[]>([]);
+    const seenIdsRef = useRef<Set<number>>(new Set());
+    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+    const notifications = gameState.players[playerNumber - 1].notifications;
+
+    useEffect(() => {
+        const newNotifs = notifications.filter(
+            (n) => !seenIdsRef.current.has(n.id),
+        );
+        if (newNotifs.length === 0) return;
+
+        for (const n of newNotifs) {
+            seenIdsRef.current.add(n.id);
+        }
+
+        const timers = timersRef.current;
+        for (const [id, timer] of timers) {
+            clearTimeout(timer);
+            timers.delete(id);
+        }
+
+        const newest = newNotifs[newNotifs.length - 1];
+        setVisibleNotifs([newest]);
+
+        const timer = setTimeout(() => {
+            setVisibleNotifs((prev) => prev.filter((v) => v.id !== newest.id));
+            timers.delete(newest.id);
+        }, NOTIFICATION_DURATION);
+        timers.set(newest.id, timer);
+
+        return () => {
+            const t = timers.get(newest.id);
+            if (t) {
+                clearTimeout(t);
+                timers.delete(newest.id);
+            }
+        };
+    }, [notifications]);
 
     if (connectionStatus !== "playing") return <Lobby />;
     if (gameState.isGameOver) return <GameOverScreen />;
@@ -64,6 +107,7 @@ export function MainScreen() {
                     </span>
                 </div>
             </div>
+            <NotificationContainer notifications={visibleNotifs} />
             {gameState.phase === 1 ? <PhaseOne /> : <PhaseTwo />}
         </>
     );
