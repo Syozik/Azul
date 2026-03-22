@@ -29,10 +29,38 @@ app.prepare().then(() => {
 
     const io = new Server(httpServer, {
         cors: { origin: "*" },
+        connectionStateRecovery: {
+            maxDisconnectionDuration: 2 * 60 * 1000,
+            skipMiddlewares: true,
+        },
+        pingInterval: 10000,
+        pingTimeout: 20000,
     });
 
     io.on("connection", (socket) => {
         console.log(`[Socket] Connected: ${socket.id}`);
+
+        if (socket.recovered) {
+            console.log("Recovered");
+            const info = playerInfo.get(socket.id);
+            if (info) {
+                clearTimeout(info.deleteTimer);
+                const game = roomGameStates.get(info.roomId);
+                if (game) {
+                    socket.emit("game-start", {
+                        playerNumber: info.playerNumber,
+                        roomId: info.roomId,
+                    });
+                    socket.emit("game-state", game.clientState);
+                    console.log(
+                        `[Socket] Recovered session for ${socket.id} in ${info.roomId}`,
+                    );
+                }
+            }
+            connectedPlayers.add(socket.id);
+            return;
+        }
+
         if (connectedPlayers.size > 0) {
             socket.emit("waiting", {
                 message: "Somebody's waiting",
@@ -120,7 +148,8 @@ app.prepare().then(() => {
             io.to(info.roomId).emit("game-state", game.clientState);
         });
 
-        socket.on("disconnect", () => {
+        socket.on("disconnect", (reason) => {
+            console.log(reason);
             console.log(`[Socket] Disconnected: ${socket.id}`);
 
             connectedPlayers.delete(socket.id);
@@ -130,17 +159,22 @@ app.prepare().then(() => {
 
             const info = playerInfo.get(socket.id);
             if (info) {
-                socket.to(info.roomId).emit("opponent-disconnected");
-                playerInfo.delete(socket.id);
+                info.deleteTimer = setTimeout(
+                    () => {
+                        socket.to(info.roomId).emit("opponent-disconnected");
+                        playerInfo.delete(socket.id);
 
-                // Clean up the other player's info and the room's game state
-                for (const [id, pInfo] of playerInfo.entries()) {
-                    if (pInfo.roomId === info.roomId) {
-                        playerInfo.delete(id);
-                        break;
-                    }
-                }
-                roomGameStates.delete(info.roomId);
+                        // Clean up the other player's info and the room's game state
+                        for (const [id, pInfo] of playerInfo.entries()) {
+                            if (pInfo.roomId === info.roomId) {
+                                playerInfo.delete(id);
+                                break;
+                            }
+                        }
+                        roomGameStates.delete(info.roomId);
+                    },
+                    5 * 60 * 10 ** 3,
+                );
             }
         });
     });

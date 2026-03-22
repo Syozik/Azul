@@ -94,16 +94,23 @@ function reducer(state: State, action: Action): State {
     }
 }
 
+export const socket = io({
+    path: "/socket.io",
+    autoConnect: false,
+    reconnection: true,
+    transports: ["websocket", "polling"],
+});
+
 export function SocketProvider({ children }: { children: ReactNode }) {
     const socketRef = useRef<Socket | null>(null);
     const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
-        const socket = io({ path: "/socket.io" });
+        if (!socket.connected) socket.connect();
         socketRef.current = socket;
 
         socket.on("connect", () => {
-            console.log("Connected to server:", socket.id);
+            console.log("Connected to server:", socket.id, "recovered:", socket.recovered);
         });
         socket.on("waiting", () => {
             dispatch({ type: "WAITING" });
@@ -131,8 +138,18 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             dispatch({ type: "DISCONNECT" });
         });
 
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible" && !socket.connected) {
+                socket.connect();
+            }
+        };
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
         return () => {
-            socket.disconnect();
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibilityChange,
+            );
         };
     }, []);
 
