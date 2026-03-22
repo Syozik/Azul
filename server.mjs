@@ -41,7 +41,6 @@ app.prepare().then(() => {
         console.log(`[Socket] Connected: ${socket.id}`);
 
         if (socket.recovered) {
-            console.log("Recovered");
             const info = playerInfo.get(socket.id);
             if (info) {
                 clearTimeout(info.deleteTimer);
@@ -57,17 +56,15 @@ app.prepare().then(() => {
                     );
                 }
             }
-            connectedPlayers.add(socket.id);
-            return;
+        } else {
+            if (connectedPlayers.size > 0) {
+                socket.emit("waiting", {
+                    message: "Somebody's waiting",
+                });
+            }
         }
 
-        if (connectedPlayers.size > 0) {
-            socket.emit("waiting", {
-                message: "Somebody's waiting",
-            });
-        }
         connectedPlayers.add(socket.id);
-
         socket.on("find-game", () => {
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = `room-${++roomCounter}`;
@@ -132,19 +129,16 @@ app.prepare().then(() => {
             const result = game.applyAction(info.playerNumber, data);
 
             if (result.error) {
-                // Send error back to the player who made the invalid action
                 socket.emit("game-error", { error: result.error });
+                socket.emit("game-state", game.clientState);
                 console.log(
                     `[Game] Error for P${info.playerNumber}: ${result.error}`,
                 );
                 return;
             }
 
-            // Update the room's game state
             game.updatePhase();
-            // roomGameStates.set(info.roomId, result.newState);
 
-            // Broadcast the new state to both players
             io.to(info.roomId).emit("game-state", game.clientState);
         });
 

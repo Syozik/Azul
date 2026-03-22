@@ -50,15 +50,12 @@ function NotificationToast({
             }
         >
             <div className="notification-grain" />
-            <div className="notification-corner" />
 
             <div className="notification-body">
                 <span className="notification-text">
                     {formatMessage(notification.message)}
                 </span>
             </div>
-
-            <div className="notification-progress" />
         </div>
     );
 }
