@@ -169,11 +169,7 @@ export class Game {
         // res is true if it's not a colored tile, and a color if it's center
         playerState.coveredTiles[color][points - 1] = res;
 
-        playerState.score += this.getBonus(
-            playerNumber,
-            color,
-            points,
-        );
+        playerState.score += this.getBonus(playerNumber, color, points);
         playerState.canTakeBaseTiles += this.checkForCombinations(
             playerNumber,
             color,
@@ -343,8 +339,10 @@ export class Game {
             shuffle(this.state._bag);
         }
 
+        const colors = [];
         for (const tile of selectedTiles) {
             const [i, j, color] = tile.split("_");
+            colors.push(color);
             playerState.pickedTiles.push(color);
             this.state.baseTiles[Number(i)][Number(j)] = this.state._bag.splice(
                 0,
@@ -354,7 +352,7 @@ export class Game {
         this.pushNotification(
             playerNumber - 1,
             "success",
-            `You took ${selectedTiles.join(" ")} tiles from the base.`,
+            `You took ${colors.join(" ")} tiles from the base.`,
             true,
         );
         playerState.canTakeBaseTiles = 0;
