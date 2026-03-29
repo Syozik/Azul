@@ -22,41 +22,74 @@ export const NUM_FACTORIES = 5;
 export const TILES_PER_FACTORY = 4;
 
 export const ANGLE = Math.PI / 3;
-export const TILE_SIZE = 50;
+export const DEFAULT_TILE_SIZE = 50;
+
+// Keep legacy constants for any code that still references them
+export const TILE_SIZE = DEFAULT_TILE_SIZE;
 export const TILE_HALF_SHORT = TILE_SIZE * Math.cos(ANGLE);
 export const TILE_HALF_LONG = TILE_SIZE * Math.sin(ANGLE);
 
 export const JOKERS = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
-export const SNOWFLAKE_POSITIONS = {
-    CENTER: { x: 0, y: 0, rotate: 3 },
-    RED: { x: 0, y: -(2 * TILE_SIZE + 2 * TILE_HALF_SHORT), rotate: 5 },
-    BLUE: {
-        x: 3 * TILE_HALF_LONG,
-        y: -TILE_SIZE - TILE_HALF_SHORT,
-        rotate: 0,
-    },
-    YELLOW: {
-        x: 3 * TILE_HALF_LONG,
-        y: TILE_SIZE + TILE_HALF_SHORT,
-        rotate: 1,
-    },
-    GREEN: { x: 0, y: 2 * TILE_SIZE + 2 * TILE_HALF_SHORT, rotate: 2 },
-    PURPLE: {
-        x: -3 * TILE_HALF_LONG,
-        y: TILE_SIZE + TILE_HALF_SHORT,
-        rotate: 3,
-    },
-    ORANGE: {
-        x: -3 * TILE_HALF_LONG,
-        y: -TILE_SIZE - TILE_HALF_SHORT,
-        rotate: 4,
-    },
-};
 
-export const DESK_IMAGE = {
-    width: 30,
-    height: 40,
-};
+// Compute snowflake positions for a given tile size
+export function getSnowflakePositions(tileSize) {
+    const halfShort = tileSize * Math.cos(ANGLE);
+    const halfLong = tileSize * Math.sin(ANGLE);
+    return {
+        CENTER: { x: 0, y: 0, rotate: 3 },
+        RED: { x: 0, y: -(2 * tileSize + 2 * halfShort), rotate: 5 },
+        BLUE: {
+            x: 3 * halfLong,
+            y: -tileSize - halfShort,
+            rotate: 0,
+        },
+        YELLOW: {
+            x: 3 * halfLong,
+            y: tileSize + halfShort,
+            rotate: 1,
+        },
+        GREEN: { x: 0, y: 2 * tileSize + 2 * halfShort, rotate: 2 },
+        PURPLE: {
+            x: -3 * halfLong,
+            y: tileSize + halfShort,
+            rotate: 3,
+        },
+        ORANGE: {
+            x: -3 * halfLong,
+            y: -tileSize - halfShort,
+            rotate: 4,
+        },
+    };
+}
+
+// Legacy static positions (at default tile size)
+export const SNOWFLAKE_POSITIONS = getSnowflakePositions(DEFAULT_TILE_SIZE);
+
+// Compute desk image dimensions scaled proportionally to tile size
+export function getDeskImage(tileSize) {
+    const scale = tileSize / DEFAULT_TILE_SIZE;
+    return {
+        width: Math.round(30 * scale),
+        height: Math.round(40 * scale),
+    };
+}
+
+// Legacy static desk image (at default tile size)
+export const DESK_IMAGE = getDeskImage(DEFAULT_TILE_SIZE);
+
+// Compute the snowflake board diameter for a given tile size
+export function getSnowflakeBoardSize(tileSize) {
+    const halfShort = tileSize * Math.cos(ANGLE);
+    const halfLong = tileSize * Math.sin(ANGLE);
+    // Each snowflake center is offset from the board center.
+    // The farthest offset is RED/GREEN: 2*tileSize + 2*halfShort (vertical).
+    // From each snowflake center, tile arms extend outward by 2*halfLong.
+    const maxSnowflakeOffset = 2 * tileSize + 2 * halfShort;
+    const tileArmExtent = 2 * halfLong;
+    const radius = maxSnowflakeOffset + tileArmExtent;
+    // diameter + small padding for decoration images
+    return Math.ceil(2 * radius * 1.04);
+}
 
 export const NOTIFICATION_DURATION = 2500;
 

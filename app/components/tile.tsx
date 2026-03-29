@@ -1,6 +1,6 @@
 "use client";
 import { MouseEventHandler } from "react";
-import { ANGLE as angle, TILE_SIZE } from "../consts";
+import { ANGLE as angle, TILE_SIZE, DEFAULT_TILE_SIZE } from "../consts";
 import "@/app/static/style/tile.css";
 
 interface TileProps {
@@ -78,7 +78,7 @@ export function Tile({
                         textAnchor="middle"
                         dominantBaseline="central"
                         fill="#000000ff"
-                        fontSize={20}
+                        fontSize={Math.round(20 * (size / DEFAULT_TILE_SIZE))}
                         fontWeight="bold"
                         transform={`rotate(180, ${centerX}, ${centerY})`}
                         style={{ cursor: onClickHandler ? "pointer" : "auto" }}

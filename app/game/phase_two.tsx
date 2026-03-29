@@ -3,7 +3,7 @@ import { PlayerDesk } from "../components/player_desk";
 import { useSocket } from "../utils/socket-context";
 import { Base } from "../components/base";
 
-const PlayerDeskContext = createContext(0);
+export const PlayerDeskContext = createContext(0);
 
 export function usePlayerDesk() {
     return useContext(PlayerDeskContext);
