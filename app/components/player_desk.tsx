@@ -1,22 +1,22 @@
 "use client";
-import { COLORS } from "../consts";
+import { COLORS, getSnowflakeBoardSize, DEFAULT_TILE_SIZE } from "../consts";
 import { Snowflake } from "./snowflake";
 import "@/app/static/style/player_desk.css";
 import { Scoreline } from "./scoreline";
 import { useSocket } from "../utils/socket-context";
 import { groupTilesByColor } from "../utils/helpers";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { TileColor } from "../utils/types";
 import { usePlayerDesk } from "../game/phase_two";
 
-const SNOWFLAKE_NATURAL_SIZE = 500;
+const DEFAULT_BOARD_SIZE = getSnowflakeBoardSize(DEFAULT_TILE_SIZE);
 
 export function PlayerDesk() {
     const { gameState, playerNumber, sendGameAction } = useSocket();
     const player = usePlayerDesk();
     const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
     const wrapperRef = useRef<HTMLDivElement>(null);
-    const [snowflakeScale, setSnowflakeScale] = useState(1);
+    const [containerWidth, setContainerWidth] = useState(0);
 
     useEffect(() => {
         const el = wrapperRef.current;
@@ -25,13 +25,27 @@ export function PlayerDesk() {
         const observer = new ResizeObserver(([entry]) => {
             const width = entry.contentRect.width;
             if (width > 0) {
-                setSnowflakeScale(Math.min(1, width / SNOWFLAKE_NATURAL_SIZE));
+                setContainerWidth(width);
             }
         });
 
         observer.observe(el);
         return () => observer.disconnect();
     }, []);
+
+    // Compute tileSize so the board fits the available width, capped at DEFAULT_TILE_SIZE
+    const MIN_TILE_SIZE = 25;
+
+    const tileSize = useMemo(() => {
+        if (containerWidth <= 0) return DEFAULT_TILE_SIZE;
+        // Leave a small padding (10px border total from the border styling)
+        const available = containerWidth - 10;
+        const scale = available / DEFAULT_BOARD_SIZE;
+        if (scale >= 1) return DEFAULT_TILE_SIZE;
+        return Math.max(MIN_TILE_SIZE, Math.floor(DEFAULT_TILE_SIZE * scale));
+    }, [containerWidth]);
+
+    const boardSize = useMemo(() => getSnowflakeBoardSize(tileSize), [tileSize]);
 
     const playerState = gameState.players[player - 1];
     const playerTiles = groupTilesByColor(playerState.pickedTiles);
@@ -42,7 +56,7 @@ export function PlayerDesk() {
         if (
             !isOwner ||
             !isMyTurn ||
-            playerState.coveredTiles[tile][points-1] ||
+            playerState.coveredTiles[tile][points - 1] ||
             selectedTiles.length < points
         ) {
             return;
@@ -74,7 +88,7 @@ export function PlayerDesk() {
 
     return (
         <div
-            className={`${isOwner ? "own-desk" : ""} desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-[50px] gap-3 md:gap-10 text-center mx-1 md:mx-28`}
+            className={`${isOwner ? "own-desk" : ""} desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-12.5 gap-3 md:gap-10 text-center mx-1 md:mx-28`}
         >
             <p className="player-name font-bold text-lg md:text-2xl">
                 {isOwner ? "Your" : "Opponent's"} Desk
@@ -90,17 +104,17 @@ export function PlayerDesk() {
             <div ref={wrapperRef} className="snowflakes-wrapper">
                 <div
                     className="snowflakes"
-                    style={snowflakeScale < 1 ? {
-                        transform: `scale(${snowflakeScale})`,
-                        transformOrigin: 'top center',
-                        marginBottom: `${-(SNOWFLAKE_NATURAL_SIZE * (1 - snowflakeScale))}px`,
-                    } : undefined}
+                    style={{
+                        width: `${boardSize}px`,
+                        height: `${boardSize}px`,
+                    }}
                 >
                     {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map(
                         (color) => (
                             <Snowflake
                                 color={color}
                                 key={color}
+                                tileSize={tileSize}
                                 onTileSelect={onSnowflakeSelect}
                             />
                         ),

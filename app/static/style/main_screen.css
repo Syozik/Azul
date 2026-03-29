@@ -83,10 +83,19 @@
 .phase-two {
     display: flex;
     height: 100%;
-    align-items: center;
     justify-content: space-between;
     font-family: system-ui, sans-serif;
     color: #2c2a26;
+}
+
+.phase-two-panel {
+    flex: 2 1 0;
+    min-width: 0;
+    justify-content: center;
+}
+
+.phase-two-panel.flex {
+    flex: 1 1 0;
 }
 
 

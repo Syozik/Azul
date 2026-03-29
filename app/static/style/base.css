@@ -1,6 +1,6 @@
 .base {
     align-self: start;
-    margin-top: 100px;
+    margin-top: clamp(20px, 8vw, 100px);
     border: thick double #d4d4d4;
     border-radius: 15px;
     background-color: antiquewhite;
@@ -115,9 +115,7 @@
 
 .jokers-order {
     display: flex;
-    gap: 10px;
     padding-top: 10px;
-    padding-left: 35px;
     .tile {
         position: relative;
     }
@@ -127,13 +125,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 27px;
-    height: 27px;
     border-radius: 50%;
     background: white;
     border: 2px solid #d4d4d4;
     font-weight: bold;
-    font-size: 14px;
     color: #333;
 }
 
@@ -145,13 +140,6 @@
 
 .base-snowflake {
     position: relative;
-    &.base-snowflake-0 {
-        margin: 100px 0 0 100px;
-    }
-
-    &.base-snowflake-1 {
-        margin: 220px 0 300px 170px;
-    }
 }
 
 @media (max-width: 768px) {
@@ -161,20 +149,5 @@
         margin-left: auto;
         margin-right: auto;
         padding-bottom: 1rem;
-    }
-
-    .jokers-order {
-        padding-left: 20px;
-        gap: 6px;
-    }
-
-    .base-snowflake {
-        /*&.base-snowflake-0 {
-            margin: 50px 0 0 50px;
-        }
-
-        &.base-snowflake-1 {
-            margin: 100px 0 100px 80px;
-        }*/
     }
 }

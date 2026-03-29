@@ -3,13 +3,24 @@ import { CIRCLE_POSITIONS, COLORS } from "../consts";
 import { CircleWithTiles } from "../components/circle";
 import "@/app/static/style/phase_one.css";
 import { useSocket } from "../utils/socket-context";
+import { useState } from "react";
+import { PlayerDeskContext } from "./phase_two";
+import { PlayerDesk } from "../components/player_desk";
 
 export function PhaseOne() {
     const { gameState, playerNumber, sendGameAction } = useSocket();
+    const [shouldShowDesk, setShouldShowDesk] = useState<boolean>(false);
 
     if (!gameState) {
         return <div className="phase-one">Loading game...</div>;
     }
+
+    const handleKeyDown = (ev: KeyboardEvent) => {
+        if (shouldShowDesk && ev.key === "Escape") {
+            setShouldShowDesk(false);
+        }
+    };
+    window.addEventListener("keydown", handleKeyDown);
 
     const isMyTurn = gameState.currentPlayer === playerNumber;
     const myIndex = playerNumber ? playerNumber - 1 : 0;
@@ -18,7 +29,7 @@ export function PhaseOne() {
     return (
         <div className="phase-one">
             <div className="tiles-box">
-                <p className="tiles-box-title">Your Tiles</p>
+                <p className="tiles-box-title">Your Tiles </p>
                 <div className="picked-tiles">
                     {gameState.players[myIndex].pickedTiles.map((color, i) => (
                         <span
@@ -34,6 +45,12 @@ export function PhaseOne() {
             </div>
 
             <div className="game-board">
+                <button
+                    className="check-desk"
+                    onClick={() => setShouldShowDesk(true)}
+                >
+                    Check desk
+                </button>
                 {gameState.factories.map((factoryTiles, idx) => (
                     <CircleWithTiles
                         colors={factoryTiles}
@@ -82,6 +99,21 @@ export function PhaseOne() {
                     )}
                 </div>
             </div>
+            {shouldShowDesk && (
+                <div className="desk-popover">
+                    <div className="pointer-events-none">
+                        <PlayerDeskContext.Provider value={playerNumber}>
+                            <PlayerDesk />
+                        </PlayerDeskContext.Provider>
+                    </div>
+                    <button
+                        className="close-popover"
+                        onClick={() => setShouldShowDesk(false)}
+                    >
+                        x
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

@@ -62,13 +62,24 @@
         rgba(245, 230, 200, 0.45) 0%,
         transparent 65%
     );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.check-desk {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #5c3d1a;
+    color: white;
 }
 
 .circle_with_tiles {
     width: 17%;
     height: 17%;
 }
-
 
 .center-pool {
     position: absolute;
@@ -170,5 +181,34 @@
         padding: 0.4rem 0.25rem;
         gap: 3px;
         min-height: 30px;
+    }
+}
+
+.desk-popover {
+    z-index: 10;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #5c3d1a;
+    background-color: #faebd7;
+    border-radius: 10px;
+    overflow: auto;
+
+    .player-name {
+        display: none;
+    }
+
+    .close-popover {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 11;
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #5c3d1a;
     }
 }
