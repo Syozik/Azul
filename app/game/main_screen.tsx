@@ -1,6 +1,7 @@
 import "@/app/static/style/main_screen.css";
 import { useEffect, useRef, useState } from "react";
 import { GameOverScreen } from "../components/game_over_screen";
+import { InfoBlock } from "../components/info_block";
 import { NotificationContainer } from "../components/notification";
 import { NOTIFICATION_DURATION } from "../consts";
 import { useSocket } from "../utils/socket-context";
@@ -12,8 +13,11 @@ import { PhaseTwo } from "./phase_two";
 export function MainScreen() {
     const { gameState, playerNumber, connectionStatus } = useSocket();
     const [visibleNotifs, setVisibleNotifs] = useState<NotificationType[]>([]);
+    const [showInfo, setShowInfo] = useState<boolean>(false);
     const seenIdsRef = useRef<Set<number>>(new Set());
-    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(
+        new Map(),
+    );
 
     const notifications = gameState.players[playerNumber - 1].notifications;
 
@@ -65,7 +69,7 @@ export function MainScreen() {
                     borderBottom: "2px solid rgba(196,162,101,0.3)",
                 }}
             >
-                <div className="flex items-center">
+                <div className="flex items-center gap-2.5">
                     <span
                         className={`turn-badge ${gameState.currentPlayer === playerNumber ? "turn-badge--yours" : "turn-badge--theirs"}`}
                     >
@@ -105,6 +109,15 @@ export function MainScreen() {
                             </>
                         )}
                     </span>
+                    <div className="info">
+                        <button
+                            className="info-button"
+                            onClick={() => setShowInfo(!showInfo)}
+                        >
+                            Info
+                        </button>
+                        {showInfo && <InfoBlock />}
+                    </div>
                 </div>
             </div>
             <NotificationContainer notifications={visibleNotifs} />

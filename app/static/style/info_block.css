@@ -1,0 +1,7 @@
+.info-block {
+    position: absolute;
+    top: 5%;
+    background-color: wheat;
+    padding: 10px 5px;
+    border: 1px solid black;
+}

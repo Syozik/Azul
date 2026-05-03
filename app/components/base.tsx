@@ -1,6 +1,6 @@
 "use client";
 import "@/app/static/style/base.css";
-import { COLORS, JOKERS } from "../consts";
+import { COLORS, DEFAULT_BASE_TILE_SIZE, DEFAULT_BASE_WIDTH, DEFAULT_JOKER_GAP, DEFAULT_JOKER_PADDING_LEFT, DEFAULT_JOKER_TILE_SIZE, DEFAULT_ROUND_TRANSLATE_X, DEFAULT_SNOWFLAKE_MARGINS, JOKERS } from "../consts";
 import { Tile } from "./tile";
 import { ColorKey } from "../utils/types";
 import { useSocket } from "../utils/socket-context";
@@ -9,18 +9,6 @@ import { useState, useRef, useEffect, useMemo } from "react";
 function getAngle(i: number, j: number): number {
     return Math.PI * (-1 / 3 + i / 1.5 + (2 * j) / 5);
 }
-
-const DEFAULT_BASE_WIDTH = 400;
-const DEFAULT_JOKER_TILE_SIZE = 30;
-const DEFAULT_BASE_TILE_SIZE = 40;
-const DEFAULT_JOKER_PADDING_LEFT = 35;
-const DEFAULT_JOKER_GAP = 10;
-const DEFAULT_ROUND_TRANSLATE_X = -14;
-
-const DEFAULT_SNOWFLAKE_MARGINS = [
-    { top: 100, right: 0, bottom: 0, left: 100 },
-    { top: 220, right: 0, bottom: 300, left: 170 },
-];
 
 export function Base() {
     const { gameState, sendGameAction, playerNumber } = useSocket();

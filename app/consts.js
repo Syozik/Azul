@@ -100,7 +100,7 @@ const PENTAGON_ANGLES = [-90, -18, 54, 126, 198].map(
 );
 
 export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
-    top: `${(50 + PENTAGON_RADIUS * Math.sin(angle) - CIRCLE_HALF).toFixed(2)}%`,
+    top: `${(55 + PENTAGON_RADIUS * Math.sin(angle) - CIRCLE_HALF).toFixed(2)}%`,
     left: `${(50 + PENTAGON_RADIUS * Math.cos(angle) - CIRCLE_HALF).toFixed(2)}%`,
 }));
 
@@ -115,3 +115,15 @@ export const BONUSES = {
     "GREEN": 18,
     "PURPLE": 20,
 }
+
+export const DEFAULT_BASE_WIDTH = 400;
+export const DEFAULT_JOKER_TILE_SIZE = 30;
+export const DEFAULT_BASE_TILE_SIZE = 40;
+export const DEFAULT_JOKER_PADDING_LEFT = 35;
+export const DEFAULT_JOKER_GAP = 10;
+export const DEFAULT_ROUND_TRANSLATE_X = -14;
+
+export const DEFAULT_SNOWFLAKE_MARGINS = [
+    { top: 100, right: 0, bottom: 0, left: 100 },
+    { top: 220, right: 0, bottom: 300, left: 170 },
+];
