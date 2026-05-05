@@ -187,7 +187,7 @@ export class Game {
         const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let bonus = 1;
         let i = points - 2;
-        while (i >= 0 && coveredTiles[color][i]) {
+        while (coveredTiles[color][(i + 6) % 6] && bonus < 6) {
             bonus += 1;
             i -= 1;
         }
@@ -403,7 +403,7 @@ export class Game {
     }
 
     /**
-     * Strip server-only fields before sending this.state.to clients
+     * Strip server-only fields before sending this.state to clients
      */
     get clientState() {
         const {
