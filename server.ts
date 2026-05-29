@@ -1,7 +1,9 @@
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
-import { Game } from "./app/utils/game-logic.mjs";
+import { Game } from "./app/backend/game-logic.ts";
+import { fetchGame } from "./app/backend/utils.ts";
+import { GameBackendState } from "./app/utils/types.ts";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOST || "0.0.0.0";
@@ -10,19 +12,24 @@ const port = parseInt(process.env.PORT || "3000", 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-/** @type {string | null} */
-let waitingSocketId = null;
+let waitingSocketId: string | null = null;
 
-/** @type {Map<string, { roomId: string; playerNumber: 1 | 2 }>} */
-const playerInfo = new Map();
+interface PlayerSessionInfo {
+    roomId: string;
+    playerNumber: 1 | 2;
+    deleteTimer?: ReturnType<typeof setTimeout>;
+}
 
-/** @type {Map<string, object>} */
-const roomGameStates = new Map();
+const playerInfo: Map<string, PlayerSessionInfo> = new Map();
+
+const roomGameStates: Map<string, Game> = new Map();
 
 let roomCounter = 0;
-const connectedPlayers = new Set();
+const connectedPlayers: Set<string> = new Set();
 
-app.prepare().then(() => {
+async function main() {
+    await app.prepare();
+
     const httpServer = createServer((req, res) => {
         handle(req, res);
     });
@@ -37,9 +44,10 @@ app.prepare().then(() => {
         pingTimeout: 20000,
     });
 
-    io.on("connection", (socket) => {
+    io.on("connection", async (socket) => {
         console.log(`[Socket] Connected: ${socket.id}`);
 
+        let lastGameState: GameBackendState | false = false;
         if (socket.recovered) {
             const info = playerInfo.get(socket.id);
             if (info) {
@@ -57,6 +65,12 @@ app.prepare().then(() => {
                 }
             }
         } else {
+            lastGameState = await fetchGame();
+
+            if (lastGameState) {
+                socket.emit("last-game-available");
+            }
+
             if (connectedPlayers.size > 0) {
                 socket.emit("waiting", {
                     message: "Somebody's waiting",
@@ -65,7 +79,8 @@ app.prepare().then(() => {
         }
 
         connectedPlayers.add(socket.id);
-        socket.on("find-game", () => {
+
+        socket.on("find-game", ({ newGame = true }) => {
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = `room-${++roomCounter}`;
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
@@ -90,11 +105,13 @@ app.prepare().then(() => {
 
                 waitingSocketId = null;
 
-                // Initialize game state for this room
                 const game = new Game();
+                if (!newGame && lastGameState) {
+                    game.setState(lastGameState);
+                }
+
                 roomGameStates.set(roomId, game);
 
-                // Notify both players the game is starting + send initial state
                 const clientState = game.clientState;
                 waitingSocket.emit("game-start", {
                     playerNumber: 1,
@@ -176,4 +193,9 @@ app.prepare().then(() => {
     httpServer.listen(port, hostname, () => {
         console.log(`> Ready on http://${hostname}:${port}`);
     });
+}
+
+main().catch((err) => {
+    console.error(err);
+    process.exit(1);
 });

@@ -20,6 +20,11 @@ export interface GameState {
     isFirstCenterPick: boolean;
 }
 
+export interface GameBackendState extends GameState {
+    _bag: ColorKey[];
+    _trash: ColorKey[];
+}
+
 export interface PlayerState {
     pickedTiles: ColorKey[]; // tiles the player has picked
     coveredTiles: Record<ColorKey, (boolean | string)[]>;

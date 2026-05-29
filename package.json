@@ -4,13 +4,15 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "node server.mjs",
-        "dev:socket": "node server.mjs",
+        "dev": "node server.ts",
+        "dev:socket": "node server.ts",
         "build": "next build",
-        "start": "NODE_ENV=production node server.mjs",
+        "start": "NODE_ENV=production node server.ts",
         "lint": "eslint"
     },
     "dependencies": {
+        "@prisma/adapter-better-sqlite3": "^7.8.0",
+        "@prisma/client": "^7.8.0",
         "next": "16.1.6",
         "react": "19.2.3",
         "react-dom": "19.2.3",
@@ -19,11 +21,14 @@
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4",
-        "@types/node": "^20",
+        "@types/better-sqlite3": "^7.6.13",
+        "@types/node": "^20.19.41",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "dotenv": "^17.4.2",
         "eslint": "^9",
         "eslint-config-next": "16.1.6",
+        "prisma": "^7.8.0",
         "tailwindcss": "^4",
         "typescript": "^5"
     }

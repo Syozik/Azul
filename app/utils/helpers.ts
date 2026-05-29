@@ -4,13 +4,14 @@ import {
     TILE_COLORS,
     TILES_PER_COLOR,
     TILES_PER_FACTORY,
-} from "../consts.js";
+} from "../consts.ts";
+import type { ColorKey, GameState } from "./types.ts";
 
 /**
  * Create a shuffled tile bag: 22 tiles of each of the 6 colors = 132 total
  */
 export function createTileBag() {
-    const bag = [];
+    const bag: ColorKey[] = [];
     for (const color of TILE_COLORS) {
         for (let i = 0; i < TILES_PER_COLOR; i++) {
             bag.push(color);
@@ -21,7 +22,7 @@ export function createTileBag() {
 }
 
 // Fisher-Yates shuffle
-export function shuffle(arr) {
+export function shuffle<T>(arr: T[]) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -31,7 +32,7 @@ export function shuffle(arr) {
 /**
  * Fill factories by drawing from the bag
  */
-export function fillFactories(bag) {
+export function fillFactories(bag: ColorKey[]) {
     const factories = [];
     for (let i = 0; i < NUM_FACTORIES; i++) {
         const factory = bag.splice(0, TILES_PER_FACTORY);
@@ -41,50 +42,50 @@ export function fillFactories(bag) {
 }
 
 export function initCoveredTiles() {
-    const coveredTiles = {};
-    for (const color of Object.keys(COLORS)) {
+    const coveredTiles = {} as Record<
+        ColorKey | "CENTER",
+        (boolean | string)[]
+    >;
+    for (const color of Object.keys(COLORS) as (ColorKey | "CENTER")[]) {
         coveredTiles[color] = Array(6).fill(false);
     }
     return coveredTiles;
 }
 
-export function initState() {
-    return /** @type {import('./types').GameState} */ ({
+export function initState(): GameState {
+    return {
         factories: [[]],
         centerPool: [],
-        players:
-            /** @type {[import('./types').PlayerState, import('./types').PlayerState]} */ ([
-                {
-                    pickedTiles: [],
-                    coveredTiles: initCoveredTiles(),
-                    score: 5,
-                    hasPassed: false,
-                    canTakeBaseTiles: 0,
-                    notifications:
-                        /** @type {import('./types').NotificationType[]} */ ([]),
-                },
-                {
-                    pickedTiles: [],
-                    coveredTiles: initCoveredTiles(),
-                    score: 5,
-                    hasPassed: false,
-                    canTakeBaseTiles: 0,
-                    notifications:
-                        /** @type {import('./types').NotificationType[]} */ ([]),
-                },
-            ]),
-        currentPlayer: /** @type {1 | 2} */ (1),
+        players: [
+            {
+                pickedTiles: [],
+                coveredTiles: initCoveredTiles(),
+                score: 5,
+                hasPassed: false,
+                canTakeBaseTiles: 0,
+                notifications: [],
+            },
+            {
+                pickedTiles: [],
+                coveredTiles: initCoveredTiles(),
+                score: 5,
+                hasPassed: false,
+                canTakeBaseTiles: 0,
+                notifications: [],
+            },
+        ],
+        currentPlayer: 1,
         round: 1,
-        phase: /** @type {1 | 2} */ (1),
+        phase: 1,
         baseTiles: [[], []],
         isGameOver: false,
-        firstPlayer: /** @type {1 | 2} */ (1),
+        firstPlayer: 1,
         isFirstCenterPick: true,
-    });
+    };
 }
 
-export function groupTilesByColor(tiles) {
-    const groupedTiles = [];
+export function groupTilesByColor(tiles: ColorKey[]) {
+    const groupedTiles: ColorKey[][] = [];
     for (const tile of tiles) {
         let hasInsertedTile = false;
         for (const group of groupedTiles) {

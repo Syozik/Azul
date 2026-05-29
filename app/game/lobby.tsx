@@ -4,7 +4,7 @@ import { useSocket } from "../utils/socket-context";
 import "@/app/static/style/lobby.css";
 
 export function Lobby() {
-    const { connectionStatus, findGame } = useSocket();
+    const { connectionStatus, lastGameAvailable, findGame } = useSocket();
 
     return (
         <div className="lobby-container">
@@ -27,10 +27,14 @@ export function Lobby() {
                                 ? "Press Play to find an opponent"
                                 : "Press Play to join an opponent"}
                         </p>
-                        <button className="lobby-play-btn" onClick={findGame} id="play-button">
+                        <button className="lobby-play-btn" onClick={() => findGame()}>
                             <span className="btn-text">Play</span>
                             <span className="btn-icon">→</span>
                         </button>
+                        {lastGameAvailable && <button className="lobby-play-btn" onClick={() => findGame(false)}>
+                            <span className="btn-text">Join last game</span>
+                            <span className="btn-icon">→</span>
+                        </button>}
                     </div>
                 )}
 
@@ -46,7 +50,7 @@ export function Lobby() {
                         <p className="lobby-status lobby-status-error">Opponent disconnected</p>
                         <button
                             className="lobby-play-btn"
-                            onClick={findGame}
+                            onClick={() => findGame(false)}
                             id="play-again-button"
                         >
                             <span className="btn-text">Find New Game</span>

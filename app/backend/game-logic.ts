@@ -1,8 +1,24 @@
-import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts.js";
-import { createTileBag, fillFactories, initState, shuffle } from "./helpers.js";
+import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts.ts";
+import {
+    createTileBag,
+    fillFactories,
+    initState,
+    shuffle,
+} from "../utils/helpers.ts";
+
+import type {
+    BasePickAction,
+    ColorKey,
+    CoverTileAction,
+    GameBackendState,
+    PassAction,
+    PickTilesAction,
+} from "../utils/types.ts";
 
 export class Game {
-    constructor() {
+    private state: GameBackendState;
+
+    public constructor() {
         const bag = createTileBag();
         this.state = {
             ...initState(),
@@ -13,7 +29,14 @@ export class Game {
         };
     }
 
-    applyAction(playerNumber, data) {
+    public setState(newState: GameBackendState) {
+        this.state = newState;
+    }
+
+    public applyAction(
+        playerNumber: 1 | 2,
+        data: PickTilesAction | CoverTileAction | PassAction | BasePickAction,
+    ) {
         try {
             switch (data.type) {
                 case "pick":
@@ -45,8 +68,10 @@ export class Game {
             }
         } catch (error) {
             console.log(error);
-            this.pushNotification(playerNumber - 1, "error", error.message);
-            return { error: error.message };
+            if (error instanceof Error) {
+                this.pushNotification(playerNumber - 1, "error", error.message);
+                return { error: error.message };
+            }
         }
         const nextPlayer = this.state.currentPlayer === 1 ? 2 : 1;
         if (
@@ -61,7 +86,11 @@ export class Game {
         };
     }
 
-    applyPickAction(playerNumber, color, factoryIndex) {
+    private applyPickAction(
+        playerNumber: 1 | 2,
+        color: ColorKey,
+        factoryIndex: number | undefined,
+    ) {
         if (this.state.currentPlayer !== playerNumber) {
             throw new Error("Not your turn");
         }
@@ -79,7 +108,7 @@ export class Game {
         if (!pool.includes(color)) {
             throw new Error(`Color ${color} not in the selected pool`);
         }
-        const joker = JOKERS[this.state.round - 1];
+        const joker: ColorKey = JOKERS[this.state.round - 1];
         if (color === joker && pool.some((color) => color !== joker)) {
             throw new Error(`Can't choose the current joker`);
         }
@@ -118,7 +147,12 @@ export class Game {
         );
     }
 
-    applyCoverAction(playerNumber, color, points, usedTiles) {
+    private applyCoverAction(
+        playerNumber: 1 | 2,
+        color: ColorKey,
+        points: number,
+        usedTiles: ColorKey[],
+    ) {
         if (this.state.currentPlayer !== playerNumber) {
             throw new Error("Not your turn");
         }
@@ -132,7 +166,7 @@ export class Game {
 
         const joker = JOKERS[this.state.round - 1];
         const isCenter = color === "CENTER";
-        let res = true;
+        let res: ColorKey | boolean = true;
         if (!isCenter) {
             usedTiles = usedTiles.filter(
                 (tile) => tile === color || tile === joker,
@@ -140,18 +174,21 @@ export class Game {
         } else {
             const usedTilesSet = new Set(usedTiles);
             if (
-                usedTilesSet.length > 2 ||
-                (usedTilesSet.length == 2 && !usedTilesSet.has(joker))
+                usedTilesSet.size > 2 ||
+                (usedTilesSet.size == 2 && !usedTilesSet.has(joker))
             ) {
                 throw new Error("You can't use these tiles");
             }
             const centerColor = usedTiles.find((tile) => tile !== joker);
-            res = centerColor;
-            if (playerState.coveredTiles[color].includes(centerColor)) {
+            if (
+                !centerColor ||
+                playerState.coveredTiles[color].includes(centerColor)
+            ) {
                 throw new Error(
                     `You can place ${centerColor} in the center only once.`,
                 );
             }
+            res = centerColor;
         }
         if (usedTiles.length !== points) {
             throw new Error("Not the right number of tiles");
@@ -183,7 +220,7 @@ export class Game {
         );
     }
 
-    getBonus(playerNumber, color, points) {
+    private getBonus(playerNumber: 1 | 2, color: ColorKey, points: number) {
         const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let bonus = 1;
         let i = points - 2;
@@ -197,7 +234,7 @@ export class Game {
             i += 1;
         }
 
-        if (1 <= points <= 4) {
+        if (1 <= points && points <= 4) {
             if (
                 Object.values(coveredTiles).every(
                     (color) => !!color[points - 1],
@@ -220,7 +257,11 @@ export class Game {
         return bonus;
     }
 
-    checkForCombinations(playerNumber, color, points) {
+    private checkForCombinations(
+        playerNumber: 1 | 2,
+        color: ColorKey,
+        points: number,
+    ) {
         const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let numberOfPilesToTake = 0;
         if (color !== "CENTER") {
@@ -259,7 +300,7 @@ export class Game {
                     const idx = TILE_COLORS.indexOf(color);
                     if (
                         coveredTiles["CENTER"][idx] &&
-                        coveredTiles["CENTER"[(idx + 1) % 6]]
+                        coveredTiles["CENTER"][(idx + 1) % 6]
                     ) {
                         this.pushNotification(
                             playerNumber - 1,
@@ -290,7 +331,7 @@ export class Game {
                 }
             }
         } else {
-            const checkColor = (color) =>
+            const checkColor = (color: ColorKey) =>
                 coveredTiles[color][1] && coveredTiles[color][2];
             if (coveredTiles[color][points]) {
                 if (checkColor(TILE_COLORS[points - 1])) {
@@ -318,12 +359,12 @@ export class Game {
         return numberOfPilesToTake;
     }
 
-    applyPassAction(playerNumber) {
+    private applyPassAction(playerNumber: 1 | 2) {
         this.state.players[playerNumber - 1].hasPassed = true;
         this.pushNotification(playerNumber - 1, "success", `You passed!`, true);
     }
 
-    applyBasePickAction(playerNumber, selectedTiles) {
+    private applyBasePickAction(playerNumber: 1 | 2, selectedTiles: string[]) {
         if (this.state.currentPlayer !== playerNumber) {
             throw new Error("It's not your turn");
         }
@@ -339,15 +380,15 @@ export class Game {
             shuffle(this.state._bag);
         }
 
-        const colors = [];
+        const colors: ColorKey[] = [];
         for (const tile of selectedTiles) {
             const [i, j, color] = tile.split("_");
-            colors.push(color);
-            playerState.pickedTiles.push(color);
+            colors.push(color as ColorKey);
+            playerState.pickedTiles.push(color as ColorKey);
             this.state.baseTiles[Number(i)][Number(j)] = this.state._bag.splice(
                 0,
                 1,
-            );
+            )[0];
         }
         this.pushNotification(
             playerNumber - 1,
@@ -358,7 +399,7 @@ export class Game {
         playerState.canTakeBaseTiles = 0;
     }
 
-    updatePhase() {
+    public updatePhase() {
         if (this.state.phase === 1 && this.isPickingPhaseOver) {
             this.state.phase = 2;
             this.state.currentPlayer = this.state.firstPlayer;
@@ -384,7 +425,7 @@ export class Game {
         }
     }
 
-    get isCoveringPhaseOver() {
+    public get isCoveringPhaseOver() {
         return this.state.players.every(
             (player) =>
                 !player.canTakeBaseTiles &&
@@ -395,7 +436,7 @@ export class Game {
     /**
      * Check if the picking phase is over (all factories and center pool are empty)
      */
-    get isPickingPhaseOver() {
+    public get isPickingPhaseOver() {
         return (
             this.state.factories.every((f) => f.length === 0) &&
             this.state.centerPool.length === 0
@@ -405,7 +446,7 @@ export class Game {
     /**
      * Strip server-only fields before sending this.state to clients
      */
-    get clientState() {
+    public get clientState() {
         const {
             _bag: _unused_bag,
             _trash: _unused_trash,
@@ -416,7 +457,12 @@ export class Game {
         return clientState;
     }
 
-    pushNotification(player, type, message, pushToOpponent = false) {
+    private pushNotification(
+        player: number,
+        type: "error" | "success" | "info",
+        message: string,
+        pushToOpponent: boolean = false,
+    ) {
         this.state.players[player].notifications.push({
             type,
             message,
@@ -432,7 +478,7 @@ export class Game {
         }
     }
 
-    getNewNotificationId(player) {
+    public getNewNotificationId(player: number) {
         return this.state.players[player].notifications.length + 1;
     }
 }

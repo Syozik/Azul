@@ -1,4 +1,6 @@
-export const TILE_COLORS = [
+import type { ColorKey } from "./utils/types.ts";
+
+export const TILE_COLORS: ColorKey[] = [
     "RED",
     "BLUE",
     "YELLOW",
@@ -7,7 +9,7 @@ export const TILE_COLORS = [
     "ORANGE",
 ];
 
-export const COLORS = {
+export const COLORS: Record<ColorKey | "CENTER", string> = {
     BLUE: "#1A4C9EFF",
     GREEN: "#27AE60FF",
     RED: "#E84545FF",
@@ -29,10 +31,10 @@ export const TILE_SIZE = DEFAULT_TILE_SIZE;
 export const TILE_HALF_SHORT = TILE_SIZE * Math.cos(ANGLE);
 export const TILE_HALF_LONG = TILE_SIZE * Math.sin(ANGLE);
 
-export const JOKERS = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
+export const JOKERS: ColorKey[] = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
 
 // Compute snowflake positions for a given tile size
-export function getSnowflakePositions(tileSize) {
+export function getSnowflakePositions(tileSize: number) {
     const halfShort = tileSize * Math.cos(ANGLE);
     const halfLong = tileSize * Math.sin(ANGLE);
     return {
@@ -66,7 +68,7 @@ export function getSnowflakePositions(tileSize) {
 export const SNOWFLAKE_POSITIONS = getSnowflakePositions(DEFAULT_TILE_SIZE);
 
 // Compute desk image dimensions scaled proportionally to tile size
-export function getDeskImage(tileSize) {
+export function getDeskImage(tileSize: number) {
     const scale = tileSize / DEFAULT_TILE_SIZE;
     return {
         width: Math.round(30 * scale),
@@ -78,7 +80,7 @@ export function getDeskImage(tileSize) {
 export const DESK_IMAGE = getDeskImage(DEFAULT_TILE_SIZE);
 
 // Compute the snowflake board diameter for a given tile size
-export function getSnowflakeBoardSize(tileSize) {
+export function getSnowflakeBoardSize(tileSize: number) {
     const halfShort = tileSize * Math.cos(ANGLE);
     const halfLong = tileSize * Math.sin(ANGLE);
     // Each snowflake center is offset from the board center.
