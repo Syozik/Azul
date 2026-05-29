@@ -1,4 +1,4 @@
-import type { ColorKey } from "./utils/types.ts";
+import type { ColorKey, GameBackendState } from "./utils/types.ts";
 
 export const TILE_COLORS: ColorKey[] = [
     "RED",
@@ -19,6 +19,21 @@ export const COLORS: Record<ColorKey | "CENTER", string> = {
     CENTER: "#0E6B5EFF",
 };
 
+export const stateKeys: (keyof GameBackendState)[] = [
+    "factories",
+    "centerPool",
+    "players",
+    "currentPlayer",
+    "round",
+    "phase",
+    "baseTiles",
+    "isGameOver",
+    "firstPlayer",
+    "isFirstCenterPick",
+    "_bag",
+    "_trash",
+];
+
 export const TILES_PER_COLOR = 22;
 export const NUM_FACTORIES = 5;
 export const TILES_PER_FACTORY = 4;
@@ -31,7 +46,14 @@ export const TILE_SIZE = DEFAULT_TILE_SIZE;
 export const TILE_HALF_SHORT = TILE_SIZE * Math.cos(ANGLE);
 export const TILE_HALF_LONG = TILE_SIZE * Math.sin(ANGLE);
 
-export const JOKERS: ColorKey[] = ["PURPLE", "GREEN", "ORANGE", "YELLOW", "BLUE", "RED"];
+export const JOKERS: ColorKey[] = [
+    "PURPLE",
+    "GREEN",
+    "ORANGE",
+    "YELLOW",
+    "BLUE",
+    "RED",
+];
 
 // Compute snowflake positions for a given tile size
 export function getSnowflakePositions(tileSize: number) {
@@ -109,14 +131,14 @@ export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
 export const allowedGameActions = ["pick", "cover", "pass", "base-pick"];
 
 export const BONUSES = {
-    "CENTER": 12,
-    "RED": 14,
-    "BLUE": 15,
-    "YELLOW": 16,
-    "ORANGE": 17,
-    "GREEN": 18,
-    "PURPLE": 20,
-}
+    CENTER: 12,
+    RED: 14,
+    BLUE: 15,
+    YELLOW: 16,
+    ORANGE: 17,
+    GREEN: 18,
+    PURPLE: 20,
+};
 
 export const DEFAULT_BASE_WIDTH = 400;
 export const DEFAULT_JOKER_TILE_SIZE = 30;

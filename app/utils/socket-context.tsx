@@ -168,14 +168,17 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const findGame = useCallback((newGame: boolean = true) => {
-        if (socketRef.current) {
-            dispatch({ type: "SEARCHING" });
-            socketRef.current.emit("find-game", {
-                newGame: !state.lastGameAvailable || newGame,
-            });
-        }
-    }, [state.lastGameAvailable]);
+    const findGame = useCallback(
+        (newGame: boolean = true) => {
+            if (socketRef.current) {
+                dispatch({ type: "SEARCHING" });
+                socketRef.current.emit("find-game", {
+                    newGame: !state.lastGameAvailable || newGame,
+                });
+            }
+        },
+        [state.lastGameAvailable],
+    );
 
     const sendGameAction = useCallback((action: GameAction) => {
         socketRef.current?.emit("game-action", action);

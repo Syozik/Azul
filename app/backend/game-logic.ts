@@ -1,10 +1,10 @@
-import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts.ts";
+import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts";
 import {
     createTileBag,
     fillFactories,
     initState,
     shuffle,
-} from "../utils/helpers.ts";
+} from "../utils/helpers";
 
 import type {
     BasePickAction,
@@ -13,10 +13,10 @@ import type {
     GameBackendState,
     PassAction,
     PickTilesAction,
-} from "../utils/types.ts";
+} from "../utils/types";
 
 export class Game {
-    private state: GameBackendState;
+    public state: GameBackendState;
 
     public constructor() {
         const bag = createTileBag();

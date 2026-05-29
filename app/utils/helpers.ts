@@ -4,7 +4,7 @@ import {
     TILE_COLORS,
     TILES_PER_COLOR,
     TILES_PER_FACTORY,
-} from "../consts.ts";
+} from "../consts";
 import type { ColorKey, GameState } from "./types.ts";
 
 /**

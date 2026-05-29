@@ -14,7 +14,8 @@ datasource db {
 
 model Games {
     id Int @id @default (autoincrement())
-    gameState Json
+    roomId String @unique
+    gameState Json?
     time DateTime
     finished Boolean
 }

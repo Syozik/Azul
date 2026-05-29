@@ -1,9 +1,10 @@
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
-import { Game } from "./app/backend/game-logic.ts";
-import { fetchGame } from "./app/backend/utils.ts";
-import { GameBackendState } from "./app/utils/types.ts";
+import { Game } from "./app/backend/game-logic";
+import { fetchGame, saveGame } from "./app/backend/utils";
+import type { GameBackendState } from "./app/utils/types.ts";
+import { randomUUID } from "crypto";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOST || "0.0.0.0";
@@ -45,7 +46,7 @@ async function main() {
     });
 
     io.on("connection", async (socket) => {
-        console.log(`[Socket] Connected: ${socket.id}`);
+        console.log(new Date(), `[Socket] Connected: ${socket.id}`);
 
         let lastGameState: GameBackendState | false = false;
         if (socket.recovered) {
@@ -60,6 +61,7 @@ async function main() {
                     });
                     socket.emit("game-state", game.clientState);
                     console.log(
+                        new Date(),
                         `[Socket] Recovered session for ${socket.id} in ${info.roomId}`,
                     );
                 }
@@ -82,7 +84,7 @@ async function main() {
 
         socket.on("find-game", ({ newGame = true }) => {
             if (waitingSocketId && waitingSocketId !== socket.id) {
-                const roomId = `room-${++roomCounter}`;
+                const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
 
                 if (!waitingSocket) {
@@ -123,6 +125,7 @@ async function main() {
                 io.to(roomId).emit("game-state", clientState);
 
                 console.log(
+                    new Date(),
                     `[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`,
                 );
             } else {
@@ -132,7 +135,10 @@ async function main() {
                         message: "Somebody just connected",
                     });
                 }
-                console.log(`[Socket] ${socket.id} is waiting for an opponent`);
+                console.log(
+                    new Date(),
+                    `[Socket] ${socket.id} is waiting for an opponent`,
+                );
             }
         });
 
@@ -149,6 +155,7 @@ async function main() {
                 socket.emit("game-error", { error: result.error });
                 socket.emit("game-state", game.clientState);
                 console.log(
+                    new Date(),
                     `[Game] Error for P${info.playerNumber}: ${result.error}`,
                 );
                 return;
@@ -161,7 +168,7 @@ async function main() {
 
         socket.on("disconnect", (reason) => {
             console.log(reason);
-            console.log(`[Socket] Disconnected: ${socket.id}`);
+            console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
             connectedPlayers.delete(socket.id);
             if (waitingSocketId === socket.id) {
@@ -170,6 +177,10 @@ async function main() {
 
             const info = playerInfo.get(socket.id);
             if (info) {
+                const game = roomGameStates.get(info.roomId);
+                if (game) {
+                    saveGame(info.roomId, game.state, false);
+                }
                 info.deleteTimer = setTimeout(
                     () => {
                         socket.to(info.roomId).emit("opponent-disconnected");
@@ -191,7 +202,7 @@ async function main() {
     });
 
     httpServer.listen(port, hostname, () => {
-        console.log(`> Ready on http://${hostname}:${port}`);
+        console.log(new Date(), `> Ready on http://${hostname}:${port}`);
     });
 }
 

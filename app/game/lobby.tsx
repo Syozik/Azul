@@ -28,11 +28,11 @@ export function Lobby() {
                                 : "Press Play to join an opponent"}
                         </p>
                         <button className="lobby-play-btn" onClick={() => findGame()}>
-                            <span className="btn-text">Play</span>
+                            <span className="btn-text">New Game</span>
                             <span className="btn-icon">→</span>
                         </button>
                         {lastGameAvailable && <button className="lobby-play-btn" onClick={() => findGame(false)}>
-                            <span className="btn-text">Join last game</span>
+                            <span className="btn-text">Restore last game</span>
                             <span className="btn-icon">→</span>
                         </button>}
                     </div>
