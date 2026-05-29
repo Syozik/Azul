@@ -1,9 +1,9 @@
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
-import { Game } from "./app/backend/game-logic";
-import { fetchGame, saveGame } from "./app/backend/utils";
-import type { GameBackendState } from "./app/utils/types.ts";
+import { Game } from "./game-logic";
+import { fetchGame, saveGame } from "./utils";
+import type { GameBackendState } from "../utils/types";
 import { randomUUID } from "crypto";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -25,7 +25,6 @@ const playerInfo: Map<string, PlayerSessionInfo> = new Map();
 
 const roomGameStates: Map<string, Game> = new Map();
 
-let roomCounter = 0;
 const connectedPlayers: Set<string> = new Set();
 
 async function main() {
