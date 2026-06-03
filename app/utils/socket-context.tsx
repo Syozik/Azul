@@ -11,7 +11,7 @@ import {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import type { GameState, GameAction } from "./types";
-import { initState } from "./helpers";
+import { getPlayerId, initState } from "./helpers";
 
 type ConnectionStatus =
     | "idle"
@@ -123,6 +123,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
                 "recovered:",
                 socket.recovered,
             );
+        });
+        socket.on("get-player-id", (callback) => {
+            const playerId = getPlayerId();
+            callback(playerId);
         });
         socket.on("waiting", () => {
             dispatch({ type: "WAITING" });

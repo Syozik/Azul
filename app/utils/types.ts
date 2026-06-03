@@ -1,3 +1,5 @@
+import { Game } from "../backend/game-logic";
+
 export type ColorKey =
     | "PURPLE"
     | "GREEN"
@@ -23,6 +25,23 @@ export interface GameState {
 export interface GameBackendState extends GameState {
     _bag: ColorKey[];
     _trash: ColorKey[];
+}
+
+export interface LastGame {
+    gameState: GameBackendState;
+    playerIds: string[];
+}
+
+export interface PlayerSessionInfo {
+    roomId: string;
+    id: string;
+    number: 1 | 2;
+    deleteTimer?: ReturnType<typeof setTimeout>;
+}
+
+export interface RoomState {
+    game: Game;
+    socketIds: string[];
 }
 
 export interface PlayerState {

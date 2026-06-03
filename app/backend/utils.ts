@@ -1,20 +1,9 @@
 import { stateKeys } from "../consts";
 import { Prisma } from "../generated/prisma/client";
-import { createTileBag, fillFactories, initState } from "../utils/helpers";
-import type { GameBackendState } from "../utils/types";
+import type { GameBackendState, LastGame } from "../utils/types";
 import { prisma } from "./prisma";
 
-export async function fetchGame(): Promise<GameBackendState | false> {
-    const bag = createTileBag();
-    const state: GameBackendState = {
-        ...initState(),
-        factories: fillFactories(bag),
-        baseTiles: [bag.splice(0, 5), bag.splice(0, 5)],
-        phase: 2,
-        _bag: bag,
-        _trash: [],
-    };
-    state.players[0].score = 100;
+export async function fetchGame(): Promise<LastGame | false> {
     try {
         const lastGame = await prisma.games.findFirst({
             where: {
@@ -25,7 +14,12 @@ export async function fetchGame(): Promise<GameBackendState | false> {
         if (!lastGame) {
             return false;
         }
-        return makeGameState(lastGame.gameState);
+        return {
+            gameState: formatGameState(lastGame.gameState),
+            playerIds: (lastGame.playerIds as Prisma.JsonArray).map((id) =>
+                String(id),
+            ),
+        };
     } catch (error) {
         if (error instanceof Error) {
             console.log(error.message);
@@ -36,6 +30,7 @@ export async function fetchGame(): Promise<GameBackendState | false> {
 
 export async function saveGame(
     roomId: string,
+    playerIds: string[],
     gameState: GameBackendState,
     finished: boolean,
 ): Promise<boolean> {
@@ -53,6 +48,7 @@ export async function saveGame(
                 roomId,
                 finished,
                 gameState: gameState as unknown as Prisma.InputJsonObject,
+                playerIds,
                 time: new Date(),
             },
         });
@@ -65,14 +61,16 @@ export async function saveGame(
     }
 }
 
-function makeGameState(json: Prisma.JsonValue): GameBackendState {
+function formatGameState(json: Prisma.JsonValue): GameBackendState {
     const jsonObject = json as Prisma.JsonObject;
     const state = {} as GameBackendState;
 
     for (const stateKey of stateKeys) {
         const value = jsonObject[stateKey];
         if (value === undefined) {
-            throw new Error(`Invalid gameState JSON: missing key \"${stateKey}\"`);
+            throw new Error(
+                `Invalid gameState JSON: missing key \"${stateKey}\"`,
+            );
         }
 
         (state as Record<keyof GameBackendState, unknown>)[stateKey] = value;

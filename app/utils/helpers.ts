@@ -101,3 +101,14 @@ export function groupTilesByColor(tiles: ColorKey[]) {
     }
     return groupedTiles;
 }
+
+const ID_KEY = "DEVICE_PLAYER_ID";
+
+export function getPlayerId(): string {
+    let id = localStorage.getItem(ID_KEY);
+    if (id) return id;
+
+    id = window.crypto.randomUUID();
+    localStorage.setItem(ID_KEY, id);
+    return id;
+}

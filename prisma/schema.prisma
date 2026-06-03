@@ -16,6 +16,7 @@ model Games {
     id Int @id @default (autoincrement())
     roomId String @unique
     gameState Json?
+    playerIds Json
     time DateTime
     finished Boolean
 }
