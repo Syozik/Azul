@@ -2,7 +2,7 @@ import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
 import { Game } from "./game-logic";
-import { fetchGame, saveGame } from "./utils";
+import { fetchLastGame, saveGame, updatePlayerNumber } from "./utils";
 import type { LastGame, PlayerSessionInfo, RoomState } from "../utils/types";
 import { randomUUID } from "crypto";
 
@@ -40,7 +40,7 @@ async function main() {
         pingTimeout: 20000,
     });
 
-    io.on("connection", async (socket) => {
+    io.on("connection", (socket) => {
         console.log(new Date(), `[Socket] Connected: ${socket.id}`);
 
         socket.emit("get-player-id", (playerId: string) => {
@@ -65,97 +65,125 @@ async function main() {
                     );
                 }
             }
-        } else {
-            lastGame = await fetchGame();
-            if (lastGame) {
-                socket.emit("last-game-available");
-            }
-
-            if (connectedPlayers.size > 0) {
-                socket.emit("waiting", {
-                    message: "Somebody's waiting",
-                });
-            }
         }
 
         connectedPlayers.add(socket.id);
 
-        socket.on("find-game", ({ newGame = true }) => {
+        socket.on("start-game", ({ newGame = true }) => {
+            const info = playerInfo.get(socket.id) as PlayerSessionInfo;
+            const roomId = info.roomId;
+
+            const roomState = roomStates.get(roomId) as RoomState;
+            const opponentSocketId = roomState.socketIds.find(
+                (id) => id !== socket.id,
+            ) as string;
+            const opponentSocket = io.sockets.sockets.get(opponentSocketId);
+            if (!opponentSocket) {
+                return;
+            }
+            const opponentInfo = playerInfo.get(
+                opponentSocketId,
+            ) as PlayerSessionInfo;
+
+            if (!newGame && roomState.lastGame) {
+                roomState.game.setState(roomState.lastGame.gameState);
+                updatePlayerNumber(info, roomState.lastGame.playerIds);
+                updatePlayerNumber(opponentInfo, roomState.lastGame.playerIds);
+            }
+            roomState.gameStarted = true;
+
+            const clientState = roomState.game.clientState;
+            socket.emit("game-start", {
+                playerNumber: info.number,
+                roomId,
+            });
+            opponentSocket.emit("game-start", {
+                playerNumber: opponentInfo.number,
+                roomId,
+            });
+            // Send initial game state to both
+            io.to(roomId).emit("game-state", clientState);
+
+            console.log(
+                new Date(),
+                `[Game] ${roomId} game started:
+                    ${info.id}: P${info.number}, ${opponentSocketId}: P${opponentInfo.number}`,
+            );
+        });
+
+        socket.on("find-game", async () => {
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
 
                 if (!waitingSocket) {
                     waitingSocketId = socket.id;
-                    socket.emit("waiting", {
-                        message: "Waiting for Player 2...",
-                    });
                     return;
                 }
 
-                const playerId: string | undefined = socketToPlayerMap.get(
-                    socket.id,
-                );
-                const waitingPlayerId: string | undefined =
-                    socketToPlayerMap.get(waitingSocket.id);
-                if (!(playerId && waitingPlayerId)) {
-                    return false;
-                }
+                const playerId = socketToPlayerMap.get(socket.id);
+                const waitingPlayerId = socketToPlayerMap.get(waitingSocket.id);
+                if (!playerId || !waitingPlayerId) return false;
+
                 // Both join the room
                 waitingSocket.join(roomId);
                 socket.join(roomId);
                 waitingSocketId = null;
 
-                const game = new Game();
-                let [socketPlayer, waitingSocketPlayer]: (1 | 2)[] = [1, 2];
-                if (!newGame && lastGame) {
-                    game.setState(lastGame.gameState);
-                    socketPlayer = lastGame.playerIds.indexOf(playerId) + 1;
-                    waitingSocketPlayer =
-                        lastGame.playerIds.indexOf(waitingPlayerId) + 1;
-                }
-
                 playerInfo.set(socket.id, {
                     roomId,
-                    number: socketPlayer as 1 | 2,
+                    number: 1,
                     id: playerId as string,
                 });
 
                 playerInfo.set(waitingSocket.id, {
                     roomId,
-                    number: waitingSocketPlayer as 1 | 2,
+                    number: 2,
                     id: waitingPlayerId as string,
                 });
 
+                const game = new Game();
+                lastGame = await fetchLastGame(playerId, waitingPlayerId);
                 roomStates.set(roomId, {
                     game,
+                    lastGame,
                     socketIds: [socket.id, waitingSocket.id],
+                    gameStarted: false,
                 });
-
-                const clientState = game.clientState;
-                waitingSocket.emit("game-start", {
-                    playerNumber: waitingSocketPlayer,
-                    roomId,
-                });
-                socket.emit("game-start", {
-                    playerNumber: socketPlayer,
-                    roomId,
-                });
-
-                // Send initial game state to both
-                io.to(roomId).emit("game-state", clientState);
 
                 console.log(
                     new Date(),
                     `[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`,
                 );
+
+                if (lastGame) {
+                    io.to(roomId).emit("room-found", !!lastGame);
+                } else {
+                    socket.emit("game-start", {
+                        playerNumber: 1,
+                        roomId,
+                    });
+                    waitingSocket.emit("game-start", {
+                        playerNumber: 2,
+                        roomId,
+                    });
+                    // Send initial game state to both
+                    io.to(roomId).emit("game-state", game.clientState);
+                    const roomState = roomStates.get(roomId) as RoomState;
+                    roomState.gameStarted = true;
+                    console.log(
+                        new Date(),
+                        `[Game] ${roomId} game started:
+                        ${playerId}: P${1}, ${waitingPlayerId}: P${2}`,
+                    );
+                }
             } else {
                 waitingSocketId = socket.id;
-                for (const id of Array.from(connectedPlayers)) {
-                    socket.to(id).emit("waiting", {
-                        message: "Somebody just connected",
-                    });
-                }
+                // for (const id of Array.from(connectedPlayers)) {
+                //     socket.to(id).emit("waiting", {
+                //         message: "Somebody just connected",
+                //     });
+                // }
                 console.log(
                     new Date(),
                     `[Socket] ${socket.id} is waiting for an opponent`,
@@ -187,7 +215,7 @@ async function main() {
             io.to(info.roomId).emit("game-state", game.clientState);
         });
 
-        socket.on("disconnect", (reason) => {
+        socket.on("disconnect", async (reason) => {
             console.log(reason);
             console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
@@ -199,7 +227,8 @@ async function main() {
             const info = playerInfo.get(socket.id);
             if (info) {
                 const roomState = roomStates.get(info.roomId);
-                if (roomState) {
+                console.log(roomState);
+                if (roomState?.gameStarted) {
                     const playerIds: string[] = new Array<string>(
                         roomState.socketIds.length,
                     );
@@ -210,12 +239,17 @@ async function main() {
                         }
                         playerIds[info.number - 1] = info.id;
                     }
-                    saveGame(
+                    const isGameSaved = await saveGame(
                         info.roomId,
                         playerIds,
                         roomState.game.state,
                         false,
                     );
+                    if (isGameSaved) {
+                        console.log("The game has been succesfully saved.");
+                    } else {
+                        console.log("The game hasn't been saved.");
+                    }
                 }
                 info.deleteTimer = setTimeout(
                     () => {

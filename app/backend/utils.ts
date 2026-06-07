@@ -1,14 +1,26 @@
 import { stateKeys } from "../consts";
 import { Prisma } from "../generated/prisma/client";
-import type { GameBackendState, LastGame } from "../utils/types";
+import type {
+    GameBackendState,
+    LastGame,
+    PlayerSessionInfo,
+} from "../utils/types";
 import { prisma } from "./prisma";
 
-export async function fetchGame(): Promise<LastGame | false> {
+export async function fetchLastGame(
+    id1: string,
+    id2: string,
+): Promise<LastGame | false> {
     try {
-        const lastGame = await prisma.games.findFirst({
+        const lastGame = await prisma.game.findFirst({
             where: {
                 finished: false,
+                AND: [
+                    { players: { some: { id: id1 } } },
+                    { players: { some: { id: id2 } } },
+                ],
             },
+            include: { players: true },
             orderBy: { time: "desc" },
         });
         if (!lastGame) {
@@ -16,9 +28,7 @@ export async function fetchGame(): Promise<LastGame | false> {
         }
         return {
             gameState: formatGameState(lastGame.gameState),
-            playerIds: (lastGame.playerIds as Prisma.JsonArray).map((id) =>
-                String(id),
-            ),
+            playerIds: lastGame.players.map((id) => String(id)),
         };
     } catch (error) {
         if (error instanceof Error) {
@@ -35,10 +45,16 @@ export async function saveGame(
     finished: boolean,
 ): Promise<boolean> {
     try {
-        await prisma.games.upsert({
-            where: {
-                roomId,
-            },
+        const operations = playerIds.map((id) =>
+            prisma.player.upsert({
+                where: { id },
+                update: { id },
+                create: { id },
+            }),
+        );
+        await prisma.$transaction(operations);
+        await prisma.game.upsert({
+            where: { roomId },
             update: {
                 finished,
                 gameState: gameState as unknown as Prisma.InputJsonObject,
@@ -48,7 +64,9 @@ export async function saveGame(
                 roomId,
                 finished,
                 gameState: gameState as unknown as Prisma.InputJsonObject,
-                playerIds,
+                players: {
+                    connect: playerIds.map((id) => ({ id })),
+                },
                 time: new Date(),
             },
         });
@@ -77,4 +95,13 @@ function formatGameState(json: Prisma.JsonValue): GameBackendState {
     }
 
     return state;
+}
+
+export function updatePlayerNumber(
+    playerInfo: PlayerSessionInfo,
+    playerIds: string[],
+) {
+    const playerIdx = playerIds.indexOf(playerInfo.id);
+    playerInfo.number = (playerIdx + 1) as 1 | 2;
+    return true;
 }

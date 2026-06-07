@@ -12,11 +12,16 @@ datasource db {
   provider = "sqlite"
 }
 
-model Games {
+model Game {
     id Int @id @default (autoincrement())
     roomId String @unique
     gameState Json?
-    playerIds Json
+    players Player[]
     time DateTime
     finished Boolean
+}
+
+model Player {
+    id String @id
+    games Game[]
 }

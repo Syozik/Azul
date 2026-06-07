@@ -42,6 +42,8 @@ export interface PlayerSessionInfo {
 export interface RoomState {
     game: Game;
     socketIds: string[];
+    gameStarted: boolean;
+    lastGame?: LastGame | false;
 }
 
 export interface PlayerState {
