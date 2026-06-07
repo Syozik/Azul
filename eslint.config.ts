@@ -16,3 +16,4 @@ const eslintConfig = defineConfig([
 ]);
 
 export default eslintConfig;
+import "@/app/static/style/info_block.css";

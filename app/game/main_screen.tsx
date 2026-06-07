@@ -109,7 +109,7 @@ export function MainScreen() {
                             </>
                         )}
                     </span>
-                    <div className="info">
+                    {/*<div className="info">
                         <button
                             className="info-button"
                             onClick={() => setShowInfo(!showInfo)}
@@ -117,7 +117,7 @@ export function MainScreen() {
                             Info
                         </button>
                         {showInfo && <InfoBlock />}
-                    </div>
+                    </div>*/}
                 </div>
             </div>
             <NotificationContainer notifications={visibleNotifs} />
