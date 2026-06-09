@@ -159,6 +159,33 @@ pnpm start # to run in production
 
 This starts the Next.js dev server with the Socket.io backend on `http://localhost:3000`, if not specified differently.
 
+##### Running with Docker
+
+##### Prerequisites
+
+- [Docker](https://www.docker.com/)
+- [Docker buildx plugin](https://docs.docker.com/reference/cli/docker/buildx/) Requires Docker 19.03+
+
+0. Create a `.env` file in the project root with the database URL:
+
+```
+DATABASE_URL="file:./dev.db"
+```
+
+1. Build the image:
+
+```
+docker build buildx -t azul .
+```
+
+2. Run the container:
+
+```
+docker run -p 3000:3000 azul
+```
+
+The app will be available at `http://localhost:3000`.
+
 ---
 
 #### Some (not really) important notes

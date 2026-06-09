@@ -1,4 +1,4 @@
-import { ColorKey } from "@/src/shared/types";
+import { ColorKey } from "@/shared/types";
 
 export function groupTilesByColor(tiles: ColorKey[]) {
     const groupedTiles: ColorKey[][] = [];
