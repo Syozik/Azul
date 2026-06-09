@@ -10,8 +10,9 @@ import {
     useReducer,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import type { GameState, GameAction } from "./types";
-import { getPlayerId, initState } from "./helpers";
+import type { GameState, GameAction } from "../shared/types";
+import { initState } from "../shared/helpers";
+import { getPlayerId } from "./utils";
 
 type ConnectionStatus =
     | "idle"

@@ -1,7 +1,7 @@
 "use client";
-import { COLORS, TILE_HALF_LONG } from "../consts";
-import type { TileColor, GameAction } from "../utils/types";
-import "@/app/static/style/circle.css";
+import { COLORS, TILE_HALF_LONG } from "../../shared/consts";
+import type { TileColor, GameAction } from "../../shared/types";
+import "@/app/style/circle.css";
 import { Tile } from "./tile";
 import { useRef, useEffect, useState } from "react";
 

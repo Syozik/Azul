@@ -1,7 +1,7 @@
 "use client";
 
-import { useSocket } from "../utils/socket-context";
-import "@/app/static/style/lobby.css";
+import { useSocket } from "../socket-context";
+import "@/app/style/lobby.css";
 
 export function Lobby() {
     const { connectionStatus, findGame, startGame } = useSocket();

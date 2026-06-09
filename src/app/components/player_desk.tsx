@@ -1,13 +1,13 @@
 "use client";
-import { COLORS, getSnowflakeBoardSize, DEFAULT_TILE_SIZE } from "../consts";
+import { COLORS, getSnowflakeBoardSize, DEFAULT_TILE_SIZE } from "../../shared/consts";
 import { Snowflake } from "./snowflake";
-import "@/app/static/style/player_desk.css";
+import "@/app/style/player_desk.css";
 import { Scoreline } from "./scoreline";
-import { useSocket } from "../utils/socket-context";
-import { groupTilesByColor } from "../utils/helpers";
+import { useSocket } from "../socket-context";
 import { useState, useRef, useEffect, useMemo } from "react";
-import { TileColor } from "../utils/types";
+import { TileColor } from "../../shared/types";
 import { usePlayerDesk } from "../game/phase_two";
+import { groupTilesByColor } from "../utils";
 
 const DEFAULT_BOARD_SIZE = getSnowflakeBoardSize(DEFAULT_TILE_SIZE);
 

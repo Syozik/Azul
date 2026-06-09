@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "@/app/static/style/globals.css";
+import "@/app/style/globals.css";
 
 export const metadata: Metadata = {
     title: "Azul",

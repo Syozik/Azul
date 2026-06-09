@@ -4,10 +4,10 @@ import {
     COLORS,
     getSnowflakePositions,
     getDeskImage,
-} from "../consts";
+} from "../../shared/consts";
 import { usePlayerDesk } from "../game/phase_two";
-import { useSocket } from "../utils/socket-context";
-import { TileColor } from "../utils/types";
+import { useSocket } from "../socket-context";
+import { TileColor } from "../../shared/types";
 import { Tile } from "./tile";
 import { useMemo } from "react";
 

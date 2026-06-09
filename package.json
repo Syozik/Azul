@@ -4,10 +4,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "tsx app/backend/server.ts",
-        "dev:socket": "tsx app/backend/server.ts",
+        "dev": "tsx src/backend/server.ts",
+        "dev:socket": "tsx src/backend/server.ts",
         "build": "next build",
-        "start": "NODE_ENV=production tsx app/backend/server.ts",
+        "start": "NODE_ENV=production tsx src/backend/server.ts",
         "lint": "eslint"
     },
     "dependencies": {

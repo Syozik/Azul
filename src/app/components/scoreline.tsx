@@ -1,4 +1,4 @@
-import "@/app/static/style/scoreline.css";
+import "@/app/style/scoreline.css";
 
 interface ScorelineProps {
     range: { start: number; end: number; step: number };

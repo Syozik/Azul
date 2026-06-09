@@ -1,11 +1,11 @@
-import { allowedGameActions, BONUSES, JOKERS, TILE_COLORS } from "../consts";
 import {
-    createTileBag,
-    fillFactories,
-    initState,
-    shuffle,
-} from "../utils/helpers";
-
+    allowedGameActions,
+    BONUSES,
+    JOKERS,
+    TILE_COLORS,
+} from "../shared/consts";
+import { initState } from "../shared/helpers";
+import { createTileBag, fillFactories, shuffle } from "./utils";
 import type {
     BasePickAction,
     ColorKey,
@@ -13,7 +13,7 @@ import type {
     GameBackendState,
     PassAction,
     PickTilesAction,
-} from "../utils/types";
+} from "../shared/types";
 
 export class Game {
     public state: GameBackendState;

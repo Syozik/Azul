@@ -1,10 +1,17 @@
-import { stateKeys } from "../consts";
-import { Prisma } from "../generated/prisma/client";
+import {
+    NUM_FACTORIES,
+    stateKeys,
+    TILE_COLORS,
+    TILES_PER_COLOR,
+    TILES_PER_FACTORY,
+} from "../shared/consts";
+import { Prisma } from "./db/generated/prisma/client";
 import type {
+    ColorKey,
     GameBackendState,
     LastGame,
     PlayerSessionInfo,
-} from "../utils/types";
+} from "../shared/types";
 import { prisma } from "./prisma";
 
 export async function fetchLastGame(
@@ -104,4 +111,38 @@ export function updatePlayerNumber(
     const playerIdx = playerIds.indexOf(playerInfo.id);
     playerInfo.number = (playerIdx + 1) as 1 | 2;
     return true;
+}
+
+/**
+ * Create a shuffled tile bag: 22 tiles of each of the 6 colors = 132 total
+ */
+export function createTileBag() {
+    const bag: ColorKey[] = [];
+    for (const color of TILE_COLORS) {
+        for (let i = 0; i < TILES_PER_COLOR; i++) {
+            bag.push(color);
+        }
+    }
+    shuffle(bag);
+    return bag;
+}
+
+// Fisher-Yates shuffle
+export function shuffle<T>(arr: T[]) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+/**
+ * Fill factories by drawing from the bag
+ */
+export function fillFactories(bag: ColorKey[]) {
+    const factories = [];
+    for (let i = 0; i < NUM_FACTORIES; i++) {
+        const factory = bag.splice(0, TILES_PER_FACTORY);
+        factories.push(factory);
+    }
+    return factories;
 }

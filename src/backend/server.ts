@@ -3,7 +3,7 @@ import next from "next";
 import { Server } from "socket.io";
 import { Game } from "./game-logic";
 import { fetchLastGame, saveGame, updatePlayerNumber } from "./utils";
-import type { LastGame, PlayerSessionInfo, RoomState } from "../utils/types";
+import type { LastGame, PlayerSessionInfo, RoomState } from "../shared/types";
 import { randomUUID } from "crypto";
 
 const dev = process.env.NODE_ENV !== "production";

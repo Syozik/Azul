@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { PlayerDesk } from "../components/player_desk";
-import { useSocket } from "../utils/socket-context";
+import { useSocket } from "../socket-context";
 import { Base } from "../components/base";
 
 export const PlayerDeskContext = createContext(0);

@@ -1,5 +1,5 @@
-import "@/app/static/style/game_over_screen.css";
-import { useSocket } from "../utils/socket-context";
+import "@/app/style/game_over_screen.css";
+import { useSocket } from "../socket-context";
 
 export function GameOverScreen() {
     const { gameState, playerNumber } = useSocket();

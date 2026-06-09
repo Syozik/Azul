@@ -1,4 +1,4 @@
-import "@/app/static/style/info_block.css";
+import "@/app/style/info_block.css";
 
 export function InfoBlock() {
     return (

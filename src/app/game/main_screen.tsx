@@ -1,11 +1,11 @@
-import "@/app/static/style/main_screen.css";
+import "@/app/style/main_screen.css";
 import { useEffect, useRef, useState } from "react";
 import { GameOverScreen } from "../components/game_over_screen";
 import { InfoBlock } from "../components/info_block";
 import { NotificationContainer } from "../components/notification";
-import { NOTIFICATION_DURATION } from "../consts";
-import { useSocket } from "../utils/socket-context";
-import { NotificationType } from "../utils/types";
+import { NOTIFICATION_DURATION } from "../../shared/consts";
+import { useSocket } from "../socket-context";
+import { NotificationType } from "../../shared/types";
 import { Lobby } from "./lobby";
 import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";

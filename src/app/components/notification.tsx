@@ -1,7 +1,7 @@
-import "@/app/static/style/notification.css";
+import "@/app/style/notification.css";
 import { useEffect, useState } from "react";
-import { COLORS, NOTIFICATION_DURATION } from "../consts";
-import { NotificationType, TileColor } from "../utils/types";
+import { COLORS, NOTIFICATION_DURATION } from "../../shared/consts";
+import { NotificationType, TileColor } from "../../shared/types";
 
 const EXIT_ANIMATION_DURATION = 350;
 

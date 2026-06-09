@@ -1,7 +1,7 @@
 "use client";
 import { MouseEventHandler } from "react";
-import { ANGLE as angle, TILE_SIZE, DEFAULT_TILE_SIZE } from "../consts";
-import "@/app/static/style/tile.css";
+import { ANGLE as angle, TILE_SIZE, DEFAULT_TILE_SIZE } from "../../shared/consts";
+import "@/app/style/tile.css";
 
 interface TileProps {
     points?: number;

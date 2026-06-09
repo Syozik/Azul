@@ -8,15 +8,15 @@ import {
     DEFAULT_JOKER_TILE_SIZE,
     DEFAULT_ROUND_TRANSLATE_X,
     JOKERS,
-} from "../consts";
+} from "../../shared/consts";
 import { CircleWithTiles } from "../components/circle";
-import "@/app/static/style/phase_one.css";
-import { useSocket } from "../utils/socket-context";
+import "@/app/style/phase_one.css";
+import { useSocket } from "../socket-context";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PlayerDeskContext } from "./phase_two";
 import { PlayerDesk } from "../components/player_desk";
 import { Tile } from "../components/tile";
-import { ColorKey } from "../utils/types";
+import { ColorKey } from "../../shared/types";
 
 export function PhaseOne() {
     const { gameState, playerNumber, sendGameAction } = useSocket();

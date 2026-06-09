@@ -1,4 +1,4 @@
-import type { ColorKey, GameBackendState } from "./utils/types.ts";
+import type { ColorKey, GameBackendState } from "./types.js";
 
 export const TILE_COLORS: ColorKey[] = [
     "RED",

@@ -1,9 +1,9 @@
 "use client";
-import "@/app/static/style/base.css";
-import { COLORS, DEFAULT_BASE_TILE_SIZE, DEFAULT_BASE_WIDTH, DEFAULT_JOKER_GAP, DEFAULT_JOKER_PADDING_LEFT, DEFAULT_JOKER_TILE_SIZE, DEFAULT_ROUND_TRANSLATE_X, DEFAULT_SNOWFLAKE_MARGINS, JOKERS } from "../consts";
+import "@/app/style/base.css";
+import { COLORS, DEFAULT_BASE_TILE_SIZE, DEFAULT_BASE_WIDTH, DEFAULT_JOKER_GAP, DEFAULT_JOKER_PADDING_LEFT, DEFAULT_JOKER_TILE_SIZE, DEFAULT_ROUND_TRANSLATE_X, DEFAULT_SNOWFLAKE_MARGINS, JOKERS } from "../../shared/consts";
 import { Tile } from "./tile";
-import { ColorKey } from "../utils/types";
-import { useSocket } from "../utils/socket-context";
+import { ColorKey } from "../../shared/types";
+import { useSocket } from "../socket-context";
 import { useState, useRef, useEffect, useMemo } from "react";
 
 function getAngle(i: number, j: number): number {
