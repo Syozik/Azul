@@ -157,7 +157,7 @@ async function main() {
                 );
 
                 if (lastGame) {
-                    io.to(roomId).emit("room-found", !!lastGame);
+                    io.to(roomId).emit("room-found");
                 } else {
                     socket.emit("game-start", {
                         playerNumber: 1,

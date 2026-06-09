@@ -4,8 +4,7 @@ import { useSocket } from "../utils/socket-context";
 import "@/app/static/style/lobby.css";
 
 export function Lobby() {
-    const { connectionStatus, lastGameAvailable, findGame, startGame } =
-        useSocket();
+    const { connectionStatus, findGame, startGame } = useSocket();
 
     return (
         <div className="lobby-container">

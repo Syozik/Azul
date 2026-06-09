@@ -24,7 +24,6 @@ interface SocketContextType {
     connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2;
     roomId: string | null;
-    lastGameAvailable: boolean;
     gameState: GameState;
     findGame: () => void;
     startGame: (newGame?: boolean) => void;
@@ -35,7 +34,6 @@ const SocketContext = createContext<SocketContextType>({
     connectionStatus: "idle",
     playerNumber: 1,
     roomId: null,
-    lastGameAvailable: false,
     gameState: initState(),
     findGame: () => {},
     startGame: () => {},
@@ -50,13 +48,12 @@ type State = {
     connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2;
     roomId: string | null;
-    lastGameAvailable: boolean;
     gameState: GameState;
 };
 
 type Action =
     | { type: "SEARCHING" }
-    | { type: "WAITING"; lastGameAvailable: boolean }
+    | { type: "WAITING" }
     | { type: "GAME_START"; playerNumber: 1 | 2; roomId: string }
     | { type: "GAME_STATE"; gameState: GameState }
     | { type: "OPPONENT_DISCONNECTED" }
@@ -66,7 +63,6 @@ const initialState: State = {
     connectionStatus: "idle",
     playerNumber: 1,
     roomId: null,
-    lastGameAvailable: false,
     gameState: initState(),
 };
 
@@ -77,7 +73,6 @@ function reducer(state: State, action: Action): State {
         case "WAITING":
             return {
                 ...state,
-                lastGameAvailable: action.lastGameAvailable,
                 connectionStatus: "waiting",
             };
         case "GAME_START":
@@ -131,8 +126,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             const playerId = getPlayerId();
             callback(playerId);
         });
-        socket.on("room-found", (lastGameAvailable: boolean) => {
-            dispatch({ type: "WAITING", lastGameAvailable });
+        socket.on("room-found", () => {
+            dispatch({ type: "WAITING" });
         });
         socket.on(
             "game-start",
@@ -179,17 +174,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    const startGame = useCallback(
-        (newGame: boolean = true) => {
-            if (socketRef.current) {
-                dispatch({ type: "SEARCHING" });
-                socketRef.current.emit("start-game", {
-                    newGame: !state.lastGameAvailable || newGame,
-                });
-            }
-        },
-        [state.lastGameAvailable],
-    );
+    const startGame = useCallback((newGame: boolean = true) => {
+        if (socketRef.current) {
+            dispatch({ type: "SEARCHING" });
+            socketRef.current.emit("start-game", { newGame });
+        }
+    }, []);
 
     const sendGameAction = useCallback((action: GameAction) => {
         socketRef.current?.emit("game-action", action);
@@ -201,7 +191,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
                 connectionStatus: state.connectionStatus,
                 playerNumber: state.playerNumber,
                 roomId: state.roomId,
-                lastGameAvailable: state.lastGameAvailable,
                 gameState: state.gameState,
                 findGame,
                 startGame,
