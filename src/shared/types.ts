@@ -29,6 +29,7 @@ export interface GameBackendState extends GameState {
 
 export interface LastGame {
     gameState: GameBackendState;
+    gameId: number;
     playerIds: string[];
 }
 

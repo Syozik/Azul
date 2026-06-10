@@ -35,7 +35,8 @@ export async function fetchLastGame(
         }
         return {
             gameState: formatGameState(lastGame.gameState),
-            playerIds: lastGame.players.map((id) => String(id)),
+            gameId: lastGame.id,
+            playerIds: lastGame.playersOrder as Prisma.JsonArray as string[],
         };
     } catch (error) {
         if (error instanceof Error) {
@@ -46,12 +47,23 @@ export async function fetchLastGame(
 }
 
 export async function saveGame(
-    roomId: string,
     playerIds: string[],
     gameState: GameBackendState,
     finished: boolean,
+    gameId: number | undefined,
 ): Promise<boolean> {
     try {
+        if (gameId) {
+            await prisma.game.update({
+                where: { id: gameId },
+                data: {
+                    finished,
+                    gameState: gameState as unknown as Prisma.InputJsonObject,
+                    time: new Date(),
+                },
+            });
+            return true;
+        }
         const operations = playerIds.map((id) =>
             prisma.player.upsert({
                 where: { id },
@@ -60,20 +72,14 @@ export async function saveGame(
             }),
         );
         await prisma.$transaction(operations);
-        await prisma.game.upsert({
-            where: { roomId },
-            update: {
-                finished,
-                gameState: gameState as unknown as Prisma.InputJsonObject,
-                time: new Date(),
-            },
-            create: {
-                roomId,
+        await prisma.game.create({
+            data: {
                 finished,
                 gameState: gameState as unknown as Prisma.InputJsonObject,
                 players: {
                     connect: playerIds.map((id) => ({ id })),
                 },
+                playersOrder: playerIds as unknown as Prisma.InputJsonArray,
                 time: new Date(),
             },
         });

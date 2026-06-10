@@ -227,7 +227,6 @@ async function main() {
             const info = playerInfo.get(socket.id);
             if (info) {
                 const roomState = roomStates.get(info.roomId);
-                console.log(roomState);
                 if (roomState?.gameStarted) {
                     const playerIds: string[] = new Array<string>(
                         roomState.socketIds.length,
@@ -239,11 +238,14 @@ async function main() {
                         }
                         playerIds[info.number - 1] = info.id;
                     }
+
                     const isGameSaved = await saveGame(
-                        info.roomId,
                         playerIds,
                         roomState.game.state,
                         false,
+                        roomState.lastGame
+                            ? roomState.lastGame.gameId
+                            : undefined,
                     );
                     if (isGameSaved) {
                         console.log("The game has been succesfully saved.");
