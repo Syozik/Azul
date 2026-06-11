@@ -9,7 +9,7 @@ export function GameOverScreen() {
     const isWin = yourScore > opScore;
     const isDraw = yourScore === opScore;
 
-    const icon = isWin ? "🏆❤️" : isDraw ? "❤️" : "❤️";
+    const icon = isWin ? "🏆❤️" : "❤️";
     const headline = isWin ? "Victory!" : isDraw ? "It's a Draw" : "Defeat";
     const subline = isWin
         ? "You're unbeatable!"
@@ -78,7 +78,6 @@ export function GameOverScreen() {
                     className="end-play-again-btn"
                     onClick={() => window.location.reload()}
                 >
-                    <span className="end-btn-icon">🎮</span>
                     Play Again
                 </button>
             </div>

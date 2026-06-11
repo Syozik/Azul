@@ -53,7 +53,7 @@ async function main() {
             if (info) {
                 clearTimeout(info.deleteTimer);
                 const roomState = roomStates.get(info.roomId);
-                if (roomState) {
+                if (roomState && !roomState.game.state.isGameOver) {
                     socket.emit("game-start", {
                         playerNumber: info.number,
                         roomId: info.roomId,
@@ -226,8 +226,8 @@ async function main() {
 
             const info = playerInfo.get(socket.id);
             if (info) {
-                const roomState = roomStates.get(info.roomId);
-                if (roomState?.gameStarted) {
+                const roomState = roomStates.get(info.roomId) as RoomState;
+                if (roomState.gameStarted) {
                     const playerIds: string[] = new Array<string>(
                         roomState.socketIds.length,
                     );
@@ -242,7 +242,7 @@ async function main() {
                     const isGameSaved = await saveGame(
                         playerIds,
                         roomState.game.state,
-                        false,
+                        roomState.game.state.isGameOver,
                         roomState.lastGame
                             ? roomState.lastGame.gameId
                             : undefined,
@@ -256,18 +256,13 @@ async function main() {
                 info.deleteTimer = setTimeout(
                     () => {
                         socket.to(info.roomId).emit("opponent-disconnected");
-                        playerInfo.delete(socket.id);
-
                         // Clean up the other player's info and the room's game state
-                        for (const [id, pInfo] of playerInfo.entries()) {
-                            if (pInfo.roomId === info.roomId) {
-                                playerInfo.delete(id);
-                                break;
-                            }
+                        for (const socketId of roomState.socketIds) {
+                            playerInfo.delete(socketId);
                         }
                         roomStates.delete(info.roomId);
                     },
-                    5 * 60 * 10 ** 3,
+                    60 * 10 ** 3,
                 );
             }
         });

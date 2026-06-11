@@ -260,14 +260,6 @@
     box-shadow: 0 2px 8px rgba(92, 61, 26, 0.3);
 }
 
-.end-btn-icon {
-    font-size: 1.1rem;
-    transition: transform 0.3s ease;
-}
-
-.end-play-again-btn:hover .end-btn-icon {
-    transform: rotate(20deg) scale(1.15);
-}
 
 /* ── draw state ── */
 .end-headline--draw {
