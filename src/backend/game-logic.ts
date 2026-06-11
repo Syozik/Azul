@@ -408,7 +408,7 @@ export class Game {
 
         if (this.state.phase === 2 && this.isCoveringPhaseOver) {
             if (this.state.round === 6) {
-                this.state.isGameOver = true;
+                this.endGame();
                 return;
             }
             this.state.phase = 1;
@@ -441,6 +441,20 @@ export class Game {
             this.state.factories.every((f) => f.length === 0) &&
             this.state.centerPool.length === 0
         );
+    }
+
+    private endGame() {
+        for (const [playerNumber, player] of this.state.players.entries()) {
+            const unusedTiles = player.pickedTiles.length;
+            this.pushNotification(
+                playerNumber,
+                "info",
+                `You lost ${unusedTiles} points for unused tiles.`,
+            );
+            player.score -= unusedTiles;
+            player.pickedTiles = [];
+        }
+        this.state.isGameOver = true;
     }
 
     /**
