@@ -65,6 +65,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    .jokers-order {
+        margin-top: -25px;
+    }
 }
 
 .check-desk {
@@ -81,6 +85,9 @@
     height: 17%;
 }
 
+.circles {
+    margin-top: 20px;
+}
 .center-pool {
     position: absolute;
     top: 55%;
@@ -143,6 +150,10 @@
         flex: 0 0 100%;
         max-width: calc(100vw - 1rem);
         max-height: calc(100vw - 1rem);
+        margin-top: 80px;
+        .jokers-order {
+            margin-top: -90px;
+        }
     }
 
     .circle_with_tiles {

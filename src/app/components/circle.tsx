@@ -55,7 +55,7 @@ export function CircleWithTiles({
     return (
         <div
             ref={circleRef}
-            className={`circle_with_tiles ${isEmpty ? "circle-empty" : ""} ${isMyTurn && !isEmpty ? "circle-active" : ""}`}
+            className={`circle_with_tiles${isEmpty ? " circle-empty" : ""}${isMyTurn && !isEmpty ? " circle-active" : ""}`}
             style={{
                 position: "absolute",
                 top: position.top,

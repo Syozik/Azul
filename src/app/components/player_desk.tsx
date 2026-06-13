@@ -88,7 +88,7 @@ export function PlayerDesk() {
 
     return (
         <div
-            className={`${isOwner ? "own-desk" : ""} desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-12.5 gap-3 md:gap-10 text-center mx-1 md:mx-28`}
+            className={`${isOwner ? "own-desk " : ""}desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-12.5 gap-3 md:gap-10 text-center mx-1 md:mx-28`}
         >
             <p className="player-name font-bold text-lg md:text-2xl">
                 {isOwner ? "Your" : "Opponent's"} Desk

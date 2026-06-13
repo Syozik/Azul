@@ -1,4 +1,5 @@
 import { ColorKey } from "@/shared/types";
+import { useEffect, useState } from "react";
 
 export function groupTilesByColor(tiles: ColorKey[]) {
     const groupedTiles: ColorKey[][] = [];
@@ -27,4 +28,19 @@ export function getPlayerId(): string {
     id = window.crypto.randomUUID();
     localStorage.setItem(ID_KEY, id);
     return id;
+}
+
+export function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkWidth = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkWidth();
+        window.addEventListener("resize", checkWidth);
+        return () => {
+            window.removeEventListener("resize", checkWidth);
+        };
+    }, []);
+    return isMobile;
 }

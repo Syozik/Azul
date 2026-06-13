@@ -24,7 +24,6 @@ export function PhaseOne() {
 
     const outerRef = useRef<HTMLDivElement>(null);
     const [parentWidth, setParentWidth] = useState(0);
-    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         const el = outerRef.current?.parentElement;
@@ -85,37 +84,34 @@ export function PhaseOne() {
             </div>
 
             <div className="game-board">
-                {!isMobile && (
-                    <div
-                        className="jokers-order"
-                        style={{
-                            paddingLeft: `${jokerPaddingLeft}px`,
-                            gap: `${jokerGap}px`,
-                            marginTop: "-25px",
-                        }}
-                    >
-                        {JOKERS.map((color, idx) => (
-                            <div className="base-round" key={color}>
-                                <Tile
-                                    color={COLORS[color as ColorKey]}
-                                    transformAngle={0}
-                                    size={jokerTileSize}
-                                />
-                                <p
-                                    className={`round-number ${gameState.round === idx + 1 ? "active" : ""}`}
-                                    style={{
-                                        transform: `translate(${roundTranslateX}px)`,
-                                        width: `${Math.round(27 * scale)}px`,
-                                        height: `${Math.round(27 * scale)}px`,
-                                        fontSize: `${Math.round(14 * scale)}px`,
-                                    }}
-                                >
-                                    {idx + 1}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <div
+                    className="jokers-order"
+                    style={{
+                        paddingLeft: `${jokerPaddingLeft}px`,
+                        gap: `${jokerGap}px`,
+                    }}
+                >
+                    {JOKERS.map((color, idx) => (
+                        <div className="base-round" key={color}>
+                            <Tile
+                                color={COLORS[color as ColorKey]}
+                                transformAngle={0}
+                                size={jokerTileSize}
+                            />
+                            <p
+                                className={`round-number ${gameState.round === idx + 1 ? "active" : ""}`}
+                                style={{
+                                    transform: `translate(${roundTranslateX}px)`,
+                                    width: `${Math.round(27 * scale)}px`,
+                                    height: `${Math.round(27 * scale)}px`,
+                                    fontSize: `${Math.round(14 * scale)}px`,
+                                }}
+                            >
+                                {idx + 1}
+                            </p>
+                        </div>
+                    ))}
+                </div>
                 <button
                     className="check-desk"
                     style={{ marginTop: "10px" }}

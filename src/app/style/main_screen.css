@@ -75,8 +75,7 @@
     font-weight: bold;
 
     &:hover {
-        transform: scale(1.03);
-        border: 2px solid #1a8fb5;
+        transform: scale(1.02);
     }
 }
 
