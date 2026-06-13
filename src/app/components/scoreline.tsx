@@ -2,7 +2,7 @@ import "@/app/style/scoreline.css";
 
 interface ScorelineProps {
     range: { start: number; end: number; step: number };
-    currentScore: number | undefined;
+    currentScore?: number;
 }
 
 export function Scoreline({ range, currentScore = 5 }: ScorelineProps) {

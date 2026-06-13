@@ -97,6 +97,13 @@
     flex: 1 1 0;
 }
 
+.box-tile.clickable {
+    cursor: pointer;
+}
+
+.box-tile.clickable:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 
 @media (max-width: 768px) {
     .game-header {

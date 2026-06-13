@@ -65,7 +65,7 @@ After all tiles are drafted, players place tiles onto their star board:
 
 - The star has 6 points, each corresponding to one color and containing spaces numbered 1 through 6.
 - To fill a space numbered N, you must spend exactly N tiles of that star's color (joker tiles may substitute for any color).
-- Any tiles you cannot or choose not to place are lost (returned to the supply), with a maximum of 4 tiles that can be kept for the next round. Currently, you can keep them for the next round.
+- Any tiles you cannot or choose not to place are lost (returned to the supply), with a maximum of 4 tiles that can be kept for the next round.
 - For the center you can choose any color to cover a space, however, this color mustn't have been used in the center already.
 
 ##### Tiles
@@ -181,7 +181,6 @@ I think if you have docker installed, you know how to get it running =)
 - If by some chance a fan of the original game stumbles upon this, they should know that any ideas, suggestions, issues, prs
   are more than welcome.
   Future ideas that I plan to work on whenever I will have time:
-- Add 4 tile spaces that we can leave for the next round, now you can pass and all tiles are kept.
 - Responsiveness, responsiveness, responsiveness.
 - Add visual rules to the app.
 - Collect enough data to figure out the strategy to beat my gf's butt 95% of the time.

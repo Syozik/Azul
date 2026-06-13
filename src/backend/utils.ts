@@ -50,7 +50,7 @@ export async function saveGame(
     playerIds: string[],
     gameState: GameBackendState,
     finished: boolean,
-    gameId: number | undefined,
+    gameId?: number,
 ): Promise<boolean> {
     try {
         if (gameId) {

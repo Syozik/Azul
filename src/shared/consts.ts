@@ -1,4 +1,4 @@
-import type { ColorKey, GameBackendState } from "./types.js";
+import type { ColorKey, GameBackendState, TileColor } from "./types.js";
 
 export const TILE_COLORS: ColorKey[] = [
     "RED",
@@ -9,7 +9,7 @@ export const TILE_COLORS: ColorKey[] = [
     "ORANGE",
 ];
 
-export const COLORS: Record<ColorKey | "CENTER", string> = {
+export const COLORS: Record<TileColor, string> = {
     BLUE: "#1A4C9EFF",
     GREEN: "#27AE60FF",
     RED: "#E84545FF",
@@ -128,7 +128,7 @@ export const CIRCLE_POSITIONS = PENTAGON_ANGLES.map((angle) => ({
     left: `${(50 + PENTAGON_RADIUS * Math.cos(angle) - CIRCLE_HALF).toFixed(2)}%`,
 }));
 
-export const allowedGameActions = ["pick", "cover", "pass", "base-pick"];
+export const allowedGameActions = ["pick", "cover", "pass", "base-pick", "save-for-next-round"];
 
 export const BONUSES = {
     CENTER: 12,

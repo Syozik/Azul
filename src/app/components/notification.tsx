@@ -1,7 +1,7 @@
 import "@/app/style/notification.css";
 import { useEffect, useState } from "react";
 import { COLORS, NOTIFICATION_DURATION } from "../../shared/consts";
-import { NotificationType, TileColor } from "../../shared/types";
+import { ColorKey, NotificationType } from "../../shared/types";
 
 const EXIT_ANIMATION_DURATION = 350;
 
@@ -13,7 +13,7 @@ function formatMessage(message: string) {
                     <span
                         className={`box-tile my-0.5`}
                         style={{
-                            backgroundColor: COLORS[word as TileColor],
+                            backgroundColor: COLORS[word as ColorKey],
                         }}
                         key={id}
                     />

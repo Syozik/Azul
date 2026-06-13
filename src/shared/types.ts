@@ -6,8 +6,7 @@ export type ColorKey =
     | "ORANGE"
     | "YELLOW"
     | "BLUE"
-    | "RED"
-    | "CENTER";
+    | "RED";
 
 export interface GameState {
     factories: ColorKey[][];
@@ -49,7 +48,8 @@ export interface RoomState {
 
 export interface PlayerState {
     pickedTiles: ColorKey[]; // tiles the player has picked
-    coveredTiles: Record<ColorKey, (boolean | string)[]>;
+    coveredTiles: Record<TileColor, (boolean | string)[]>;
+    savedTilesForNextRound: (ColorKey | undefined)[];
     score: number;
     hasPassed: boolean;
     canTakeBaseTiles: number;
@@ -66,12 +66,12 @@ export interface NotificationType {
 export interface PickTilesAction {
     type: "pick";
     color: ColorKey;
-    factoryIndex: number | undefined;
+    factoryIndex?: number;
 }
 
 export interface CoverTileAction {
     type: "cover";
-    color: ColorKey;
+    color: TileColor;
     points: number;
     usedTiles: ColorKey[];
 }
@@ -85,10 +85,17 @@ export interface BasePickAction {
     selectedTiles: string[];
 }
 
+export interface SaveForNextRoundAction {
+    type: "save-for-next-round";
+    slotIdx: number;
+    selectedTiles: ColorKey[];
+}
+
 export type GameAction =
-    | Partial<PickTilesAction>
+    | PickTilesAction
     | CoverTileAction
     | PassAction
-    | BasePickAction;
+    | BasePickAction
+    | SaveForNextRoundAction;
 
-export type TileColor = ColorKey;
+export type TileColor = ColorKey | "CENTER";

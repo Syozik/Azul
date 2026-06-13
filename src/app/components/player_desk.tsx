@@ -1,11 +1,15 @@
 "use client";
-import { COLORS, getSnowflakeBoardSize, DEFAULT_TILE_SIZE } from "../../shared/consts";
+import {
+    COLORS,
+    getSnowflakeBoardSize,
+    DEFAULT_TILE_SIZE,
+} from "../../shared/consts";
 import { Snowflake } from "./snowflake";
 import "@/app/style/player_desk.css";
 import { Scoreline } from "./scoreline";
 import { useSocket } from "../socket-context";
 import { useState, useRef, useEffect, useMemo } from "react";
-import { TileColor } from "../../shared/types";
+import { ColorKey, TileColor } from "../../shared/types";
 import { usePlayerDesk } from "../game/phase_two";
 import { groupTilesByColor } from "../utils";
 
@@ -45,14 +49,20 @@ export function PlayerDesk() {
         return Math.max(MIN_TILE_SIZE, Math.floor(DEFAULT_TILE_SIZE * scale));
     }, [containerWidth]);
 
-    const boardSize = useMemo(() => getSnowflakeBoardSize(tileSize), [tileSize]);
+    const boardSize = useMemo(
+        () => getSnowflakeBoardSize(tileSize),
+        [tileSize],
+    );
 
     const playerState = gameState.players[player - 1];
     const playerTiles = groupTilesByColor(playerState.pickedTiles);
     const isOwner = playerNumber === player;
     const isMyTurn = playerNumber === gameState.currentPlayer;
 
-    const onSnowflakeSelect = (tile: TileColor, points: number) => {
+    const getFormattedTiles = (tiles: string[]): ColorKey[] =>
+        tiles.map((tile) => tile.split("_")[0] as ColorKey);
+
+    const onSnowflakeTileSelect = (tile: TileColor, points: number) => {
         if (
             !isOwner ||
             !isMyTurn ||
@@ -61,9 +71,7 @@ export function PlayerDesk() {
         ) {
             return;
         }
-        const usedTiles = selectedTiles.map(
-            (tile) => tile.split("_")[0] as TileColor,
-        );
+        const usedTiles = getFormattedTiles(selectedTiles);
         sendGameAction({
             type: "cover",
             color: tile,
@@ -74,7 +82,7 @@ export function PlayerDesk() {
         return;
     };
 
-    const onTileSelect = (tile: TileColor, idx: number) => {
+    const onTileSelect = (tile: ColorKey, idx: number) => {
         if (!isOwner || !isMyTurn) {
             return;
         }
@@ -84,6 +92,21 @@ export function PlayerDesk() {
         } else {
             setSelectedTiles([...selectedTiles, formattedTile]);
         }
+    };
+
+    const saveTileForNextRound = (slotIdx: number) => {
+        if (
+            !isOwner ||
+            !selectedTiles.length ||
+            playerState.savedTilesForNextRound[slotIdx]
+        )
+            return;
+        sendGameAction({
+            type: "save-for-next-round",
+            slotIdx,
+            selectedTiles: getFormattedTiles(selectedTiles),
+        });
+        setSelectedTiles([]);
     };
 
     return (
@@ -115,7 +138,23 @@ export function PlayerDesk() {
                                 color={color}
                                 key={color}
                                 tileSize={tileSize}
-                                onTileSelect={onSnowflakeSelect}
+                                onTileSelect={onSnowflakeTileSelect}
+                            />
+                        ),
+                    )}
+                </div>
+                <div className="saved-tiles">
+                    {playerState.savedTilesForNextRound.map(
+                        (color: ColorKey | undefined, idx) => (
+                            <span
+                                className={`box-tile ms-0.5${isOwner && selectedTiles.length && !color ? " clickable" : ""} tile-${idx+1}`}
+                                style={{
+                                    backgroundColor: color
+                                        ? COLORS[color]
+                                        : "#faebd7",
+                                }}
+                                key={idx}
+                                onClick={() => saveTileForNextRound(idx)}
                             />
                         ),
                     )}

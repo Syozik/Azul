@@ -20,6 +20,7 @@ export function initState(): GameState {
             {
                 pickedTiles: [],
                 coveredTiles: initCoveredTiles(),
+                savedTilesForNextRound: Array(4).fill(undefined),
                 score: 5,
                 hasPassed: false,
                 canTakeBaseTiles: 0,
@@ -28,6 +29,7 @@ export function initState(): GameState {
             {
                 pickedTiles: [],
                 coveredTiles: initCoveredTiles(),
+                savedTilesForNextRound: Array(4).fill(undefined),
                 score: 5,
                 hasPassed: false,
                 canTakeBaseTiles: 0,
@@ -42,4 +44,13 @@ export function initState(): GameState {
         firstPlayer: 1,
         isFirstCenterPick: true,
     };
+}
+
+/**
+ * Returns the number of elements that satisfy a provided condition.
+ */
+export function numberOf<T>(arr: T[], fn: (el: T) => boolean): number {
+    let res = 0;
+    arr.forEach((el) => (res += Number(fn(el))));
+    return res;
 }

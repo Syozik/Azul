@@ -4,15 +4,13 @@ import {
     JOKERS,
     TILE_COLORS,
 } from "../shared/consts";
-import { initState } from "../shared/helpers";
+import { initState, numberOf } from "../shared/helpers";
 import { createTileBag, fillFactories, shuffle } from "./utils";
 import type {
-    BasePickAction,
     ColorKey,
-    CoverTileAction,
+    GameAction,
     GameBackendState,
-    PassAction,
-    PickTilesAction,
+    TileColor,
 } from "../shared/types";
 
 export class Game {
@@ -33,10 +31,8 @@ export class Game {
         this.state = newState;
     }
 
-    public applyAction(
-        playerNumber: 1 | 2,
-        data: PickTilesAction | CoverTileAction | PassAction | BasePickAction,
-    ) {
+    public applyAction(playerNumber: 1 | 2, data: GameAction) {
+        let shouldSwitchPlayer = true;
         try {
             switch (data.type) {
                 case "pick":
@@ -60,6 +56,14 @@ export class Game {
                 case "base-pick":
                     this.applyBasePickAction(playerNumber, data.selectedTiles);
                     break;
+                case "save-for-next-round":
+                    this.applySaveForNextRoundAction(
+                        playerNumber,
+                        data.slotIdx,
+                        data.selectedTiles,
+                    );
+                    shouldSwitchPlayer = false;
+                    break;
                 default:
                     throw new Error(
                         "Wrong game action type. Allowed actions: " +
@@ -73,13 +77,14 @@ export class Game {
                 return { error: error.message };
             }
         }
-        const nextPlayer = this.state.currentPlayer === 1 ? 2 : 1;
         if (
-            !this.state.players[this.state.currentPlayer - 1]
-                .canTakeBaseTiles &&
-            !this.state.players[nextPlayer - 1].hasPassed
+            shouldSwitchPlayer &&
+            !this.state.players[this.state.currentPlayer - 1].canTakeBaseTiles
         ) {
-            this.state.currentPlayer = nextPlayer;
+            const nextPlayer = this.state.currentPlayer === 1 ? 2 : 1;
+            if (!this.state.players[nextPlayer - 1].hasPassed) {
+                this.state.currentPlayer = nextPlayer;
+            }
         }
         return {
             success: "Action done!",
@@ -89,7 +94,7 @@ export class Game {
     private applyPickAction(
         playerNumber: 1 | 2,
         color: ColorKey,
-        factoryIndex: number | undefined,
+        factoryIndex?: number,
     ) {
         if (this.state.currentPlayer !== playerNumber) {
             throw new Error("Not your turn");
@@ -149,7 +154,7 @@ export class Game {
 
     private applyCoverAction(
         playerNumber: 1 | 2,
-        color: ColorKey,
+        color: TileColor,
         points: number,
         usedTiles: ColorKey[],
     ) {
@@ -220,7 +225,7 @@ export class Game {
         );
     }
 
-    private getBonus(playerNumber: 1 | 2, color: ColorKey, points: number) {
+    private getBonus(playerNumber: 1 | 2, color: TileColor, points: number) {
         const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
         let bonus = 1;
         let i = points - 2;
@@ -259,7 +264,7 @@ export class Game {
 
     private checkForCombinations(
         playerNumber: 1 | 2,
-        color: ColorKey,
+        color: TileColor,
         points: number,
     ) {
         const coveredTiles = this.state.players[playerNumber - 1].coveredTiles;
@@ -360,8 +365,17 @@ export class Game {
     }
 
     private applyPassAction(playerNumber: 1 | 2) {
-        this.state.players[playerNumber - 1].hasPassed = true;
-        this.pushNotification(playerNumber - 1, "success", `You passed!`, true);
+        const playerState = this.state.players[playerNumber - 1];
+        playerState.hasPassed = true;
+        const tilesLeft = playerState.pickedTiles.length;
+        playerState.score -= tilesLeft;
+        let message = "You passed!";
+        if (tilesLeft) {
+            message += ` You got minus ${tilesLeft} points for unused tiles.`;
+        }
+        this.pushNotification(playerNumber - 1, "success", message, true);
+        this.state._trash.push(...playerState.pickedTiles);
+        playerState.pickedTiles = [];
     }
 
     private applyBasePickAction(playerNumber: 1 | 2, selectedTiles: string[]) {
@@ -397,6 +411,37 @@ export class Game {
             true,
         );
         playerState.canTakeBaseTiles = 0;
+    }
+
+    private applySaveForNextRoundAction(
+        playerNumber: 1 | 2,
+        idx: number,
+        selectedTiles: ColorKey[],
+    ) {
+        const playerState = this.state.players[playerNumber - 1];
+        const savedTiles = playerState.savedTilesForNextRound;
+        if (savedTiles[idx]) {
+            throw new Error("You've already used that slot.");
+        }
+        const nbAvailable = numberOf(savedTiles, (tile) => !tile);
+        if (selectedTiles.length > nbAvailable) {
+            throw new Error(`You can't save ${selectedTiles.length} tiles.
+                You have only ${nbAvailable} available slots left.`);
+        }
+        let saved = 0;
+        while (saved < selectedTiles.length && idx < 8) {
+            if (!savedTiles[idx % 4]) {
+                const tile = selectedTiles[saved];
+                const idxOfTile = playerState.pickedTiles.indexOf(tile);
+                if (idxOfTile === -1) {
+                    throw new Error(`You don't have ${tile} tile!`);
+                }
+                playerState.pickedTiles.splice(idxOfTile, 1);
+                savedTiles[idx % 4] = tile;
+                saved += 1;
+            }
+            idx += 1;
+        }
     }
 
     public updatePhase() {

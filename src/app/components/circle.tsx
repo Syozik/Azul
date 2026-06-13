@@ -1,12 +1,12 @@
 "use client";
 import { COLORS, TILE_HALF_LONG } from "../../shared/consts";
-import type { TileColor, GameAction } from "../../shared/types";
+import type { GameAction, ColorKey } from "../../shared/types";
 import "@/app/style/circle.css";
 import { Tile } from "./tile";
 import { useRef, useEffect, useState } from "react";
 
 interface CircleProps {
-    colors: TileColor[];
+    colors: ColorKey[];
     factoryIndex: number;
     position: { top: string; left: string };
     isMyTurn: boolean;
@@ -42,7 +42,7 @@ export function CircleWithTiles({
         return () => observer.disconnect();
     }, []);
 
-    const onClickHandler = (color: TileColor) => {
+    const onClickHandler = (color: ColorKey) => {
         if (isMyTurn && !isEmpty) {
             sendGameAction({
                 type: "pick",
