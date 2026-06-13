@@ -4,6 +4,9 @@ This is an online version of the game [Azul](<https://en.wikipedia.org/wiki/Azul
 Its 'Summer Pavilion' extension to be presized. My girlfriend and I found it such an interesting game,
 I couldn't help but make an online version of it.
 
+You can check a demo of it on https://oneirocritically-empirical-tianna.ngrok-free.dev/, you'll need a friend to play it, right now there's no "Play against a computer" option.
+
+
 #### Rules
 
 Azul is a tile-drafting and pattern-building game for 2-4 players, played over 6 rounds.
@@ -118,6 +121,10 @@ The game ends after 6 rounds. The player with the most points wins.
 
 ### How to get it running
 
+You can check it out on https://oneirocritically-empirical-tianna.ngrok-free.dev/ 
+
+Or you can run it locally:
+
 ##### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or later)
@@ -157,34 +164,11 @@ pnpm build
 pnpm start # to run in production
 ```
 
-This starts the Next.js dev server with the Socket.io backend on `http://localhost:3000`, if not specified differently.
+This starts the Next.js server with the Socket.io backend on `http://localhost:3000`, if not specified differently. To play it with friends, you can use a reversed proxy, you can check out ngrok or cloudflare tunnels, there are a lot of good options.
 
 ##### Running with Docker
 
-##### Prerequisites
-
-- [Docker](https://www.docker.com/)
-- [Docker buildx plugin](https://docs.docker.com/reference/cli/docker/buildx/) Requires Docker 19.03+
-
-0. Create a `.env` file in the project root with the database URL:
-
-```
-DATABASE_URL="file:./dev.db"
-```
-
-1. Build the image:
-
-```
-docker build buildx -t azul .
-```
-
-2. Run the container:
-
-```
-docker run -p 3000:3000 azul
-```
-
-The app will be available at `http://localhost:3000`.
+I think if you have docker installed, you know how to get it running =) 
 
 ---
 
@@ -193,14 +177,11 @@ The app will be available at `http://localhost:3000`.
 - This was (and still is, khm-khm) meant to be played by just two of us, so I didn't overcomplicate things.
   But the game, its front and back -ends are easily extensible to make it possible to be played by more than 2 people.
   Some changes to the websocket surely would have to be made, but the architecture is pretty simple.
-- I definitely gotta improve responsiveness of the design, some hard choises were made, back when I was calculating
-  all those sines and cosines for a proper star layout, I ended up with hardcoded tile dimensions to speed things up.
   Although some steps in that directions were made, and it even works on mobile, it's really far from being good.
 - If by some chance a fan of the original game stumbles upon this, they should know that any ideas, suggestions, issues, prs
   are more than welcome.
   Future ideas that I plan to work on whenever I will have time:
 - Add 4 tile spaces that we can leave for the next round, now you can pass and all tiles are kept.
-- Deploy it somewhere :). Now I just host it locally.
 - Responsiveness, responsiveness, responsiveness.
 - Add visual rules to the app.
 - Collect enough data to figure out the strategy to beat my gf's butt 95% of the time.
