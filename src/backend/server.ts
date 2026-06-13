@@ -70,20 +70,18 @@ async function main() {
         connectedPlayers.add(socket.id);
 
         socket.on("start-game", ({ newGame = true }) => {
-            const info = playerInfo.get(socket.id) as PlayerSessionInfo;
+            const info = playerInfo.get(socket.id)!;
             const roomId = info.roomId;
 
-            const roomState = roomStates.get(roomId) as RoomState;
+            const roomState = roomStates.get(roomId)!;
             const opponentSocketId = roomState.socketIds.find(
                 (id) => id !== socket.id,
-            ) as string;
+            )!;
             const opponentSocket = io.sockets.sockets.get(opponentSocketId);
             if (!opponentSocket) {
                 return;
             }
-            const opponentInfo = playerInfo.get(
-                opponentSocketId,
-            ) as PlayerSessionInfo;
+            const opponentInfo = playerInfo.get(opponentSocketId)!;
 
             if (!newGame && roomState.lastGame) {
                 roomState.game.setState(roomState.lastGame.gameState);
@@ -120,8 +118,8 @@ async function main() {
                     return;
                 }
 
-                const playerId = socketToPlayerMap.get(socket.id);
-                const waitingPlayerId = socketToPlayerMap.get(waitingSocket.id);
+                const playerId = socketToPlayerMap.get(socket.id)!;
+                const waitingPlayerId = socketToPlayerMap.get(waitingSocket.id)!;
                 if (!playerId || !waitingPlayerId) return false;
 
                 // Both join the room
@@ -132,13 +130,13 @@ async function main() {
                 playerInfo.set(socket.id, {
                     roomId,
                     number: 1,
-                    id: playerId as string,
+                    id: playerId,
                 });
 
                 playerInfo.set(waitingSocket.id, {
                     roomId,
                     number: 2,
-                    id: waitingPlayerId as string,
+                    id: waitingPlayerId,
                 });
 
                 const game = new Game();
@@ -168,7 +166,7 @@ async function main() {
                         playerNumber: 2,
                         roomId,
                     });
-                    const roomState = roomStates.get(roomId) as RoomState;
+                    const roomState = roomStates.get(roomId)!;
                     roomState.gameStarted = true;
                     console.log(
                         new Date(),
@@ -225,7 +223,7 @@ async function main() {
 
             const info = playerInfo.get(socket.id);
             if (info) {
-                const roomState = roomStates.get(info.roomId) as RoomState;
+                const roomState = roomStates.get(info.roomId)!;
                 if (roomState.gameStarted) {
                     const playerIds: string[] = new Array<string>(
                         roomState.socketIds.length,

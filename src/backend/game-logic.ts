@@ -112,8 +112,8 @@ export class Game {
                 return;
             }
             this.state.phase = 1;
-            this.state.players.forEach((player) => (player.hasPassed = false));
             this.state.players.forEach((player) => {
+                player.hasPassed = false;
                 player.pickedTiles.push(
                     ...player.savedTilesForNextRound.filter((tile) => !!tile),
                 );
@@ -192,7 +192,7 @@ export class Game {
             const idx = player === 1 ? 0 : 1;
             this.state.players[idx].notifications.push({
                 type: "info",
-                message: message.replace("You", "Opponent"),
+                message: message.replaceAll("You", "Opponent"),
                 id: this.getNewNotificationId(idx),
             });
         }
