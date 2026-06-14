@@ -145,7 +145,7 @@ export function PlayerDesk() {
                 </div>
                 <div className="saved-tiles">
                     {playerState.savedTilesForNextRound.map(
-                        (color: ColorKey | undefined, idx) => (
+                        (color: ColorKey | null, idx) => (
                             <span
                                 className={`box-tile ms-0.5${isOwner && selectedTiles.length && !color ? " clickable" : ""} tile-${idx+1}`}
                                 style={{

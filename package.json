@@ -37,5 +37,10 @@
         "plugins": {
             "@tailwindcss/postcss": {}
         }
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "better-sqlite3"
+        ]
     }
 }

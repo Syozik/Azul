@@ -458,6 +458,12 @@ export class Game {
             }
             this.state.phase = 1;
             this.state.players.forEach((player) => (player.hasPassed = false));
+            this.state.players.forEach((player) => {
+                player.pickedTiles.push(
+                    ...player.savedTilesForNextRound.filter((tile) => !!tile),
+                );
+                player.savedTilesForNextRound = Array(4).fill(null);
+            });
             if (this.state._bag.length <= 20) {
                 this.state._bag.push(...this.state._trash);
                 this.state._trash = [];

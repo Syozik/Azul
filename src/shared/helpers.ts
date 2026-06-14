@@ -20,7 +20,7 @@ export function initState(): GameState {
             {
                 pickedTiles: [],
                 coveredTiles: initCoveredTiles(),
-                savedTilesForNextRound: Array(4).fill(undefined),
+                savedTilesForNextRound: Array(4).fill(null),
                 score: 5,
                 hasPassed: false,
                 canTakeBaseTiles: 0,
@@ -29,7 +29,7 @@ export function initState(): GameState {
             {
                 pickedTiles: [],
                 coveredTiles: initCoveredTiles(),
-                savedTilesForNextRound: Array(4).fill(undefined),
+                savedTilesForNextRound: Array(4).fill(null),
                 score: 5,
                 hasPassed: false,
                 canTakeBaseTiles: 0,

@@ -49,7 +49,7 @@ export interface RoomState {
 export interface PlayerState {
     pickedTiles: ColorKey[]; // tiles the player has picked
     coveredTiles: Record<TileColor, (boolean | string)[]>;
-    savedTilesForNextRound: (ColorKey | undefined)[];
+    savedTilesForNextRound: (ColorKey | null)[];
     score: number;
     hasPassed: boolean;
     canTakeBaseTiles: number;
