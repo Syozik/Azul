@@ -57,8 +57,8 @@ async function main() {
                     socket.emit("game-start", {
                         playerNumber: info.number,
                         roomId: info.roomId,
+                        gameState: roomState.game.clientState,
                     });
-                    socket.emit("game-state", roomState.game.clientState);
                     console.log(
                         new Date(),
                         `[] Recovered session for ${socket.id} in ${info.roomId}`,
@@ -92,17 +92,16 @@ async function main() {
             }
             roomState.gameStarted = true;
 
-            const clientState = roomState.game.clientState;
             socket.emit("game-start", {
+                gameState: roomState.game.clientState,
                 playerNumber: info.number,
                 roomId,
             });
             opponentSocket.emit("game-start", {
+                gameState: roomState.game.clientState,
                 playerNumber: opponentInfo.number,
                 roomId,
             });
-            // Send initial game state to both
-            io.to(roomId).emit("game-state", clientState);
 
             console.log(
                 new Date(),
@@ -160,15 +159,15 @@ async function main() {
                     io.to(roomId).emit("room-found");
                 } else {
                     socket.emit("game-start", {
+                        gameState: game.clientState,
                         playerNumber: 1,
                         roomId,
                     });
                     waitingSocket.emit("game-start", {
+                        gameState: game.clientState,
                         playerNumber: 2,
                         roomId,
                     });
-                    // Send initial game state to both
-                    io.to(roomId).emit("game-state", game.clientState);
                     const roomState = roomStates.get(roomId) as RoomState;
                     roomState.gameStarted = true;
                     console.log(

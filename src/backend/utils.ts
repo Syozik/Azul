@@ -53,12 +53,16 @@ export async function saveGame(
     gameId?: number,
 ): Promise<boolean> {
     try {
+        const serializedGameState = JSON.parse(
+            JSON.stringify(gameState),
+        ) as Prisma.InputJsonObject;
+
         if (gameId) {
             await prisma.game.update({
                 where: { id: gameId },
                 data: {
                     finished,
-                    gameState: gameState as unknown as Prisma.InputJsonObject,
+                    gameState: serializedGameState,
                     time: new Date(),
                 },
             });
@@ -75,7 +79,7 @@ export async function saveGame(
         await prisma.game.create({
             data: {
                 finished,
-                gameState: gameState as unknown as Prisma.InputJsonObject,
+                gameState: serializedGameState,
                 players: {
                     connect: playerIds.map((id) => ({ id })),
                 },

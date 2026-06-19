@@ -1,4 +1,5 @@
-import { Game } from "../backend/game-logic";
+import type { Player } from "@/backend/player";
+import type { Game } from "../backend/game-logic";
 
 export type ColorKey =
     | "PURPLE"
@@ -11,13 +12,13 @@ export type ColorKey =
 export interface GameState {
     factories: ColorKey[][];
     centerPool: ColorKey[];
-    players: [PlayerState, PlayerState];
-    currentPlayer: 1 | 2;
+    players: Player[];
+    currentPlayer: number;
     round: number;
     phase: 1 | 2;
     baseTiles: [ColorKey[], ColorKey[]];
     isGameOver: boolean;
-    firstPlayer: 1 | 2;
+    firstPlayer: number;
     isFirstCenterPick: boolean;
 }
 

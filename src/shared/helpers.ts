@@ -16,26 +16,7 @@ export function initState(): GameState {
     return {
         factories: [[]],
         centerPool: [],
-        players: [
-            {
-                pickedTiles: [],
-                coveredTiles: initCoveredTiles(),
-                savedTilesForNextRound: Array(4).fill(null),
-                score: 5,
-                hasPassed: false,
-                canTakeBaseTiles: 0,
-                notifications: [],
-            },
-            {
-                pickedTiles: [],
-                coveredTiles: initCoveredTiles(),
-                savedTilesForNextRound: Array(4).fill(null),
-                score: 5,
-                hasPassed: false,
-                canTakeBaseTiles: 0,
-                notifications: [],
-            },
-        ],
+        players: [],
         currentPlayer: 1,
         round: 1,
         phase: 1,

@@ -55,7 +55,12 @@ type State = {
 type Action =
     | { type: "SEARCHING" }
     | { type: "WAITING" }
-    | { type: "GAME_START"; playerNumber: 1 | 2; roomId: string }
+    | {
+          type: "GAME_START";
+          playerNumber: 1 | 2;
+          roomId: string;
+          gameState: GameState;
+      }
     | { type: "GAME_STATE"; gameState: GameState }
     | { type: "OPPONENT_DISCONNECTED" }
     | { type: "DISCONNECT" };
@@ -82,6 +87,7 @@ function reducer(state: State, action: Action): State {
                 connectionStatus: "playing",
                 playerNumber: action.playerNumber,
                 roomId: action.roomId,
+                gameState: action.gameState,
             };
         case "GAME_STATE":
             return { ...state, gameState: action.gameState };
@@ -132,11 +138,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         });
         socket.on(
             "game-start",
-            (data: { playerNumber: 1 | 2; roomId: string }) => {
+            (data: { playerNumber: 1 | 2; roomId: string, gameState: GameState }) => {
                 dispatch({
                     type: "GAME_START",
                     playerNumber: data.playerNumber,
                     roomId: data.roomId,
+                    gameState: data.gameState,
                 });
             },
         );
