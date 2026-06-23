@@ -36,9 +36,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/src/backend ./src/backend
 COPY --from=builder --chown=nextjs:nodejs /app/src/shared ./src/shared
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 EXPOSE 3000
 
-CMD ["tsx", "src/backend/server.ts"]
+CMD ["tsx", "--tsconfig", "tsconfig.json", "src/backend/server.ts"]

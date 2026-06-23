@@ -20,15 +20,10 @@ export function Lobby() {
 
                 <div className="lobby-divider" />
 
-                {connectionStatus === "idle" && (
+                {connectionStatus === "loaded" && (
                     <div className="lobby-action">
-                        <p className="lobby-instruction">
-                            Press Play to find an opponent
-                        </p>
-                        <button
-                            className="lobby-play-btn"
-                            onClick={() => findGame()}
-                        >
+                        <p className="lobby-instruction">Press Play to find an opponent</p>
+                        <button className="lobby-play-btn" onClick={() => findGame()}>
                             <span className="btn-text">Play</span>
                             <span className="btn-icon">→</span>
                         </button>
@@ -42,23 +37,13 @@ export function Lobby() {
                         >
                             Opponent found!
                         </p>
-                        <p className="lobby-instruction">
-                            Would you like to start a new game
-                        </p>
-                        <button
-                            className="lobby-play-btn"
-                            onClick={() => startGame()}
-                        >
+                        <p className="lobby-instruction">Would you like to start a new game</p>
+                        <button className="lobby-play-btn" onClick={() => startGame()}>
                             <span className="btn-text">New game</span>
                             <span className="btn-icon">→</span>
                         </button>
-                        <p className="lobby-instruction">
-                            ...or continue the previous one?
-                        </p>
-                        <button
-                            className="lobby-play-btn"
-                            onClick={() => startGame(false)}
-                        >
+                        <p className="lobby-instruction">...or continue the previous one?</p>
+                        <button className="lobby-play-btn" onClick={() => startGame(false)}>
                             <span className="btn-text">Last game</span>
                             <span className="btn-icon">→</span>
                         </button>
@@ -75,11 +60,16 @@ export function Lobby() {
                     </div>
                 )}
 
+                {connectionStatus === "idle" && (
+                    <div className="lobby-action">
+                        <div className="lobby-spinner" />
+                        <p className="lobby-status">Loading...</p>
+                    </div>
+                )}
+
                 {connectionStatus === "disconnected" && (
                     <div className="lobby-action">
-                        <p className="lobby-status lobby-status-error">
-                            Opponent disconnected
-                        </p>
+                        <p className="lobby-status lobby-status-error">Opponent disconnected</p>
                         <button
                             className="lobby-play-btn"
                             onClick={() => findGame()}
@@ -97,26 +87,20 @@ export function Lobby() {
                         <div className="lobby-player-slot">
                             <div
                                 className={`player-avatar ${
-                                    true || connectionStatus !== "idle"
-                                        ? "player-connected"
-                                        : ""
+                                    true || connectionStatus !== "idle" ? "player-connected" : ""
                                 }`}
                             >
                                 P1
                             </div>
                             <span className="player-label">
-                                {true || connectionStatus !== "idle"
-                                    ? "Connected"
-                                    : "Waiting..."}
+                                {true || connectionStatus !== "idle" ? "Connected" : "Waiting..."}
                             </span>
                         </div>
                         <span className="lobby-vs">vs</span>
                         <div className="lobby-player-slot">
                             <div
                                 className={`player-avatar ${
-                                    true || connectionStatus === "playing"
-                                        ? "player-connected"
-                                        : ""
+                                    true || connectionStatus === "playing" ? "player-connected" : ""
                                 }`}
                             >
                                 P2

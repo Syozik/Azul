@@ -14,12 +14,7 @@ import type { GameState, GameAction } from "../shared/types";
 import { initState } from "../shared/helpers";
 import { getPlayerId } from "./utils";
 
-type ConnectionStatus =
-    | "idle"
-    | "searching"
-    | "waiting"
-    | "playing"
-    | "disconnected";
+type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" | "disconnected";
 
 interface SocketContextType {
     connectionStatus: ConnectionStatus;
@@ -53,6 +48,7 @@ type State = {
 };
 
 type Action =
+    | { type: "LOADED" }
     | { type: "SEARCHING" }
     | { type: "WAITING" }
     | {
@@ -74,6 +70,8 @@ const initialState: State = {
 
 function reducer(state: State, action: Action): State {
     switch (action.type) {
+        case "LOADED":
+            return { ...state, connectionStatus: "loaded" };
         case "SEARCHING":
             return { ...state, connectionStatus: "searching" };
         case "WAITING":
@@ -122,23 +120,21 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socketRef.current = socket;
 
         socket.on("connect", () => {
-            console.log(
-                "Connected to server:",
-                socket.id,
-                "recovered:",
-                socket.recovered,
-            );
+            console.log("Connected to server:", socket.id, "recovered:", socket.recovered);
         });
         socket.on("get-player-id", (callback) => {
             const playerId = getPlayerId();
             callback(playerId);
+        });
+        socket.on("game-loaded", () => {
+            dispatch({ type: "LOADED" });
         });
         socket.on("room-found", () => {
             dispatch({ type: "WAITING" });
         });
         socket.on(
             "game-start",
-            (data: { playerNumber: 1 | 2; roomId: string, gameState: GameState }) => {
+            (data: { playerNumber: 1 | 2; roomId: string; gameState: GameState }) => {
                 dispatch({
                     type: "GAME_START",
                     playerNumber: data.playerNumber,
@@ -168,10 +164,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         document.addEventListener("visibilitychange", handleVisibilityChange);
 
         return () => {
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange,
-            );
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
     }, []);
 

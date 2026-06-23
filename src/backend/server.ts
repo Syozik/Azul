@@ -16,12 +16,11 @@ const handle = app.getRequestHandler();
 let waitingSocketId: string | null = null;
 
 const socketToPlayerMap: Map<string, string> = new Map();
+const playerToSocketMap: Map<string, string> = new Map();
 
 const playerInfo: Map<string, PlayerSessionInfo> = new Map();
 
 const roomStates: Map<string, RoomState> = new Map();
-
-const connectedPlayers: Set<string> = new Set();
 
 async function main() {
     await app.prepare();
@@ -44,7 +43,33 @@ async function main() {
         console.log(new Date(), `[Socket] Connected: ${socket.id}`);
 
         socket.emit("get-player-id", (playerId: string) => {
+            const prevSocket = playerToSocketMap.get(playerId) || "";
+            const info = playerInfo.get(prevSocket);
             socketToPlayerMap.set(socket.id, playerId);
+            playerToSocketMap.set(playerId, socket.id);
+            if (prevSocket && info) {
+                clearTimeout(info.deleteTimer);
+                const roomState = roomStates.get(info.roomId)!;
+                socket.join(info.roomId);
+                socket.emit("game-start", {
+                    playerNumber: info.number,
+                    roomId: info.roomId,
+                    gameState: roomState.game.clientState,
+                });
+                // Update info to have the new socket id.
+                playerInfo.set(socket.id, info);
+                playerInfo.delete(prevSocket);
+                socketToPlayerMap.delete(prevSocket);
+                // Replace socket id with the new one.
+                const socketIdx = roomState.socketIds.indexOf(prevSocket);
+                roomState.socketIds[socketIdx] = socket.id;
+                console.log(
+                    new Date(),
+                    `: Recovered session for ${prevSocket} (new socket: ${socket.id}) in ${info.roomId}`,
+                );
+                return;
+            }
+            socket.emit("game-loaded");
         });
 
         let lastGame: LastGame | false = false;
@@ -61,22 +86,18 @@ async function main() {
                     });
                     console.log(
                         new Date(),
-                        `[] Recovered session for ${socket.id} in ${info.roomId}`,
+                        `: Recovered session for ${socket.id} in ${info.roomId}`,
                     );
                 }
             }
         }
-
-        connectedPlayers.add(socket.id);
 
         socket.on("start-game", ({ newGame = true }) => {
             const info = playerInfo.get(socket.id)!;
             const roomId = info.roomId;
 
             const roomState = roomStates.get(roomId)!;
-            const opponentSocketId = roomState.socketIds.find(
-                (id) => id !== socket.id,
-            )!;
+            const opponentSocketId = roomState.socketIds.find((id) => id !== socket.id)!;
             const opponentSocket = io.sockets.sockets.get(opponentSocketId);
             if (!opponentSocket) {
                 return;
@@ -181,10 +202,7 @@ async function main() {
                 //         message: "Somebody just connected",
                 //     });
                 // }
-                console.log(
-                    new Date(),
-                    `[Socket] ${socket.id} is waiting for an opponent`,
-                );
+                console.log(new Date(), `[Socket] ${socket.id} is waiting for an opponent`);
             }
         });
 
@@ -200,64 +218,32 @@ async function main() {
             if (result.error) {
                 socket.emit("game-error", { error: result.error });
                 socket.emit("game-state", game.clientState);
-                console.log(
-                    new Date(),
-                    `[Game] Error for P${info.number}: ${result.error}`,
-                );
+                console.log(new Date(), `[Game] Error for P${info.number}: ${result.error}`);
                 return;
             }
 
             game.updatePhase();
 
             io.to(info.roomId).emit("game-state", game.clientState);
+            if (game.state.isGameOver) {
+                endGame(info.roomId);
+            }
         });
 
         socket.on("disconnect", async (reason) => {
             console.log(reason);
             console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
-            connectedPlayers.delete(socket.id);
             if (waitingSocketId === socket.id) {
                 waitingSocketId = null;
             }
 
             const info = playerInfo.get(socket.id);
             if (info) {
-                const roomState = roomStates.get(info.roomId)!;
-                if (roomState.gameStarted) {
-                    const playerIds: string[] = new Array<string>(
-                        roomState.socketIds.length,
-                    );
-                    for (const socketId of roomState.socketIds) {
-                        const info = playerInfo.get(socketId);
-                        if (!info) {
-                            continue;
-                        }
-                        playerIds[info.number - 1] = info.id;
-                    }
-
-                    const isGameSaved = await saveGame(
-                        playerIds,
-                        roomState.game.state,
-                        roomState.game.state.isGameOver,
-                        roomState.lastGame
-                            ? roomState.lastGame.gameId
-                            : undefined,
-                    );
-                    if (isGameSaved) {
-                        console.log("The game has been succesfully saved.");
-                    } else {
-                        console.log("The game hasn't been saved.");
-                    }
-                }
                 info.deleteTimer = setTimeout(
                     () => {
                         socket.to(info.roomId).emit("opponent-disconnected");
-                        // Clean up the other player's info and the room's game state
-                        for (const socketId of roomState.socketIds) {
-                            playerInfo.delete(socketId);
-                        }
-                        roomStates.delete(info.roomId);
+                        endGame(info.roomId);
                     },
                     60 * 10 ** 3,
                 );
@@ -268,6 +254,39 @@ async function main() {
     httpServer.listen(port, hostname, () => {
         console.log(new Date(), `> Ready on http://${hostname}:${port}`);
     });
+}
+
+async function endGame(roomId: string) {
+    const roomState = roomStates.get(roomId);
+    if (!roomState) {
+        return;
+    }
+
+    if (roomState.gameStarted) {
+        const playerIds: string[] = new Array<string>(roomState.socketIds.length);
+        for (const socketId of roomState.socketIds) {
+            const info = playerInfo.get(socketId)!;
+            playerIds[info.number - 1] = info.id;
+        }
+        const isGameSaved = await saveGame(
+            playerIds,
+            roomState.game.state,
+            roomState.game.state.isGameOver,
+            roomState.lastGame ? roomState.lastGame.gameId : undefined,
+        );
+        if (isGameSaved) {
+            console.log("The game has been succesfully saved.");
+        } else {
+            console.log("The game hasn't been saved.");
+        }
+    }
+    // Clean up the other player's info and the room's game state
+    for (const socketId of roomState.socketIds) {
+        playerInfo.delete(socketId);
+        playerToSocketMap.delete(socketToPlayerMap.get(socketId)!);
+        socketToPlayerMap.delete(socketId);
+    }
+    roomStates.delete(roomId);
 }
 
 main().catch((err) => {
