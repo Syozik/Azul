@@ -1,7 +1,7 @@
 ## Azul online board game
 
 This is an online version of the game [Azul](<https://en.wikipedia.org/wiki/Azul_(board_game)>).
-Its 'Summer Pavilion' extension to be presized. My girlfriend and I found it such an interesting game,
+Its 'Summer Pavilion' extension to be precize. My girlfriend and I found it such an interesting game,
 I couldn't help but make an online version of it.
 
 You can check a demo of it on https://oneirocritically-empirical-tianna.ngrok-free.dev/, you'll need a friend to play it, right now there's no "Play against a computer" option.
