@@ -1,0 +1,38 @@
+{
+    "name": "Azul",
+    "short_name": "Azul",
+    "description": "Azul online game",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "315x315",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot_2.png",
+            "sizes": "1888x979",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshot_1.png",
+            "sizes": "1888x979",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/screenshot_1_mobile.png",
+            "sizes": "1280x2856",
+            "type": "image/png"
+        },
+        {
+            "src": "/screenshot_2_mobile.png",
+            "sizes": "1280x2856",
+            "type": "image/png"
+        }
+    ]
+}
