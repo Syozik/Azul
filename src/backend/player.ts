@@ -112,7 +112,7 @@ export class Player {
             ) {
                 throw new Error("You can't use these tiles");
             }
-            const centerColor = usedTiles.find((tile) => tile !== joker);
+            const centerColor = usedTiles.find((tile) => tile !== joker) ?? joker;
             if (
                 !centerColor ||
                 this.coveredTiles[color].includes(centerColor)
