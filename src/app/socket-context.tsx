@@ -12,26 +12,30 @@ import {
 import { io, Socket } from "socket.io-client";
 import type { GameState, GameAction } from "../shared/types";
 import { initState } from "../shared/helpers";
-import { getPlayerId } from "./utils";
+import { getPlayerId, getPlayerName, setPlayerName } from "./utils";
 
 type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" | "disconnected";
 
 interface SocketContextType {
     connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2;
+    playerName?: string | null;
     roomId: string | null;
     gameState: GameState;
-    findGame: () => void;
+    findGame: () => boolean;
     startGame: (newGame?: boolean) => void;
     sendGameAction: (action: GameAction) => void;
+    changePlayerName: (newName: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType>({
     connectionStatus: "idle",
     playerNumber: 1,
     roomId: null,
+    playerName: undefined,
+    changePlayerName: () => {},
     gameState: initState(),
-    findGame: () => {},
+    findGame: () => false,
     startGame: () => {},
     sendGameAction: () => {},
 });
@@ -44,6 +48,7 @@ type State = {
     connectionStatus: ConnectionStatus;
     playerNumber: 1 | 2;
     roomId: string | null;
+    playerName?: string | null;
     gameState: GameState;
 };
 
@@ -59,6 +64,7 @@ type Action =
       }
     | { type: "GAME_STATE"; gameState: GameState }
     | { type: "OPPONENT_DISCONNECTED" }
+    | { type: "SET_NAME"; name: string | null }
     | { type: "DISCONNECT" };
 
 const initialState: State = {
@@ -99,6 +105,8 @@ function reducer(state: State, action: Action): State {
             };
         case "DISCONNECT":
             return initialState;
+        case "SET_NAME":
+            return { ...state, playerName: action.name };
         default:
             return state;
     }
@@ -116,6 +124,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
+        dispatch({ type: "SET_NAME", name: getPlayerName() });
+
         if (!socket.connected) socket.connect();
         socketRef.current = socket;
 
@@ -169,10 +179,14 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const findGame = useCallback(() => {
-        if (socketRef.current) {
+        const id = getPlayerId();
+        const name = getPlayerName();
+        if (socketRef.current && name) {
             dispatch({ type: "SEARCHING" });
-            socketRef.current.emit("find-game");
+            socketRef.current.emit("find-game", { id, name });
+            return true;
         }
+        return false;
     }, []);
 
     const startGame = useCallback((newGame: boolean = true) => {
@@ -186,15 +200,24 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socketRef.current?.emit("game-action", action);
     }, []);
 
+    const changePlayerName = (name: string) => {
+        if (name) {
+            dispatch({ type: "SET_NAME", name });
+            setPlayerName(name);
+        }
+    };
+
     return (
         <SocketContext.Provider
             value={{
                 connectionStatus: state.connectionStatus,
                 playerNumber: state.playerNumber,
+                playerName: state.playerName,
                 roomId: state.roomId,
                 gameState: state.gameState,
                 findGame,
                 startGame,
+                changePlayerName,
                 sendGameAction,
             }}
         >

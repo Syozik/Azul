@@ -62,13 +62,13 @@ export function PhaseOne() {
     window.addEventListener("keydown", handleKeyDown);
 
     const isMyTurn = gameState.currentPlayer === playerNumber;
-    const myIndex = playerNumber ? playerNumber - 1 : 0;
+    const myIndex = playerNumber - 1;
     const opponentIndex = playerNumber === 1 ? 1 : 0;
 
     return (
         <div className="phase-one">
             <div className="tiles-box">
-                <p className="tiles-box-title">Your Tiles </p>
+                <p className="tiles-box-title">{gameState.players[myIndex].name}</p>
                 <div className="picked-tiles">
                     {gameState.players[myIndex].pickedTiles.map((color, i) => (
                         <span
@@ -152,19 +152,16 @@ export function PhaseOne() {
             </div>
 
             <div className="tiles-box">
-                <p className="tiles-box-title">Opponent</p>
+                <p className="tiles-box-title">{gameState.players[opponentIndex].name}</p>
                 <div className="picked-tiles">
-                    {gameState.players[opponentIndex].pickedTiles.map(
-                        (color, i) => (
-                            <span
-                                key={i}
-                                className="box-tile"
-                                style={{ backgroundColor: COLORS[color] }}
-                            />
-                        ),
-                    )}
-                    {gameState.players[opponentIndex].pickedTiles.length ===
-                        0 && (
+                    {gameState.players[opponentIndex].pickedTiles.map((color, i) => (
+                        <span
+                            key={i}
+                            className="box-tile"
+                            style={{ backgroundColor: COLORS[color] }}
+                        />
+                    ))}
+                    {gameState.players[opponentIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>
                     )}
                 </div>
@@ -176,10 +173,7 @@ export function PhaseOne() {
                             <PlayerDesk />
                         </PlayerDeskContext.Provider>
                     </div>
-                    <button
-                        className="close-popover"
-                        onClick={() => setShouldShowDesk(false)}
-                    >
+                    <button className="close-popover" onClick={() => setShouldShowDesk(false)}>
                         x
                     </button>
                 </div>

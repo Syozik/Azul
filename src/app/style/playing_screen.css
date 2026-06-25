@@ -8,19 +8,34 @@
 }
 
 .turn-badge {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
     font-size: 0.65rem;
     font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 5px 20px;
+    border-radius: 10px;
     letter-spacing: 0.5px;
     vertical-align: middle;
     margin-left: 6px;
     color: #fff;
 }
 
+.turn-badge .player-name {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .turn-badge {
+        .player-name {
+            display: block;
+        }
+
+        .turn-arrow {
+            display: none;
+        }
+    }
+}
 .turn-badge--yours {
     background: linear-gradient(135deg, #4a8c3f, #6ab55e);
 }

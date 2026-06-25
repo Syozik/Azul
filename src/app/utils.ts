@@ -1,6 +1,9 @@
 import { ColorKey } from "@/shared/types";
 import { useEffect, useState } from "react";
 
+const NAME_KEY = "PLAYER_NAME";
+const ID_KEY = "DEVICE_PLAYER_ID";
+
 export function groupTilesByColor(tiles: ColorKey[]) {
     const groupedTiles: ColorKey[][] = [];
     for (const tile of tiles) {
@@ -19,8 +22,6 @@ export function groupTilesByColor(tiles: ColorKey[]) {
     return groupedTiles;
 }
 
-const ID_KEY = "DEVICE_PLAYER_ID";
-
 export function getPlayerId(): string {
     let id = localStorage.getItem(ID_KEY);
     if (id) return id;
@@ -28,6 +29,18 @@ export function getPlayerId(): string {
     id = window.crypto.randomUUID();
     localStorage.setItem(ID_KEY, id);
     return id;
+}
+
+export function getPlayerName(): string | null {
+    const name = localStorage.getItem(NAME_KEY);
+    return name ?? null;
+}
+
+export function setPlayerName(name: string) {
+    if (!name) {
+        return false;
+    }
+    localStorage.setItem(NAME_KEY, name);
 }
 
 export function useIsMobile() {

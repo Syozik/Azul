@@ -1,13 +1,7 @@
 import type { Player } from "@/backend/player";
 import type { Game } from "../backend/game-logic";
 
-export type ColorKey =
-    | "PURPLE"
-    | "GREEN"
-    | "ORANGE"
-    | "YELLOW"
-    | "BLUE"
-    | "RED";
+export type ColorKey = "PURPLE" | "GREEN" | "ORANGE" | "YELLOW" | "BLUE" | "RED";
 
 export interface GameState {
     factories: ColorKey[][];
@@ -40,6 +34,11 @@ export interface PlayerSessionInfo {
     deleteTimer?: ReturnType<typeof setTimeout>;
 }
 
+export interface PlayerInfo {
+    id: string;
+    name?: string;
+}
+
 export interface RoomState {
     game: Game;
     socketIds: string[];
@@ -49,6 +48,8 @@ export interface RoomState {
 
 export interface PlayerState {
     pickedTiles: ColorKey[]; // tiles the player has picked
+    name: string;
+    playerNumber: number;
     coveredTiles: Record<TileColor, (boolean | string)[]>;
     savedTilesForNextRound: (ColorKey | null)[];
     score: number;

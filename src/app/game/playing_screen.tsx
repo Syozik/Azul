@@ -10,17 +10,14 @@ import { PhaseTwo } from "./phase_two";
 export function PlayingScreen() {
     const { gameState, playerNumber } = useSocket();
     const [visibleNotifs, setVisibleNotifs] = useState<NotificationType[]>([]);
+    const isYourTurn = gameState.currentPlayer === playerNumber;
     // const [showInfo, setShowInfo] = useState<boolean>(false);
     const seenIdsRef = useRef<Set<number>>(new Set());
-    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(
-        new Map(),
-    );
+    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
     const notifications = gameState.players[playerNumber - 1]?.notifications;
     useEffect(() => {
-        const newNotifs = notifications.filter(
-            (n) => !seenIdsRef.current.has(n.id),
-        );
+        const newNotifs = notifications.filter((n) => !seenIdsRef.current.has(n.id));
         if (newNotifs.length === 0) return;
 
         for (const n of newNotifs) {
@@ -64,43 +61,31 @@ export function PlayingScreen() {
             >
                 <div className="flex items-center gap-2.5">
                     <span
-                        className={`turn-badge ${gameState.currentPlayer === playerNumber ? "turn-badge--yours" : "turn-badge--theirs"}`}
+                        className={`turn-badge ${isYourTurn ? "turn-badge--yours" : "turn-badge--theirs"}`}
                     >
-                        {gameState.currentPlayer === playerNumber ? (
-                            <>
-                                <svg
-                                    className="turn-arrow turn-arrow--left"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
+                        <p className="player-name">{gameState.players[gameState.currentPlayer - 1].name + "'s Turn"}</p>
+                        <svg
+                            className={`turn-arrow turn-arrow--${isYourTurn ? "left" : "right"}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            {isYourTurn ? (
+                                <>
                                     <line x1="19" y1="12" x2="5" y2="12" />
                                     <polyline points="12 19 5 12 12 5" />
-                                </svg>
-                                Your Turn
-                            </>
-                        ) : (
-                            <>
-                                Opponent&apos;s Turn
-                                <svg
-                                    className="turn-arrow turn-arrow--right"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
+                                </>
+                            ) : (
+                                <>
                                     <line x1="5" y1="12" x2="19" y2="12" />
                                     <polyline points="12 5 19 12 12 19" />
-                                </svg>
-                            </>
-                        )}
+                                </>
+                            )}
+                        </svg>
                     </span>
                     {/*<div className="info">
                         <button

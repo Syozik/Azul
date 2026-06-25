@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { NamePrompt } from "../components/name_prompt";
 import { useSocket } from "../socket-context";
 import "@/app/style/lobby.css";
 
 export function Lobby() {
     const { connectionStatus, findGame, startGame } = useSocket();
+    const [shouldAskName, setShouldAskName] = useState<boolean>(false);
+
+    const onPlay = () => setShouldAskName(!findGame());
 
     return (
         <div className="lobby-container">
@@ -20,15 +25,18 @@ export function Lobby() {
 
                 <div className="lobby-divider" />
 
-                {connectionStatus === "loaded" && (
-                    <div className="lobby-action">
-                        <p className="lobby-instruction">Press Play to find an opponent</p>
-                        <button className="lobby-play-btn" onClick={() => findGame()}>
-                            <span className="btn-text">Play</span>
-                            <span className="btn-icon">→</span>
-                        </button>
-                    </div>
-                )}
+                {connectionStatus === "loaded" &&
+                    (shouldAskName ? (
+                        <NamePrompt callback={findGame} />
+                    ) : (
+                        <div className="lobby-action">
+                            <p className="lobby-instruction">Press Play to find an opponent</p>
+                            <button className="lobby-play-btn" onClick={() => onPlay()}>
+                                <span className="btn-text">Play</span>
+                                <span className="btn-icon">→</span>
+                            </button>
+                        </div>
+                    ))}
                 {connectionStatus === "waiting" && (
                     <div className="lobby-action">
                         <p

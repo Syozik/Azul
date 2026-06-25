@@ -12,6 +12,7 @@ import { Game } from "./game-logic";
 export class Player {
     private readonly game: Game;
     public playerNumber: number;
+    public name: string;
     pickedTiles: ColorKey[] = [];
     coveredTiles: Record<TileColor, (boolean | string)[]> = initCoveredTiles();
     savedTilesForNextRound: (ColorKey | null)[] = Array(4).fill(null);
@@ -20,8 +21,9 @@ export class Player {
     hasPassed: boolean = false;
     notifications: NotificationType[] = [];
 
-    public constructor(playerNumber: number, game: Game) {
+    public constructor(playerNumber: number, name: string, game: Game) {
         this.playerNumber = playerNumber;
+        this.name = name;
         this.game = game;
         Object.defineProperty(this, "game", { enumerable: false });
     }
@@ -366,9 +368,10 @@ export class Player {
         }
     }
 
-    public toJSON(): PlayerState & { playerNumber: number } {
+    public toJSON(): PlayerState {
         return {
             playerNumber: this.playerNumber,
+            name: this.name,
             pickedTiles: [...this.pickedTiles],
             coveredTiles: Object.fromEntries(
                 Object.entries(this.coveredTiles).map(([color, tiles]) => [

@@ -3,7 +3,7 @@ import next from "next";
 import { Server } from "socket.io";
 import { Game } from "./game-logic";
 import { fetchLastGame, saveGame, updatePlayerNumber } from "./utils";
-import type { LastGame, PlayerSessionInfo, RoomState } from "../shared/types";
+import type { PlayerInfo, PlayerSessionInfo, RoomState } from "../shared/types";
 import { randomUUID } from "crypto";
 
 const dev = process.env.NODE_ENV !== "production";
@@ -15,8 +15,8 @@ const handle = app.getRequestHandler();
 
 let waitingSocketId: string | null = null;
 
-const socketToPlayerMap: Map<string, string> = new Map();
-const playerToSocketMap: Map<string, string> = new Map();
+const socketToPlayerMap: Map<string, PlayerInfo> = new Map();
+const playerIdToSocketMap: Map<string, string> = new Map();
 
 const playerInfo: Map<string, PlayerSessionInfo> = new Map();
 
@@ -43,11 +43,11 @@ async function main() {
         console.log(new Date(), `[Socket] Connected: ${socket.id}`);
 
         socket.emit("get-player-id", (playerId: string) => {
-            const prevSocket = playerToSocketMap.get(playerId) || "";
+            const prevSocket = playerIdToSocketMap.get(playerId) || "";
             const info = playerInfo.get(prevSocket);
-            socketToPlayerMap.set(socket.id, playerId);
-            playerToSocketMap.set(playerId, socket.id);
+            playerIdToSocketMap.set(playerId, socket.id);
             if (prevSocket && info) {
+                socketToPlayerMap.set(socket.id, socketToPlayerMap.get(prevSocket)!);
                 clearTimeout(info.deleteTimer);
                 const roomState = roomStates.get(info.roomId)!;
                 socket.join(info.roomId);
@@ -69,10 +69,10 @@ async function main() {
                 );
                 return;
             }
+            socketToPlayerMap.set(socket.id, { id: playerId });
             socket.emit("game-loaded");
         });
 
-        let lastGame: LastGame | false = false;
         if (socket.recovered) {
             const info = playerInfo.get(socket.id);
             if (info) {
@@ -129,7 +129,8 @@ async function main() {
             );
         });
 
-        socket.on("find-game", async () => {
+        socket.on("find-game", async ({ id, name }: { id: string; name: string }) => {
+            socketToPlayerMap.set(socket.id, { id, name });
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
@@ -139,9 +140,9 @@ async function main() {
                     return;
                 }
 
-                const playerId = socketToPlayerMap.get(socket.id)!;
-                const waitingPlayerId = socketToPlayerMap.get(waitingSocket.id)!;
-                if (!playerId || !waitingPlayerId) return false;
+                const player = socketToPlayerMap.get(socket.id)!;
+                const waitingPlayer = socketToPlayerMap.get(waitingSocket.id)!;
+                if (!player.id || !waitingPlayer.id) return false;
 
                 // Both join the room
                 waitingSocket.join(roomId);
@@ -151,17 +152,17 @@ async function main() {
                 playerInfo.set(socket.id, {
                     roomId,
                     number: 1,
-                    id: playerId,
+                    id: player.id,
                 });
 
                 playerInfo.set(waitingSocket.id, {
                     roomId,
                     number: 2,
-                    id: waitingPlayerId,
+                    id: waitingPlayer.id,
                 });
 
-                const game = new Game();
-                lastGame = await fetchLastGame(playerId, waitingPlayerId);
+                const game = new Game([player.name!, waitingPlayer.name!]);
+                const lastGame = await fetchLastGame(player.id, waitingPlayer.id);
                 roomStates.set(roomId, {
                     game,
                     lastGame,
@@ -192,7 +193,7 @@ async function main() {
                     console.log(
                         new Date(),
                         `[Game] ${roomId} game started:
-                        ${playerId}: P${1}, ${waitingPlayerId}: P${2}`,
+                        ${player.id}: P${1}, ${waitingPlayer.id}: P${2}`,
                     );
                 }
             } else {
@@ -283,7 +284,8 @@ async function endGame(roomId: string) {
     // Clean up the other player's info and the room's game state
     for (const socketId of roomState.socketIds) {
         playerInfo.delete(socketId);
-        playerToSocketMap.delete(socketToPlayerMap.get(socketId)!);
+        const player = socketToPlayerMap.get(socketId)!;
+        playerIdToSocketMap.delete(player.id);
         socketToPlayerMap.delete(socketId);
     }
     roomStates.delete(roomId);
