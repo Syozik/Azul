@@ -207,7 +207,7 @@ async function main() {
             }
         });
 
-        socket.on("game-action", (data) => {
+        socket.on("game-action", async (data) => {
             const info = playerInfo.get(socket.id);
             if (!info) return;
 
@@ -227,12 +227,11 @@ async function main() {
 
             io.to(info.roomId).emit("game-state", game.clientState);
             if (game.state.isGameOver) {
-                endGame(info.roomId);
+                await endGame(info.roomId);
             }
         });
 
-        socket.on("disconnect", async (reason) => {
-            console.log(reason);
+        socket.on("disconnect", async () => {
             console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
             if (waitingSocketId === socket.id) {
@@ -243,8 +242,13 @@ async function main() {
             if (info) {
                 info.deleteTimer = setTimeout(
                     () => {
-                        socket.to(info.roomId).emit("opponent-disconnected");
-                        endGame(info.roomId);
+                        io.to(info.roomId).emit("opponent-disconnected");
+                        endGame(info.roomId).catch((err) => {
+                            console.error(
+                                `[Error] Failed to endGame for room ${info.roomId}:`,
+                                err,
+                            );
+                        });
                     },
                     60 * 10 ** 3,
                 );
@@ -266,8 +270,10 @@ async function endGame(roomId: string) {
     if (roomState.gameStarted) {
         const playerIds: string[] = new Array<string>(roomState.socketIds.length);
         for (const socketId of roomState.socketIds) {
-            const info = playerInfo.get(socketId)!;
-            playerIds[info.number - 1] = info.id;
+            const info = playerInfo.get(socketId);
+            if (info) {
+                playerIds[info.number - 1] = info.id;
+            }
         }
         const isGameSaved = await saveGame(
             playerIds,
