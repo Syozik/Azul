@@ -69,7 +69,7 @@ export class Game {
                 case "save-for-next-round":
                     const { slotIdx, selectedTiles } = data;
                     player.applySaveForNextRoundAction(slotIdx, selectedTiles);
-                    if (player.pickedTiles) {
+                    if (player.pickedTiles.length) {
                         shouldSwitchPlayer = false;
                     }
                     break;
