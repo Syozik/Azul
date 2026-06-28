@@ -184,7 +184,7 @@ export class Game {
             const idx = player === 1 ? 0 : 1;
             this.state.players[idx].notifications.push({
                 type: "info",
-                message: message.replaceAll("You", "Opponent"),
+                message: message.replaceAll("You", this.state.players[player].name),
                 id: this.getNewNotificationId(idx),
             });
         }

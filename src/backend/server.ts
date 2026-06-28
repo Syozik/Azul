@@ -49,6 +49,7 @@ async function main() {
             if (prevSocket && info) {
                 socketToPlayerMap.set(socket.id, socketToPlayerMap.get(prevSocket)!);
                 clearTimeout(info.deleteTimer);
+                delete info.deleteTimer;
                 const roomState = roomStates.get(info.roomId)!;
                 socket.join(info.roomId);
                 socket.emit("game-start", {
@@ -62,7 +63,9 @@ async function main() {
                 socketToPlayerMap.delete(prevSocket);
                 // Replace socket id with the new one.
                 const socketIdx = roomState.socketIds.indexOf(prevSocket);
+                console.log("old sockets: ", roomState.socketIds, "index: ", socketIdx);
                 roomState.socketIds[socketIdx] = socket.id;
+                console.log("new sockets: ", roomState.socketIds);
                 console.log(
                     new Date(),
                     `: Recovered session for ${prevSocket} (new socket: ${socket.id}) in ${info.roomId}`,
@@ -77,6 +80,7 @@ async function main() {
             const info = playerInfo.get(socket.id);
             if (info) {
                 clearTimeout(info.deleteTimer);
+                delete info.deleteTimer;
                 const roomState = roomStates.get(info.roomId);
                 if (roomState && !roomState.game.state.isGameOver) {
                     socket.emit("game-start", {
@@ -267,6 +271,10 @@ async function endGame(roomId: string) {
         return;
     }
 
+    console.log("DEBUGGING-----");
+    console.log(roomState.socketIds);
+    console.log(playerInfo);
+    console.log("DEBUGGING-----");
     if (roomState.gameStarted) {
         const playerIds: string[] = new Array<string>(roomState.socketIds.length);
         for (const socketId of roomState.socketIds) {
@@ -291,7 +299,7 @@ async function endGame(roomId: string) {
     for (const socketId of roomState.socketIds) {
         playerInfo.delete(socketId);
         const player = socketToPlayerMap.get(socketId)!;
-        playerIdToSocketMap.delete(player.id);
+        if (player) playerIdToSocketMap.delete(player.id);
         socketToPlayerMap.delete(socketId);
     }
     roomStates.delete(roomId);
