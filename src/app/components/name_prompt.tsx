@@ -3,10 +3,10 @@ import { useSocket } from "../socket-context";
 import "@/app/style/name_prompt.css";
 
 export function NamePrompt({ callback }: { callback?: () => void }) {
-    const { playerName, changePlayerName } = useSocket();
+    const { state, changePlayerName } = useSocket();
     const [input, setInput] = useState<string>("");
 
-    if (playerName !== null) return;
+    if (state.playerName !== null) return;
 
     const onSave = () => {
         const trimmedInput = input.trim();

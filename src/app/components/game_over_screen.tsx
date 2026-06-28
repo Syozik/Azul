@@ -2,11 +2,11 @@ import "@/app/style/game_over_screen.css";
 import { useSocket } from "../socket-context";
 
 export function GameOverScreen() {
-    const { gameState, playerNumber } = useSocket();
-    const yourIdx = playerNumber - 1;
-    const opIdx = playerNumber % 2;
-    const yourScore = gameState.players[yourIdx].score;
-    const opScore = gameState.players[opIdx].score;
+    const { state } = useSocket();
+    const yourIdx = state.playerNumber - 1;
+    const opIdx = state.playerNumber % 2;
+    const yourScore = state.gameState.players[yourIdx].score;
+    const opScore = state.gameState.players[opIdx].score;
 
     const isWin = yourScore > opScore;
     const isDraw = yourScore === opScore;
@@ -31,19 +31,11 @@ export function GameOverScreen() {
                     <div className="end-mosaic-tile" />
                 </div>
 
-                <div
-                    className="end-result-icon"
-                    role="img"
-                    aria-label={headline}
-                >
+                <div className="end-result-icon" role="img" aria-label={headline}>
                     {icon}
                 </div>
 
-                <h1
-                    className={`end-headline${isDraw ? " end-headline--draw" : ""}`}
-                >
-                    {headline}
-                </h1>
+                <h1 className={`end-headline${isDraw ? " end-headline--draw" : ""}`}>{headline}</h1>
                 <p className="end-subline">{subline}</p>
 
                 <div className="end-divider" />
@@ -52,12 +44,12 @@ export function GameOverScreen() {
                     <div
                         className={`end-score-block${isWin || isDraw ? " end-score-block--winner" : ""}`}
                     >
-                        <span className="end-score-label">{gameState.players[yourIdx].name}</span>
+                        <span className="end-score-label">
+                            {state.gameState.players[yourIdx].name}
+                        </span>
                         <span className="end-score-value">{yourScore}</span>
                         {(isWin || isDraw) && (
-                            <span className="end-score-badge">
-                                {isDraw ? "Draw" : "Winner"}
-                            </span>
+                            <span className="end-score-badge">{isDraw ? "Draw" : "Winner"}</span>
                         )}
                     </div>
 
@@ -66,20 +58,17 @@ export function GameOverScreen() {
                     <div
                         className={`end-score-block${!isWin || isDraw ? " end-score-block--winner" : ""}`}
                     >
-                        <span className="end-score-label">{gameState.players[opIdx].name}</span>
+                        <span className="end-score-label">
+                            {state.gameState.players[opIdx].name}
+                        </span>
                         <span className="end-score-value">{opScore}</span>
                         {(!isWin || isDraw) && (
-                            <span className="end-score-badge">
-                                {isDraw ? "Draw" : "Winner"}
-                            </span>
+                            <span className="end-score-badge">{isDraw ? "Draw" : "Winner"}</span>
                         )}
                     </div>
                 </div>
 
-                <button
-                    className="end-play-again-btn"
-                    onClick={() => window.location.reload()}
-                >
+                <button className="end-play-again-btn" onClick={() => window.location.reload()}>
                     Play Again
                 </button>
             </div>

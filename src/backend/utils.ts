@@ -6,26 +6,15 @@ import {
     TILES_PER_FACTORY,
 } from "../shared/consts";
 import { Prisma } from "./db/generated/prisma/client";
-import type {
-    ColorKey,
-    GameBackendState,
-    LastGame,
-    PlayerSessionInfo,
-} from "../shared/types";
+import type { ColorKey, GameBackendState, LastGame, PlayerSessionInfo } from "../shared/types";
 import { prisma } from "./prisma";
 
-export async function fetchLastGame(
-    id1: string,
-    id2: string,
-): Promise<LastGame | false> {
+export async function fetchLastGame(id1: string, id2: string): Promise<LastGame | false> {
     try {
         const lastGame = await prisma.game.findFirst({
             where: {
                 finished: false,
-                AND: [
-                    { players: { some: { id: id1 } } },
-                    { players: { some: { id: id2 } } },
-                ],
+                AND: [{ players: { some: { id: id1 } } }, { players: { some: { id: id2 } } }],
             },
             include: { players: true },
             orderBy: { time: "desc" },
@@ -53,9 +42,7 @@ export async function saveGame(
     gameId?: number,
 ): Promise<boolean> {
     try {
-        const serializedGameState = JSON.parse(
-            JSON.stringify(gameState),
-        ) as Prisma.InputJsonObject;
+        const serializedGameState = JSON.parse(JSON.stringify(gameState)) as Prisma.InputJsonObject;
 
         if (gameId) {
             await prisma.game.update({
@@ -103,9 +90,7 @@ function formatGameState(json: Prisma.JsonValue): GameBackendState {
     for (const stateKey of stateKeys) {
         const value = jsonObject[stateKey];
         if (value === undefined) {
-            throw new Error(
-                `Invalid gameState JSON: missing key \"${stateKey}\"`,
-            );
+            throw new Error(`Invalid gameState JSON: missing key \"${stateKey}\"`);
         }
 
         (state as Record<keyof GameBackendState, unknown>)[stateKey] = value;
@@ -114,10 +99,7 @@ function formatGameState(json: Prisma.JsonValue): GameBackendState {
     return state;
 }
 
-export function updatePlayerNumber(
-    playerInfo: PlayerSessionInfo,
-    playerIds: string[],
-) {
+export function updatePlayerNumber(playerInfo: PlayerSessionInfo, playerIds: string[]) {
     const playerIdx = playerIds.indexOf(playerInfo.id);
     playerInfo.number = (playerIdx + 1) as 1 | 2;
     return true;

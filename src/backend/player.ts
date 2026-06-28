@@ -1,11 +1,6 @@
 import { BONUSES, JOKERS, TILE_COLORS } from "@/shared/consts";
 import { initCoveredTiles, numberOf } from "@/shared/helpers";
-import {
-    ColorKey,
-    NotificationType,
-    PlayerState,
-    TileColor,
-} from "@/shared/types";
+import { ColorKey, NotificationType, PlayerState, TileColor } from "@/shared/types";
 import { shuffle } from "./utils";
 import { Game } from "./game-logic";
 
@@ -34,10 +29,7 @@ export class Player {
         }
         let pool;
         if (factoryIndex !== undefined) {
-            if (
-                factoryIndex < 0 ||
-                factoryIndex >= this.game.state.factories.length
-            )
+            if (factoryIndex < 0 || factoryIndex >= this.game.state.factories.length)
                 throw new Error("Invalid factory index");
             pool = this.game.state.factories[factoryIndex];
         } else {
@@ -84,11 +76,7 @@ export class Player {
         );
     }
 
-    public applyCoverAction(
-        color: TileColor,
-        points: number,
-        usedTiles: ColorKey[],
-    ) {
+    public applyCoverAction(color: TileColor, points: number, usedTiles: ColorKey[]) {
         if (this.game.state.currentPlayer !== this.playerNumber) {
             throw new Error("It's not your turn");
         }
@@ -103,25 +91,15 @@ export class Player {
         const isCenter = color === "CENTER";
         let res: ColorKey | boolean = true;
         if (!isCenter) {
-            usedTiles = usedTiles.filter(
-                (tile) => tile === color || tile === joker,
-            );
+            usedTiles = usedTiles.filter((tile) => tile === color || tile === joker);
         } else {
             const usedTilesSet = new Set(usedTiles);
-            if (
-                usedTilesSet.size > 2 ||
-                (usedTilesSet.size == 2 && !usedTilesSet.has(joker))
-            ) {
+            if (usedTilesSet.size > 2 || (usedTilesSet.size == 2 && !usedTilesSet.has(joker))) {
                 throw new Error("You can't use these tiles");
             }
             const centerColor = usedTiles.find((tile) => tile !== joker) ?? joker;
-            if (
-                !centerColor ||
-                this.coveredTiles[color].includes(centerColor)
-            ) {
-                throw new Error(
-                    `You can place ${centerColor} in the center only once.`,
-                );
+            if (!centerColor || this.coveredTiles[color].includes(centerColor)) {
+                throw new Error(`You can place ${centerColor} in the center only once.`);
             }
             res = centerColor;
         }
@@ -165,11 +143,7 @@ export class Player {
         }
 
         if (1 <= points && points <= 4) {
-            if (
-                Object.values(this.coveredTiles).every(
-                    (color) => !!color[points - 1],
-                )
-            ) {
+            if (Object.values(this.coveredTiles).every((color) => !!color[points - 1])) {
                 bonus += points * 4;
             }
         }
@@ -191,10 +165,7 @@ export class Player {
         let numberOfPilesToTake = 0;
         if (color !== "CENTER") {
             if (points === 5 || points === 6) {
-                if (
-                    this.coveredTiles[color][4] &&
-                    this.coveredTiles[color][5]
-                ) {
+                if (this.coveredTiles[color][4] && this.coveredTiles[color][5]) {
                     this.game.pushNotification(
                         this.playerNumber - 1,
                         "success",
@@ -206,12 +177,8 @@ export class Player {
                 }
             }
             if (points === 3 || points === 4) {
-                if (
-                    this.coveredTiles[color][2] &&
-                    this.coveredTiles[color][3]
-                ) {
-                    const previousColor =
-                        TILE_COLORS[(5 + TILE_COLORS.indexOf(color)) % 6];
+                if (this.coveredTiles[color][2] && this.coveredTiles[color][3]) {
+                    const previousColor = TILE_COLORS[(5 + TILE_COLORS.indexOf(color)) % 6];
                     if (
                         this.coveredTiles[previousColor][0] &&
                         this.coveredTiles[previousColor][1]
@@ -227,10 +194,7 @@ export class Player {
                 }
             }
             if (points === 2 || points === 3) {
-                if (
-                    this.coveredTiles[color][1] &&
-                    this.coveredTiles[color][2]
-                ) {
+                if (this.coveredTiles[color][1] && this.coveredTiles[color][2]) {
                     const idx = TILE_COLORS.indexOf(color);
                     if (
                         this.coveredTiles["CENTER"][idx] &&
@@ -247,16 +211,9 @@ export class Player {
                 }
             }
             if (points === 1 || points === 2) {
-                if (
-                    this.coveredTiles[color][0] &&
-                    this.coveredTiles[color][1]
-                ) {
-                    const nextColor =
-                        TILE_COLORS[(1 + TILE_COLORS.indexOf(color)) % 6];
-                    if (
-                        this.coveredTiles[nextColor][2] &&
-                        this.coveredTiles[nextColor][3]
-                    ) {
+                if (this.coveredTiles[color][0] && this.coveredTiles[color][1]) {
+                    const nextColor = TILE_COLORS[(1 + TILE_COLORS.indexOf(color)) % 6];
+                    if (this.coveredTiles[nextColor][2] && this.coveredTiles[nextColor][3]) {
                         this.game.pushNotification(
                             this.playerNumber - 1,
                             "success",
@@ -330,8 +287,7 @@ export class Player {
             const [i, j, color] = tile.split("_");
             colors.push(color as ColorKey);
             this.pickedTiles.push(color as ColorKey);
-            this.game.state.baseTiles[Number(i)][Number(j)] =
-                this.game.state._bag.splice(0, 1)[0];
+            this.game.state.baseTiles[Number(i)][Number(j)] = this.game.state._bag.splice(0, 1)[0];
         }
         this.game.pushNotification(
             this.playerNumber - 1,
@@ -374,10 +330,7 @@ export class Player {
             name: this.name,
             pickedTiles: [...this.pickedTiles],
             coveredTiles: Object.fromEntries(
-                Object.entries(this.coveredTiles).map(([color, tiles]) => [
-                    color,
-                    [...tiles],
-                ]),
+                Object.entries(this.coveredTiles).map(([color, tiles]) => [color, [...tiles]]),
             ) as Record<TileColor, (boolean | string)[]>,
             savedTilesForNextRound: [...this.savedTilesForNextRound],
             canTakeBaseTiles: this.canTakeBaseTiles,

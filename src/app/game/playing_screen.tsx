@@ -8,14 +8,14 @@ import { PhaseOne } from "./phase_one";
 import { PhaseTwo } from "./phase_two";
 
 export function PlayingScreen() {
-    const { gameState, playerNumber } = useSocket();
+    const { state, endGame } = useSocket();
     const [visibleNotifs, setVisibleNotifs] = useState<NotificationType[]>([]);
-    const isYourTurn = gameState.currentPlayer === playerNumber;
+    const isYourTurn = state.gameState.currentPlayer === state.playerNumber;
     // const [showInfo, setShowInfo] = useState<boolean>(false);
     const seenIdsRef = useRef<Set<number>>(new Set());
-    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+    const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-    const notifications = gameState.players[playerNumber - 1]?.notifications;
+    const notifications = state.gameState.players[state.playerNumber - 1]?.notifications;
     useEffect(() => {
         const newNotifs = notifications.filter((n) => !seenIdsRef.current.has(n.id));
         if (newNotifs.length === 0) return;
@@ -25,25 +25,22 @@ export function PlayingScreen() {
         }
 
         const timers = timersRef.current;
-        for (const [id, timer] of timers) {
-            clearTimeout(timer);
-            timers.delete(id);
+        while (timers.length) {
+            clearTimeout(timers.pop());
         }
 
-        const newest = newNotifs[newNotifs.length - 1];
-        setVisibleNotifs([newest]);
+        setVisibleNotifs(newNotifs);
 
         const timer = setTimeout(() => {
-            setVisibleNotifs((prev) => prev.filter((v) => v.id !== newest.id));
-            timers.delete(newest.id);
+            setVisibleNotifs((prev) => prev.filter((notif) => !newNotifs.includes(notif)));
+            timers.pop();
         }, NOTIFICATION_DURATION);
-        timers.set(newest.id, timer);
+
+        timers.push(timer);
 
         return () => {
-            const t = timers.get(newest.id);
-            if (t) {
-                clearTimeout(t);
-                timers.delete(newest.id);
+            while (timers.length) {
+                clearTimeout(timers.pop());
             }
         };
     }, [notifications]);
@@ -63,7 +60,10 @@ export function PlayingScreen() {
                     <span
                         className={`turn-badge ${isYourTurn ? "turn-badge--yours" : "turn-badge--theirs"}`}
                     >
-                        <p className="player-name">{gameState.players[gameState.currentPlayer - 1].name + "'s Turn"}</p>
+                        <p className="player-name">
+                            {state.gameState.players[state.gameState.currentPlayer - 1].name +
+                                "'s Turn"}
+                        </p>
                         <svg
                             className={`turn-arrow turn-arrow--${isYourTurn ? "left" : "right"}`}
                             xmlns="http://www.w3.org/2000/svg"
@@ -97,9 +97,12 @@ export function PlayingScreen() {
                         {showInfo && <InfoBlock />}
                     </div>*/}
                 </div>
+                <span className="end-game-button">
+                    <button onClick={() => endGame()}>End Game</button>
+                </span>
             </div>
             <NotificationContainer notifications={visibleNotifs} />
-            {gameState.phase === 1 ? <PhaseOne /> : <PhaseTwo />}
+            {state.gameState.phase === 1 ? <PhaseOne /> : <PhaseTwo />}
         </>
     );
 }

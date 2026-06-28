@@ -10,18 +10,15 @@ export function usePlayerDesk() {
 }
 
 export function PhaseTwo() {
-    const { playerNumber, sendGameAction } = useSocket();
+    const { state, sendGameAction } = useSocket();
     return (
         <div className="phase-two">
-            <button
-                className="pass-button"
-                onClick={() => sendGameAction({ type: "pass" })}
-            >
+            <button className="pass-button" onClick={() => sendGameAction({ type: "pass" })}>
                 Pass
             </button>
 
             <div className="phase-two-panel">
-                <PlayerDeskContext.Provider value={playerNumber}>
+                <PlayerDeskContext.Provider value={state.playerNumber}>
                     <PlayerDesk />
                 </PlayerDeskContext.Provider>
             </div>
@@ -31,7 +28,7 @@ export function PhaseTwo() {
             </div>
 
             <div className="phase-two-panel">
-                <PlayerDeskContext.Provider value={playerNumber === 1 ? 2 : 1}>
+                <PlayerDeskContext.Provider value={state.playerNumber === 1 ? 2 : 1}>
                     <PlayerDesk />
                 </PlayerDeskContext.Provider>
             </div>

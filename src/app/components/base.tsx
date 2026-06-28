@@ -1,6 +1,16 @@
 "use client";
 import "@/app/style/base.css";
-import { COLORS, DEFAULT_BASE_TILE_SIZE, DEFAULT_BASE_WIDTH, DEFAULT_JOKER_GAP, DEFAULT_JOKER_PADDING_LEFT, DEFAULT_JOKER_TILE_SIZE, DEFAULT_ROUND_TRANSLATE_X, DEFAULT_SNOWFLAKE_MARGINS, JOKERS } from "../../shared/consts";
+import {
+    COLORS,
+    DEFAULT_BASE_TILE_SIZE,
+    DEFAULT_BASE_WIDTH,
+    DEFAULT_JOKER_GAP,
+    DEFAULT_JOKER_PADDING_LEFT,
+    DEFAULT_JOKER_TILE_SIZE,
+    DEFAULT_ROUND_TRANSLATE_X,
+    DEFAULT_SNOWFLAKE_MARGINS,
+    JOKERS,
+} from "@/shared/consts";
 import { Tile } from "./tile";
 import { ColorKey } from "../../shared/types";
 import { useSocket } from "../socket-context";
@@ -11,7 +21,7 @@ function getAngle(i: number, j: number): number {
 }
 
 export function Base() {
-    const { gameState, sendGameAction, playerNumber } = useSocket();
+    const { state, sendGameAction } = useSocket();
     const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
     const outerRef = useRef<HTMLDivElement>(null);
     const [parentWidth, setParentWidth] = useState(0);
@@ -49,8 +59,7 @@ export function Base() {
         left: Math.round(m.left * scale),
     }));
 
-    const numberOfTilesToTake =
-        gameState.players[playerNumber - 1].canTakeBaseTiles;
+    const numberOfTilesToTake = state.gameState.players[state.playerNumber - 1].canTakeBaseTiles;
 
     const onConfirm = () => {
         sendGameAction({
@@ -63,9 +72,7 @@ export function Base() {
     const onTileSelect = (idx1: number, idx2: number, color: string) => {
         const newTile = `${idx1}_${idx2}_${color}`;
         if (selectedTiles.includes(newTile)) {
-            const newSelectedTiles = selectedTiles.filter(
-                (tile) => tile !== newTile,
-            );
+            const newSelectedTiles = selectedTiles.filter((tile) => tile !== newTile);
             setSelectedTiles(newSelectedTiles);
         } else if (selectedTiles.length < numberOfTilesToTake) {
             setSelectedTiles([...selectedTiles, newTile]);
@@ -73,10 +80,7 @@ export function Base() {
     };
 
     return (
-        <div
-            ref={outerRef}
-            className={`base ${numberOfTilesToTake ? "active" : ""}`}
-        >
+        <div ref={outerRef} className={`base ${numberOfTilesToTake ? "active" : ""}`}>
             <div
                 className="jokers-order"
                 style={{
@@ -92,7 +96,7 @@ export function Base() {
                             size={jokerTileSize}
                         />
                         <p
-                            className={`round-number ${gameState.round === idx + 1 ? "active" : ""}`}
+                            className={`round-number ${state.gameState.round === idx + 1 ? "active" : ""}`}
                             style={{
                                 transform: `translate(${roundTranslateX}px)`,
                                 width: `${Math.round(27 * scale)}px`,
@@ -112,14 +116,12 @@ export function Base() {
                     <span
                         className={`checkmark ${selectedTiles.length < numberOfTilesToTake ? "disabled" : ""}`}
                         onClick={
-                            selectedTiles.length >= numberOfTilesToTake
-                                ? onConfirm
-                                : undefined
+                            selectedTiles.length >= numberOfTilesToTake ? onConfirm : undefined
                         }
                     />
                 </div>
             )}
-            {gameState.baseTiles.map((snowflake, i) => {
+            {state.gameState.baseTiles.map((snowflake, i) => {
                 const margin = snowflakeMargins[i] || snowflakeMargins[0];
                 return (
                     <div
@@ -133,12 +135,8 @@ export function Base() {
                             <Tile
                                 color={COLORS[tile]}
                                 transformAngle={getAngle(i, idx)}
-                                onClickHandler={() =>
-                                    onTileSelect(i, idx, tile)
-                                }
-                                isCovered={selectedTiles.includes(
-                                    `${i}_${idx}_${tile}`,
-                                )}
+                                onClickHandler={() => onTileSelect(i, idx, tile)}
+                                isCovered={selectedTiles.includes(`${i}_${idx}_${tile}`)}
                                 size={baseTileSize}
                                 key={idx}
                             />

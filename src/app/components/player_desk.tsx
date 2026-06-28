@@ -1,9 +1,5 @@
 "use client";
-import {
-    COLORS,
-    getSnowflakeBoardSize,
-    DEFAULT_TILE_SIZE,
-} from "../../shared/consts";
+import { COLORS, getSnowflakeBoardSize, DEFAULT_TILE_SIZE } from "../../shared/consts";
 import { Snowflake } from "./snowflake";
 import "@/app/style/player_desk.css";
 import { Scoreline } from "./scoreline";
@@ -16,7 +12,7 @@ import { groupTilesByColor } from "../utils";
 const DEFAULT_BOARD_SIZE = getSnowflakeBoardSize(DEFAULT_TILE_SIZE);
 
 export function PlayerDesk() {
-    const { gameState, playerNumber, sendGameAction } = useSocket();
+    const { state, sendGameAction } = useSocket();
     const player = usePlayerDesk();
     const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -49,15 +45,12 @@ export function PlayerDesk() {
         return Math.max(MIN_TILE_SIZE, Math.floor(DEFAULT_TILE_SIZE * scale));
     }, [containerWidth]);
 
-    const boardSize = useMemo(
-        () => getSnowflakeBoardSize(tileSize),
-        [tileSize],
-    );
+    const boardSize = useMemo(() => getSnowflakeBoardSize(tileSize), [tileSize]);
 
-    const playerState = gameState.players[player - 1];
+    const playerState = state.gameState.players[player - 1];
     const playerTiles = groupTilesByColor(playerState.pickedTiles);
-    const isOwner = playerNumber === player;
-    const isMyTurn = playerNumber === gameState.currentPlayer;
+    const isOwner = state.playerNumber === player;
+    const isMyTurn = state.playerNumber === state.gameState.currentPlayer;
 
     const getFormattedTiles = (tiles: string[]): ColorKey[] =>
         tiles.map((tile) => tile.split("_")[0] as ColorKey);
@@ -95,11 +88,7 @@ export function PlayerDesk() {
     };
 
     const saveTileForNextRound = (slotIdx: number) => {
-        if (
-            !isOwner ||
-            !selectedTiles.length ||
-            playerState.savedTilesForNextRound[slotIdx]
-        )
+        if (!isOwner || !selectedTiles.length || playerState.savedTilesForNextRound[slotIdx])
             return;
         sendGameAction({
             type: "save-for-next-round",
@@ -113,17 +102,9 @@ export function PlayerDesk() {
         <div
             className={`${isOwner ? "own-desk " : ""}desk flex flex-col items-center h-auto md:h-full mt-2 md:mt-12.5 gap-3 md:gap-10 text-center mx-1 md:mx-28`}
         >
-            <p className="player-name font-bold text-lg md:text-2xl">
-                {playerState.name} Desk
-            </p>
-            <Scoreline
-                range={{ start: 0, end: 160, step: 10 }}
-                currentScore={playerState.score}
-            />
-            <Scoreline
-                range={{ start: 0, end: 9, step: 1 }}
-                currentScore={playerState.score}
-            />
+            <p className="player-name font-bold text-lg md:text-2xl">{playerState.name} Desk</p>
+            <Scoreline range={{ start: 0, end: 160, step: 10 }} currentScore={playerState.score} />
+            <Scoreline range={{ start: 0, end: 9, step: 1 }} currentScore={playerState.score} />
             <div ref={wrapperRef} className="snowflakes-wrapper">
                 <div
                     className="snowflakes"
@@ -132,32 +113,26 @@ export function PlayerDesk() {
                         height: `${boardSize}px`,
                     }}
                 >
-                    {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map(
-                        (color) => (
-                            <Snowflake
-                                color={color}
-                                key={color}
-                                tileSize={tileSize}
-                                onTileSelect={onSnowflakeTileSelect}
-                            />
-                        ),
-                    )}
+                    {(Object.keys(COLORS) as Array<keyof typeof COLORS>).map((color) => (
+                        <Snowflake
+                            color={color}
+                            key={color}
+                            tileSize={tileSize}
+                            onTileSelect={onSnowflakeTileSelect}
+                        />
+                    ))}
                 </div>
                 <div className="saved-tiles">
-                    {playerState.savedTilesForNextRound.map(
-                        (color: ColorKey | null, idx) => (
-                            <span
-                                className={`box-tile ms-0.5${isOwner && selectedTiles.length && !color ? " clickable" : ""} tile-${idx+1}`}
-                                style={{
-                                    backgroundColor: color
-                                        ? COLORS[color]
-                                        : "#faebd7",
-                                }}
-                                key={idx}
-                                onClick={() => saveTileForNextRound(idx)}
-                            />
-                        ),
-                    )}
+                    {playerState.savedTilesForNextRound.map((color: ColorKey | null, idx) => (
+                        <span
+                            className={`box-tile ms-0.5${isOwner && selectedTiles.length && !color ? " clickable" : ""} tile-${idx + 1}`}
+                            style={{
+                                backgroundColor: color ? COLORS[color] : "#faebd7",
+                            }}
+                            key={idx}
+                            onClick={() => saveTileForNextRound(idx)}
+                        />
+                    ))}
                 </div>
             </div>
             <div className="available-tiles flex flex-row flex-wrap gap-2 md:gap-5 justify-center">

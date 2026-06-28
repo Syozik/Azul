@@ -235,6 +235,23 @@ async function main() {
             }
         });
 
+        socket.on("end-game", async (shouldSave: boolean) => {
+            const info = playerInfo.get(socket.id);
+            if (!info) return;
+
+            const game = roomStates.get(info.roomId)!.game;
+            const playerName = game.state.players[info.number - 1].name;
+            const message = (name: string) => `${name} ended the game. You can continue it later.`;
+            try {
+                await endGame(info.roomId, shouldSave);
+            } catch (err) {
+                console.error(`[Error] Failed to endGame for room ${info.roomId}:`, err);
+            }
+
+            socket.emit("end-game", message("You"));
+            socket.to(info.roomId).emit("end-game", message(playerName));
+        });
+
         socket.on("disconnect", async () => {
             console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
@@ -265,7 +282,7 @@ async function main() {
     });
 }
 
-async function endGame(roomId: string) {
+async function endGame(roomId: string, shouldSave: boolean = true) {
     const roomState = roomStates.get(roomId);
     if (!roomState) {
         return;
@@ -275,7 +292,7 @@ async function endGame(roomId: string) {
     console.log(roomState.socketIds);
     console.log(playerInfo);
     console.log("DEBUGGING-----");
-    if (roomState.gameStarted) {
+    if (roomState.gameStarted && shouldSave) {
         const playerIds: string[] = new Array<string>(roomState.socketIds.length);
         for (const socketId of roomState.socketIds) {
             const info = playerInfo.get(socketId);

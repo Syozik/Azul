@@ -19,7 +19,7 @@ import { Tile } from "../components/tile";
 import { ColorKey } from "../../shared/types";
 
 export function PhaseOne() {
-    const { gameState, playerNumber, sendGameAction } = useSocket();
+    const { state, sendGameAction } = useSocket();
     const [shouldShowDesk, setShouldShowDesk] = useState<boolean>(false);
 
     const outerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +50,7 @@ export function PhaseOne() {
     const jokerGap = Math.round(DEFAULT_JOKER_GAP * scale);
     const roundTranslateX = Math.round(DEFAULT_ROUND_TRANSLATE_X * scale);
 
-    if (!gameState) {
+    if (!state.gameState) {
         return <div className="phase-one">Loading game...</div>;
     }
 
@@ -61,23 +61,23 @@ export function PhaseOne() {
     };
     window.addEventListener("keydown", handleKeyDown);
 
-    const isMyTurn = gameState.currentPlayer === playerNumber;
-    const myIndex = playerNumber - 1;
-    const opponentIndex = playerNumber === 1 ? 1 : 0;
+    const isMyTurn = state.gameState.currentPlayer === state.playerNumber;
+    const myIndex = state.playerNumber - 1;
+    const opponentIndex = state.playerNumber === 1 ? 1 : 0;
 
     return (
         <div className="phase-one">
             <div className="tiles-box">
-                <p className="tiles-box-title">{gameState.players[myIndex].name}</p>
+                <p className="tiles-box-title">{state.gameState.players[myIndex].name}</p>
                 <div className="picked-tiles">
-                    {gameState.players[myIndex].pickedTiles.map((color, i) => (
+                    {state.gameState.players[myIndex].pickedTiles.map((color, i) => (
                         <span
                             key={i}
                             className="box-tile"
                             style={{ backgroundColor: COLORS[color] }}
                         />
                     ))}
-                    {gameState.players[myIndex].pickedTiles.length === 0 && (
+                    {state.gameState.players[myIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>
                     )}
                 </div>
@@ -99,7 +99,7 @@ export function PhaseOne() {
                                 size={jokerTileSize}
                             />
                             <p
-                                className={`round-number ${gameState.round === idx + 1 ? "active" : ""}`}
+                                className={`round-number ${state.gameState.round === idx + 1 ? "active" : ""}`}
                                 style={{
                                     transform: `translate(${roundTranslateX}px)`,
                                     width: `${Math.round(27 * scale)}px`,
@@ -120,7 +120,7 @@ export function PhaseOne() {
                     Check desk
                 </button>
                 <div className="circles">
-                    {gameState.factories.map((factoryTiles, idx) => (
+                    {state.gameState.factories.map((factoryTiles, idx) => (
                         <CircleWithTiles
                             colors={factoryTiles}
                             factoryIndex={idx}
@@ -133,7 +133,7 @@ export function PhaseOne() {
                 </div>
 
                 <div className="center-pool">
-                    {gameState.centerPool.map((color, i) => (
+                    {state.gameState.centerPool.map((color, i) => (
                         <span
                             key={i}
                             className={`box-tile ${isMyTurn ? "clickable" : ""}`}
@@ -152,16 +152,16 @@ export function PhaseOne() {
             </div>
 
             <div className="tiles-box">
-                <p className="tiles-box-title">{gameState.players[opponentIndex].name}</p>
+                <p className="tiles-box-title">{state.gameState.players[opponentIndex].name}</p>
                 <div className="picked-tiles">
-                    {gameState.players[opponentIndex].pickedTiles.map((color, i) => (
+                    {state.gameState.players[opponentIndex].pickedTiles.map((color, i) => (
                         <span
                             key={i}
                             className="box-tile"
                             style={{ backgroundColor: COLORS[color] }}
                         />
                     ))}
-                    {gameState.players[opponentIndex].pickedTiles.length === 0 && (
+                    {state.gameState.players[opponentIndex].pickedTiles.length === 0 && (
                         <span className="no-tiles">No tiles picked yet</span>
                     )}
                 </div>
@@ -169,7 +169,7 @@ export function PhaseOne() {
             {shouldShowDesk && (
                 <div className="desk-popover">
                     <div className="pointer-events-none">
-                        <PlayerDeskContext.Provider value={playerNumber}>
+                        <PlayerDeskContext.Provider value={state.playerNumber}>
                             <PlayerDesk />
                         </PlayerDeskContext.Provider>
                     </div>

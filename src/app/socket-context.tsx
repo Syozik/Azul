@@ -17,31 +17,12 @@ import { getPlayerId, getPlayerName, setPlayerName } from "./utils";
 type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" | "disconnected";
 
 interface SocketContextType {
-    connectionStatus: ConnectionStatus;
-    playerNumber: 1 | 2;
-    playerName?: string | null;
-    roomId: string | null;
-    gameState: GameState;
+    state: State;
     findGame: () => boolean;
     startGame: (newGame?: boolean) => void;
     sendGameAction: (action: GameAction) => void;
     changePlayerName: (newName: string) => void;
-}
-
-const SocketContext = createContext<SocketContextType>({
-    connectionStatus: "idle",
-    playerNumber: 1,
-    roomId: null,
-    playerName: undefined,
-    changePlayerName: () => {},
-    gameState: initState(),
-    findGame: () => false,
-    startGame: () => {},
-    sendGameAction: () => {},
-});
-
-export function useSocket() {
-    return useContext(SocketContext);
+    endGame: (shouldSave?: boolean) => void;
 }
 
 type State = {
@@ -50,7 +31,28 @@ type State = {
     roomId: string | null;
     playerName?: string | null;
     gameState: GameState;
+    disconnectedReason?: string;
 };
+
+const initialState: State = {
+    connectionStatus: "idle",
+    playerNumber: 1,
+    roomId: null,
+    gameState: initState(),
+};
+
+const SocketContext = createContext<SocketContextType>({
+    state: initialState,
+    changePlayerName: () => {},
+    findGame: () => false,
+    startGame: () => {},
+    endGame: () => {},
+    sendGameAction: () => {},
+});
+
+export function useSocket() {
+    return useContext(SocketContext);
+}
 
 type Action =
     | { type: "LOADED" }
@@ -65,14 +67,8 @@ type Action =
     | { type: "GAME_STATE"; gameState: GameState }
     | { type: "OPPONENT_DISCONNECTED" }
     | { type: "SET_NAME"; name: string | null }
+    | { type: "END_GAME"; reason: string }
     | { type: "DISCONNECT" };
-
-const initialState: State = {
-    connectionStatus: "idle",
-    playerNumber: 1,
-    roomId: null,
-    gameState: initState(),
-};
 
 function reducer(state: State, action: Action): State {
     switch (action.type) {
@@ -107,6 +103,12 @@ function reducer(state: State, action: Action): State {
             return initialState;
         case "SET_NAME":
             return { ...state, playerName: action.name };
+        case "END_GAME":
+            return {
+                ...state,
+                connectionStatus: "disconnected",
+                disconnectedReason: action.reason,
+            };
         default:
             return state;
     }
@@ -165,6 +167,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socket.on("disconnect", () => {
             dispatch({ type: "DISCONNECT" });
         });
+        socket.on("end-game", (reason) => {
+            dispatch({ type: "END_GAME", reason });
+        });
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === "visible" && !socket.connected) {
@@ -200,6 +205,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socketRef.current?.emit("game-action", action);
     }, []);
 
+    const endGame = useCallback((shouldSave: boolean = true) => {
+        socketRef.current?.emit("end-game", shouldSave);
+    }, []);
+
     const changePlayerName = (name: string) => {
         if (name) {
             dispatch({ type: "SET_NAME", name });
@@ -210,13 +219,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     return (
         <SocketContext.Provider
             value={{
-                connectionStatus: state.connectionStatus,
-                playerNumber: state.playerNumber,
-                playerName: state.playerName,
-                roomId: state.roomId,
-                gameState: state.gameState,
+                state,
                 findGame,
                 startGame,
+                endGame,
                 changePlayerName,
                 sendGameAction,
             }}

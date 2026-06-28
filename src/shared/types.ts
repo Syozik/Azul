@@ -94,10 +94,6 @@ export interface SaveForNextRoundAction {
 }
 
 export type GameAction =
-    | PickTilesAction
-    | CoverTileAction
-    | PassAction
-    | BasePickAction
-    | SaveForNextRoundAction;
+    PickTilesAction | CoverTileAction | PassAction | BasePickAction | SaveForNextRoundAction;
 
 export type TileColor = ColorKey | "CENTER";

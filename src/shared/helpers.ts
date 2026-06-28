@@ -2,10 +2,7 @@ import { COLORS } from "./consts";
 import type { ColorKey, GameState } from "./types";
 
 export function initCoveredTiles() {
-    const coveredTiles = {} as Record<
-        ColorKey | "CENTER",
-        (boolean | string)[]
-    >;
+    const coveredTiles = {} as Record<ColorKey | "CENTER", (boolean | string)[]>;
     for (const color of Object.keys(COLORS) as (ColorKey | "CENTER")[]) {
         coveredTiles[color] = Array(6).fill(false);
     }

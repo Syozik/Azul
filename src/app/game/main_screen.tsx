@@ -4,9 +4,10 @@ import { Lobby } from "./lobby";
 import { PlayingScreen } from "./playing_screen";
 
 export function MainScreen() {
-    const { gameState, connectionStatus } = useSocket();
+    const { state } = useSocket();
 
-    if (connectionStatus !== "playing") return <Lobby />;
-    if (gameState.isGameOver) return <GameOverScreen />;
+    if (state.connectionStatus !== "playing") return <Lobby />;
+    if (state.gameState.isGameOver) return <GameOverScreen />;
+    if (state.gameState.isGameOver) return <GameOverScreen />;
     return <PlayingScreen />;
 }

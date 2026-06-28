@@ -6,7 +6,7 @@ import { useSocket } from "../socket-context";
 import "@/app/style/lobby.css";
 
 export function Lobby() {
-    const { connectionStatus, findGame, startGame } = useSocket();
+    const { state, findGame, startGame } = useSocket();
     const [shouldAskName, setShouldAskName] = useState<boolean>(false);
 
     const onPlay = () => setShouldAskName(!findGame());
@@ -25,7 +25,7 @@ export function Lobby() {
 
                 <div className="lobby-divider" />
 
-                {connectionStatus === "loaded" &&
+                {state.connectionStatus === "loaded" &&
                     (shouldAskName ? (
                         <NamePrompt callback={findGame} />
                     ) : (
@@ -37,7 +37,7 @@ export function Lobby() {
                             </button>
                         </div>
                     ))}
-                {connectionStatus === "waiting" && (
+                {state.connectionStatus === "waiting" && (
                     <div className="lobby-action">
                         <p
                             className="lobby-instruction font-bold underline"
@@ -61,23 +61,25 @@ export function Lobby() {
                     </div>
                 )}
 
-                {connectionStatus === "searching" && (
+                {state.connectionStatus === "searching" && (
                     <div className="lobby-action">
                         <div className="lobby-spinner" />
                         <p className="lobby-status">Connecting...</p>
                     </div>
                 )}
 
-                {connectionStatus === "idle" && (
+                {state.connectionStatus === "idle" && (
                     <div className="lobby-action">
                         <div className="lobby-spinner" />
                         <p className="lobby-status">Loading...</p>
                     </div>
                 )}
 
-                {connectionStatus === "disconnected" && (
+                {state.connectionStatus === "disconnected" && (
                     <div className="lobby-action">
-                        <p className="lobby-status lobby-status-error">Opponent disconnected</p>
+                        <p className="lobby-status lobby-status-error">
+                            {state.disconnectedReason}
+                        </p>
                         <button
                             className="lobby-play-btn"
                             onClick={() => findGame()}
@@ -95,26 +97,32 @@ export function Lobby() {
                         <div className="lobby-player-slot">
                             <div
                                 className={`player-avatar ${
-                                    true || connectionStatus !== "idle" ? "player-connected" : ""
+                                    true || state.connectionStatus !== "idle"
+                                        ? "player-connected"
+                                        : ""
                                 }`}
                             >
                                 P1
                             </div>
                             <span className="player-label">
-                                {true || connectionStatus !== "idle" ? "Connected" : "Waiting..."}
+                                {true || state.connectionStatus !== "idle"
+                                    ? "Connected"
+                                    : "Waiting..."}
                             </span>
                         </div>
                         <span className="lobby-vs">vs</span>
                         <div className="lobby-player-slot">
                             <div
                                 className={`player-avatar ${
-                                    true || connectionStatus === "playing" ? "player-connected" : ""
+                                    true || state.connectionStatus === "playing"
+                                        ? "player-connected"
+                                        : ""
                                 }`}
                             >
                                 P2
                             </div>
                             <span className="player-label">
-                                {true || connectionStatus === "playing"
+                                {true || state.connectionStatus === "playing"
                                     ? "Connected"
                                     : "Waiting..."}
                             </span>

@@ -1,10 +1,5 @@
 import Image from "next/image";
-import {
-    ANGLE,
-    COLORS,
-    getSnowflakePositions,
-    getDeskImage,
-} from "../../shared/consts";
+import { ANGLE, COLORS, getSnowflakePositions, getDeskImage } from "../../shared/consts";
 import { usePlayerDesk } from "../game/phase_two";
 import { useSocket } from "../socket-context";
 import { TileColor } from "../../shared/types";
@@ -17,25 +12,37 @@ interface SnowflakeProps {
     onTileSelect: (color: TileColor, points: number) => void;
 }
 
-function getStatueTransform(rotate: number, tileSize: number, deskImage: { width: number; height: number }): string {
+function getStatueTransform(
+    rotate: number,
+    tileSize: number,
+    deskImage: { width: number; height: number },
+): string {
     const angle = ANGLE * (1.5 + rotate);
     const x = 1.5 * tileSize * Math.cos(angle) - deskImage.width / 2;
     const y = 1.5 * tileSize * Math.sin(angle) - deskImage.height / 2;
     return `translate(${x}px, ${y}px) rotate(${angle}rad) `;
 }
 
-function getMirrorTransform(rotate: number, tileSize: number, deskImage: { width: number; height: number }): string {
+function getMirrorTransform(
+    rotate: number,
+    tileSize: number,
+    deskImage: { width: number; height: number },
+): string {
     const angle = ANGLE * (rotate + 1);
     return `translate(-50%, -50%) rotate(${angle}rad) translate(0, -${tileSize + deskImage.height / 2}px)`;
 }
 
-function getFontaineTransform(rotate: number, tileSize: number, deskImage: { width: number; height: number }): string {
+function getFontaineTransform(
+    rotate: number,
+    tileSize: number,
+    deskImage: { width: number; height: number },
+): string {
     const angle = ANGLE * (rotate + 1);
     return `translate(-50%, -50%) rotate(${angle}rad) translate(0, ${tileSize + deskImage.height / 2}px)`;
 }
 
 export function Snowflake({ color, tileSize, onTileSelect }: SnowflakeProps) {
-    const { gameState, playerNumber } = useSocket();
+    const { state } = useSocket();
     const player = usePlayerDesk();
 
     const snowflakePositions = useMemo(() => getSnowflakePositions(tileSize), [tileSize]);
@@ -57,7 +64,7 @@ export function Snowflake({ color, tileSize, onTileSelect }: SnowflakeProps) {
                 <Tile
                     color={
                         (color === "CENTER" &&
-                            (gameState.players[player - 1].coveredTiles[color][
+                            (state.gameState.players[player - 1].coveredTiles[color][
                                 idx
                             ] as string)) ||
                         COLORS[color]
@@ -66,11 +73,9 @@ export function Snowflake({ color, tileSize, onTileSelect }: SnowflakeProps) {
                     transformAngle={angle}
                     key={angle}
                     size={tileSize}
-                    isCovered={
-                        !!gameState.players[player - 1].coveredTiles[color][idx]
-                    }
+                    isCovered={!!state.gameState.players[player - 1].coveredTiles[color][idx]}
                     onClickHandler={
-                        player === playerNumber
+                        player === state.playerNumber
                             ? () => onTileSelect(color, idx + 1)
                             : undefined
                     }
