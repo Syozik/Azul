@@ -30,6 +30,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next
+RUN mkdir -p /data && chown -R nextjs:nodejs /data
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -37,9 +38,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/src/backend ./src/backend
 COPY --from=builder --chown=nextjs:nodejs /app/src/shared ./src/shared
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=production-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 EXPOSE 3000
 
-CMD ["tsx", "--tsconfig", "tsconfig.json", "src/backend/server.ts"]
+CMD ["sh", "-c", "pnpm prisma migrate deploy && exec tsx --tsconfig tsconfig.json src/backend/server.ts"]
