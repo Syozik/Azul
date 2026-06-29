@@ -63,9 +63,7 @@ async function main() {
                 socketToPlayerMap.delete(prevSocket);
                 // Replace socket id with the new one.
                 const socketIdx = roomState.socketIds.indexOf(prevSocket);
-                console.log("old sockets: ", roomState.socketIds, "index: ", socketIdx);
                 roomState.socketIds[socketIdx] = socket.id;
-                console.log("new sockets: ", roomState.socketIds);
                 console.log(
                     new Date(),
                     `: Recovered session for ${prevSocket} (new socket: ${socket.id}) in ${info.roomId}`,
@@ -129,12 +127,13 @@ async function main() {
             console.log(
                 new Date(),
                 `[Game] ${roomId} game started:
-                    ${info.id}: P${info.number}, ${opponentSocketId}: P${opponentInfo.number}`,
+                    ${info.id}: P${info.number}, ${opponentInfo.id}: P${opponentInfo.number}`,
             );
         });
 
         socket.on("find-game", async ({ id, name }: { id: string; name: string }) => {
             socketToPlayerMap.set(socket.id, { id, name });
+            playerIdToSocketMap.set(id, socket.id);
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
@@ -270,6 +269,9 @@ async function main() {
                                 err,
                             );
                         });
+                        const player = socketToPlayerMap.get(socket.id)!;
+                        socketToPlayerMap.delete(socket.id);
+                        playerIdToSocketMap.delete(player.id);
                     },
                     60 * 10 ** 3,
                 );
@@ -288,10 +290,6 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
         return;
     }
 
-    console.log("DEBUGGING-----");
-    console.log(roomState.socketIds);
-    console.log(playerInfo);
-    console.log("DEBUGGING-----");
     if (roomState.gameStarted && shouldSave) {
         const playerIds: string[] = new Array<string>(roomState.socketIds.length);
         for (const socketId of roomState.socketIds) {
@@ -315,9 +313,6 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
     // Clean up the other player's info and the room's game state
     for (const socketId of roomState.socketIds) {
         playerInfo.delete(socketId);
-        const player = socketToPlayerMap.get(socketId)!;
-        if (player) playerIdToSocketMap.delete(player.id);
-        socketToPlayerMap.delete(socketId);
     }
     roomStates.delete(roomId);
 }
