@@ -89,9 +89,11 @@ export class Game {
             shouldSwitchPlayer &&
             !this.state.players[this.state.currentPlayer - 1].canTakeBaseTiles
         ) {
-            const nextPlayer = this.state.currentPlayer === 1 ? 2 : 1;
-            if (!this.state.players[nextPlayer - 1].hasPassed) {
-                this.state.currentPlayer = nextPlayer;
+            const nextPlayerIdx = (this.state.currentPlayer % 2) + 1;
+            const nextPlayer = this.state.players[nextPlayerIdx - 1];
+            const canPlay = !nextPlayer.hasPassed && nextPlayer.pickedTiles.length;
+            if (this.state.phase === 1 || canPlay) {
+                this.state.currentPlayer = nextPlayerIdx;
             }
         }
         return {

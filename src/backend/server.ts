@@ -110,6 +110,8 @@ async function main() {
                 roomState.game.setState(roomState.lastGame.gameState);
                 updatePlayerNumber(info, roomState.lastGame.playerIds);
                 updatePlayerNumber(opponentInfo, roomState.lastGame.playerIds);
+                roomState.socketIds[info.number - 1] = socket.id;
+                roomState.socketIds[opponentInfo.number - 1] = opponentSocketId;
             }
             roomState.gameStarted = true;
 
@@ -175,7 +177,7 @@ async function main() {
 
                 console.log(
                     new Date(),
-                    `[Room] ${roomId} created: P1=${waitingSocket.id}, P2=${socket.id}`,
+                    `[Room] ${roomId} created: P1=${socket.id}, P2=${waitingSocket.id}`,
                 );
 
                 if (lastGame) {
@@ -196,7 +198,7 @@ async function main() {
                     console.log(
                         new Date(),
                         `[Game] ${roomId} game started:
-                        ${player.id}: P${1}, ${waitingPlayer.id}: P${2}`,
+                        ${player.id}: P1, ${waitingPlayer.id}: P2`,
                     );
                 }
             } else {
@@ -305,9 +307,9 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
             roomState.lastGame ? roomState.lastGame.gameId : undefined,
         );
         if (isGameSaved) {
-            console.log("The game has been succesfully saved.");
+            console.log(new Date(), "The game has been succesfully saved.");
         } else {
-            console.log("The game hasn't been saved.");
+            console.log(new Date(), "The game hasn't been saved.");
         }
     }
     // Clean up the other player's info and the room's game state
