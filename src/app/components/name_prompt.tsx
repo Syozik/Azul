@@ -24,7 +24,7 @@ export function NamePrompt({ callback }: { callback?: () => void }) {
         >
             <div className="name-prompt-popover">
                 <h2 id="name-prompt-title" className="name-prompt-title">
-                    Please add your name.
+                    Please add your name:
                 </h2>
                 <input
                     className="name-prompt-input"
