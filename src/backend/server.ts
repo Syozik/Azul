@@ -16,9 +16,8 @@ const handle = app.getRequestHandler();
 let waitingSocketId: string | null = null;
 
 const socketToPlayerMap: Map<string, PlayerInfo> = new Map();
-const playerIdToSocketMap: Map<string, string> = new Map();
 
-const playerInfo: Map<string, PlayerSessionInfo> = new Map();
+const playerInfo: Map<string, PlayerSessionInfo> = new Map(); // playerId: info
 
 const roomStates: Map<string, RoomState> = new Map();
 
@@ -42,40 +41,11 @@ async function main() {
     io.on("connection", (socket) => {
         console.log(new Date(), `[Socket] Connected: ${socket.id}`);
 
-        socket.emit("get-player-id", (playerId: string) => {
-            const prevSocket = playerIdToSocketMap.get(playerId) || "";
-            const info = playerInfo.get(prevSocket);
-            playerIdToSocketMap.set(playerId, socket.id);
-            if (prevSocket && info) {
-                socketToPlayerMap.set(socket.id, socketToPlayerMap.get(prevSocket)!);
-                clearTimeout(info.deleteTimer);
-                delete info.deleteTimer;
-                const roomState = roomStates.get(info.roomId)!;
-                socket.join(info.roomId);
-                socket.emit("game-start", {
-                    playerNumber: info.number,
-                    roomId: info.roomId,
-                    gameState: roomState.game.clientState,
-                });
-                // Update info to have the new socket id.
-                playerInfo.set(socket.id, info);
-                playerInfo.delete(prevSocket);
-                socketToPlayerMap.delete(prevSocket);
-                // Replace socket id with the new one.
-                const socketIdx = roomState.socketIds.indexOf(prevSocket);
-                roomState.socketIds[socketIdx] = socket.id;
-                console.log(
-                    new Date(),
-                    `: Recovered session for ${prevSocket} (new socket: ${socket.id}) in ${info.roomId}`,
-                );
-                return;
-            }
-            socketToPlayerMap.set(socket.id, { id: playerId });
-            socket.emit("game-loaded");
-        });
-
+        let shouldGetPlayerId = true;
         if (socket.recovered) {
-            const info = playerInfo.get(socket.id);
+            const player = socketToPlayerMap.get(socket.id);
+            shouldGetPlayerId = !!player;
+            const info = player && playerInfo.get(player.id);
             if (info) {
                 clearTimeout(info.deleteTimer);
                 delete info.deleteTimer;
@@ -93,25 +63,53 @@ async function main() {
                 }
             }
         }
+        if (shouldGetPlayerId) {
+            socket.emit("get-player-id", (playerId: string) => {
+                const info = playerInfo.get(playerId);
+                if (info && info.socketId) {
+                    const player = socketToPlayerMap.get(info.socketId)!;
+                    socketToPlayerMap.delete(info.socketId);
+                    socketToPlayerMap.set(socket.id, player);
+                    clearTimeout(info.deleteTimer);
+                    delete info.deleteTimer;
+                    const roomState = roomStates.get(info.roomId)!;
+                    socket.join(info.roomId);
+                    socket.emit("game-start", {
+                        playerNumber: info.number,
+                        roomId: info.roomId,
+                        gameState: roomState.game.clientState,
+                    });
+                    console.log(
+                        new Date(),
+                        `: Recovered session for ${info.socketId}, id: ${playerId} (new socket: ${socket.id}) in ${info.roomId}`,
+                    );
+                    info.socketId = socket.id;
+                    return;
+                }
+                socketToPlayerMap.set(socket.id, { id: playerId });
+                socket.emit("game-loaded");
+            });
+        }
 
         socket.on("start-game", ({ newGame = true }) => {
-            const info = playerInfo.get(socket.id)!;
+            const player = socketToPlayerMap.get(socket.id)!;
+            const info = playerInfo.get(player.id)!;
             const roomId = info.roomId;
 
             const roomState = roomStates.get(roomId)!;
-            const opponentSocketId = roomState.socketIds.find((id) => id !== socket.id)!;
-            const opponentSocket = io.sockets.sockets.get(opponentSocketId);
+            const opponentPlayerId = roomState.playerIds.find((id) => id !== player.id)!;
+            const opponentInfo = playerInfo.get(opponentPlayerId)!;
+            const opponentSocket = io.sockets.sockets.get(opponentInfo.socketId);
             if (!opponentSocket) {
                 return;
             }
-            const opponentInfo = playerInfo.get(opponentSocketId)!;
 
             if (!newGame && roomState.lastGame) {
                 roomState.game.setState(roomState.lastGame.gameState);
                 updatePlayerNumber(info, roomState.lastGame.playerIds);
                 updatePlayerNumber(opponentInfo, roomState.lastGame.playerIds);
-                roomState.socketIds[info.number - 1] = socket.id;
-                roomState.socketIds[opponentInfo.number - 1] = opponentSocketId;
+                roomState.playerIds[info.number - 1] = player.id;
+                roomState.playerIds[opponentInfo.number - 1] = opponentPlayerId;
             }
             roomState.gameStarted = true;
 
@@ -135,7 +133,6 @@ async function main() {
 
         socket.on("find-game", async ({ id, name }: { id: string; name: string }) => {
             socketToPlayerMap.set(socket.id, { id, name });
-            playerIdToSocketMap.set(id, socket.id);
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
@@ -154,16 +151,18 @@ async function main() {
                 socket.join(roomId);
                 waitingSocketId = null;
 
-                playerInfo.set(socket.id, {
+                playerInfo.set(player.id, {
                     roomId,
                     number: 1,
                     id: player.id,
+                    socketId: socket.id,
                 });
 
-                playerInfo.set(waitingSocket.id, {
+                playerInfo.set(waitingPlayer.id, {
                     roomId,
                     number: 2,
                     id: waitingPlayer.id,
+                    socketId: waitingSocket.id,
                 });
 
                 const game = new Game([player.name!, waitingPlayer.name!]);
@@ -171,13 +170,13 @@ async function main() {
                 roomStates.set(roomId, {
                     game,
                     lastGame,
-                    socketIds: [socket.id, waitingSocket.id],
+                    playerIds: [player.id, waitingPlayer.id],
                     gameStarted: false,
                 });
 
                 console.log(
                     new Date(),
-                    `[Room] ${roomId} created: P1=${socket.id}, P2=${waitingSocket.id}`,
+                    `[Room] ${roomId} created: P1=${player.id}, P2=${waitingPlayer.id}`,
                 );
 
                 if (lastGame) {
@@ -213,7 +212,8 @@ async function main() {
         });
 
         socket.on("game-action", async (data) => {
-            const info = playerInfo.get(socket.id);
+            const player = socketToPlayerMap.get(socket.id)!;
+            const info = playerInfo.get(player.id);
             if (!info) return;
 
             const game = roomStates.get(info.roomId)?.game;
@@ -237,7 +237,8 @@ async function main() {
         });
 
         socket.on("end-game", async (shouldSave: boolean) => {
-            const info = playerInfo.get(socket.id);
+            const player = socketToPlayerMap.get(socket.id)!;
+            const info = playerInfo.get(player.id);
             if (!info) return;
 
             const game = roomStates.get(info.roomId)!.game;
@@ -260,7 +261,8 @@ async function main() {
                 waitingSocketId = null;
             }
 
-            const info = playerInfo.get(socket.id);
+            const player = socketToPlayerMap.get(socket.id);
+            const info = player && playerInfo.get(player.id);
             if (info) {
                 info.deleteTimer = setTimeout(
                     () => {
@@ -271,12 +273,12 @@ async function main() {
                                 err,
                             );
                         });
-                        const player = socketToPlayerMap.get(socket.id)!;
                         socketToPlayerMap.delete(socket.id);
-                        playerIdToSocketMap.delete(player.id);
                     },
                     60 * 10 ** 3,
                 );
+            } else {
+                socketToPlayerMap.delete(socket.id);
             }
         });
     });
@@ -293,9 +295,9 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
     }
 
     if (roomState.gameStarted && shouldSave) {
-        const playerIds: string[] = new Array<string>(roomState.socketIds.length);
-        for (const socketId of roomState.socketIds) {
-            const info = playerInfo.get(socketId);
+        const playerIds: string[] = new Array<string>(roomState.playerIds.length);
+        for (const playerId of roomState.playerIds) {
+            const info = playerInfo.get(playerId);
             if (info) {
                 playerIds[info.number - 1] = info.id;
             }
@@ -313,8 +315,8 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
         }
     }
     // Clean up the other player's info and the room's game state
-    for (const socketId of roomState.socketIds) {
-        playerInfo.delete(socketId);
+    for (const playerId of roomState.playerIds) {
+        playerInfo.delete(playerId);
     }
     roomStates.delete(roomId);
 }

@@ -29,6 +29,7 @@ export interface LastGame {
 
 export interface PlayerSessionInfo {
     roomId: string;
+    socketId: string;
     id: string;
     number: 1 | 2;
     deleteTimer?: ReturnType<typeof setTimeout>;
@@ -41,7 +42,7 @@ export interface PlayerInfo {
 
 export interface RoomState {
     game: Game;
-    socketIds: string[];
+    playerIds: string[];
     gameStarted: boolean;
     lastGame?: LastGame | false;
 }
