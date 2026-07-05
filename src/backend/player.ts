@@ -300,6 +300,9 @@ export class Player {
 
     public applySaveForNextRoundAction(idx: number, selectedTiles: ColorKey[]) {
         const savedTiles = this.savedTilesForNextRound;
+        if (this.game.state.round === 6) {
+            throw new Error("This is the last round. You can't do this action.");
+        }
         if (savedTiles[idx]) {
             throw new Error("You've already used that slot.");
         }
