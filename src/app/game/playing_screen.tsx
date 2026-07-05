@@ -15,7 +15,8 @@ export function PlayingScreen() {
     const seenIdsRef = useRef<Set<number>>(new Set());
     const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-    const notifications = state.gameState.players[state.playerNumber - 1]?.notifications;
+    const playerNotifications = state.gameState.players[state.playerNumber - 1]?.notifications;
+    const notifications = playerNotifications.slice(playerNotifications.length - 4);
     useEffect(() => {
         const newNotifs = notifications.filter((n) => !seenIdsRef.current.has(n.id));
         if (newNotifs.length === 0) return;

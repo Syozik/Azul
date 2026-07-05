@@ -71,7 +71,7 @@ export class Player {
         this.game.pushNotification(
             this.playerNumber - 1,
             "success",
-            `You picked up ${picked.join(" ")} tiles`,
+            `You picked up ${picked.join(" ")}`,
             true,
         );
     }
@@ -153,7 +153,7 @@ export class Player {
             this.game.pushNotification(
                 this.playerNumber - 1,
                 "success",
-                `You covered all ${color} tiles`,
+                `You covered the ${color} snowflake!`,
                 true,
             );
         }
@@ -233,7 +233,7 @@ export class Player {
                     this.game.pushNotification(
                         this.playerNumber - 1,
                         "success",
-                        `You covered ${color} a fountain!`,
+                        `You covered a fountain!`,
                         true,
                     );
                 }
@@ -292,7 +292,7 @@ export class Player {
         this.game.pushNotification(
             this.playerNumber - 1,
             "success",
-            `You took ${colors.join(" ")} tiles from the base.`,
+            `You took ${colors.join(" ")} from the base.`,
             true,
         );
         this.canTakeBaseTiles = 0;

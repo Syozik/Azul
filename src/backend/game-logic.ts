@@ -79,7 +79,6 @@ export class Game {
                     );
             }
         } catch (error) {
-            console.log(error);
             if (error instanceof Error) {
                 this.pushNotification(playerNumber - 1, "error", error.message);
                 return { error: error.message };
