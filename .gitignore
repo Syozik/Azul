@@ -1,6 +1,4 @@
 .vscode
-pnpm-lock.yaml
-pnpm-workspace.yaml
 
 # dependencies
 /node_modules
