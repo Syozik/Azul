@@ -10,35 +10,16 @@ import {
     useReducer,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import type { GameState, GameAction } from "../shared/types";
-import { initState } from "../shared/helpers";
+import type { GameState, GameAction, State, SocketContextType, Action } from "@/shared/types";
+import { initState } from "@/shared/helpers";
 import { getPlayerId, getPlayerName, setPlayerName } from "./utils";
-
-type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" | "disconnected";
-
-interface SocketContextType {
-    state: State;
-    findGame: () => boolean;
-    startGame: (newGame?: boolean) => void;
-    sendGameAction: (action: GameAction) => void;
-    changePlayerName: (newName: string) => void;
-    endGame: (shouldSave?: boolean) => void;
-}
-
-type State = {
-    connectionStatus: ConnectionStatus;
-    playerNumber: 1 | 2;
-    roomId: string | null;
-    playerName?: string | null;
-    gameState: GameState;
-    disconnectedReason?: string;
-};
 
 const initialState: State = {
     connectionStatus: "idle",
     playerNumber: 1,
     roomId: null,
     gameState: initState(),
+    peopleOnline: 1,
 };
 
 const SocketContext = createContext<SocketContextType>({
@@ -53,22 +34,6 @@ const SocketContext = createContext<SocketContextType>({
 export function useSocket() {
     return useContext(SocketContext);
 }
-
-type Action =
-    | { type: "LOADED" }
-    | { type: "SEARCHING" }
-    | { type: "WAITING" }
-    | {
-          type: "GAME_START";
-          playerNumber: 1 | 2;
-          roomId: string;
-          gameState: GameState;
-      }
-    | { type: "GAME_STATE"; gameState: GameState }
-    | { type: "OPPONENT_DISCONNECTED" }
-    | { type: "SET_NAME"; name: string | null }
-    | { type: "END_GAME"; reason: string }
-    | { type: "DISCONNECT" };
 
 function reducer(state: State, action: Action): State {
     switch (action.type) {
@@ -109,6 +74,11 @@ function reducer(state: State, action: Action): State {
                 connectionStatus: "disconnected",
                 disconnectedReason: action.reason,
             };
+        case "SET_ONLINE":
+            return {
+                ...state,
+                peopleOnline: action.peopleOnline,
+            };
         default:
             return state;
     }
@@ -133,6 +103,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
         socket.on("connect", () => {
             console.log("Connected to server:", socket.id, "recovered:", socket.recovered);
+        });
+        socket.on("online-size", (peopleOnline) => {
+            dispatch({ type: "SET_ONLINE", peopleOnline });
         });
         socket.on("get-player-id", (callback) => {
             const playerId = getPlayerId();

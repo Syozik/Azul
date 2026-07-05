@@ -97,4 +97,42 @@ export interface SaveForNextRoundAction {
 export type GameAction =
     PickTilesAction | CoverTileAction | PassAction | BasePickAction | SaveForNextRoundAction;
 
+type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" | "disconnected";
+
+export interface SocketContextType {
+    state: State;
+    findGame: () => boolean;
+    startGame: (newGame?: boolean) => void;
+    sendGameAction: (action: GameAction) => void;
+    changePlayerName: (newName: string) => void;
+    endGame: (shouldSave?: boolean) => void;
+}
+
+export type State = {
+    connectionStatus: ConnectionStatus;
+    playerNumber: 1 | 2;
+    roomId: string | null;
+    playerName?: string | null;
+    gameState: GameState;
+    disconnectedReason?: string;
+    peopleOnline: number;
+};
+
+export type Action =
+    | { type: "LOADED" }
+    | { type: "SEARCHING" }
+    | { type: "WAITING" }
+    | {
+          type: "GAME_START";
+          playerNumber: 1 | 2;
+          roomId: string;
+          gameState: GameState;
+      }
+    | { type: "SET_ONLINE"; peopleOnline: number }
+    | { type: "GAME_STATE"; gameState: GameState }
+    | { type: "OPPONENT_DISCONNECTED" }
+    | { type: "SET_NAME"; name: string | null }
+    | { type: "END_GAME"; reason: string }
+    | { type: "DISCONNECT" };
+
 export type TileColor = ColorKey | "CENTER";

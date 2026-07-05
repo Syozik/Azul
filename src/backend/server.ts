@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import next from "next";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { Game } from "./game-logic";
 import { fetchLastGame, saveGame, updatePlayerNumber } from "./utils";
 import type { PlayerInfo, PlayerSessionInfo, RoomState } from "../shared/types";
@@ -21,6 +21,8 @@ const playerInfo: Map<string, PlayerSessionInfo> = new Map(); // playerId: info
 
 const roomStates: Map<string, RoomState> = new Map();
 
+const socketsOnline: Set<Socket> = new Set();
+
 async function main() {
     await app.prepare();
 
@@ -38,8 +40,16 @@ async function main() {
         pingTimeout: 20000,
     });
 
+    const updateOnline = () => {
+        for (const socket of socketsOnline) {
+            socket.emit("online-size", socketsOnline.size);
+        }
+    };
+
     io.on("connection", (socket) => {
+        socketsOnline.add(socket);
         console.log(new Date(), `[Socket] Connected: ${socket.id}`);
+        updateOnline();
 
         let shouldGetPlayerId = true;
         if (socket.recovered) {
@@ -255,6 +265,8 @@ async function main() {
         });
 
         socket.on("disconnect", async () => {
+            socketsOnline.delete(socket);
+            updateOnline();
             console.log(new Date(), `[Socket] Disconnected: ${socket.id}`);
 
             if (waitingSocketId === socket.id) {

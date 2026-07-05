@@ -306,3 +306,20 @@
         font-size: 1.1rem;
     }
 }
+
+.online-status {
+    font-size: 1.05rem;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 70%;
+}
+
+.online-mark {
+    display: inline-block;
+    background-color: green;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-bottom: 2px;
+}

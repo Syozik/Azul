@@ -14,6 +14,11 @@ export function Lobby() {
     return (
         <div className="lobby-container">
             <div className="lobby-card">
+                {state.connectionStatus !== "idle" && (
+                    <div className="online-status flex justify-center items-center gap-1">
+                        Online: {state.peopleOnline} <span className="online-mark" />
+                    </div>
+                )}
                 <div className="lobby-mosaic">
                     {Array.from({ length: 6 }, (_, i) => (
                         <div key={i} className="mosaic-tile" />
@@ -22,7 +27,6 @@ export function Lobby() {
 
                 <h1 className="lobby-title">Azul</h1>
                 <p className="lobby-subtitle">The Tile-Laying Game</p>
-
                 <div className="lobby-divider" />
 
                 {state.connectionStatus === "loaded" &&
