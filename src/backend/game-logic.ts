@@ -1,13 +1,14 @@
-import { allowedGameActions } from "../shared/consts";
-import { initState } from "../shared/helpers";
+import { allowedGameActions, JOKERS } from "../shared/consts";
+import { ai, initState } from "../shared/helpers";
 import { createTileBag, fillFactories, shuffle } from "./utils";
-import type { GameAction, GameBackendState } from "../shared/types";
+import type { AISymbol, ColorKey, GameAction, GameBackendState } from "../shared/types";
 import { Player } from "./player";
+import { AI } from "./ai";
 
 export class Game {
     public state: GameBackendState;
 
-    public constructor(playerNames: string[]) {
+    public constructor(players: (string | AISymbol)[]) {
         const bag = createTileBag();
         this.state = {
             ...initState(),
@@ -16,7 +17,9 @@ export class Game {
             _bag: bag, // keep the bag on the server (not sent to clients)
             _trash: [],
         };
-        this.state.players = playerNames.map((name, idx) => new Player(idx + 1, name, this));
+        this.state.players = players.map((player, idx) =>
+            player === ai ? new AI(idx + 1, "AI", this) : new Player(idx + 1, player, this),
+        );
     }
 
     public setState(newState: GameBackendState) {
@@ -48,7 +51,7 @@ export class Game {
         };
     }
 
-    public applyAction(playerNumber: 1 | 2, data: GameAction) {
+    public applyAction(playerNumber: number, data: GameAction) {
         let shouldSwitchPlayer = true;
         const player = this.state.players[playerNumber - 1];
         try {
@@ -95,19 +98,17 @@ export class Game {
                 this.state.currentPlayer = nextPlayerIdx;
             }
         }
+        this.updatePhase();
         return {
             success: "Action done!",
         };
     }
 
-    public updatePhase() {
+    private updatePhase() {
         if (this.state.phase === 1 && this.isPickingPhaseOver) {
             this.state.phase = 2;
             this.state.currentPlayer = this.state.firstPlayer;
-            return;
-        }
-
-        if (this.state.phase === 2 && this.isCoveringPhaseOver) {
+        } else if (this.state.phase === 2 && this.isCoveringPhaseOver) {
             if (this.state.round === 6) {
                 this.endGame();
                 return;
@@ -144,6 +145,10 @@ export class Game {
         return (
             this.state.factories.every((f) => f.length === 0) && this.state.centerPool.length === 0
         );
+    }
+
+    public get joker(): ColorKey {
+        return JOKERS[this.state.round - 1];
     }
 
     private endGame() {

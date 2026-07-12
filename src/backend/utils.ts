@@ -100,7 +100,7 @@ function formatGameState(json: Prisma.JsonValue): GameBackendState {
 }
 
 export function updatePlayerNumber(playerInfo: PlayerSessionInfo, playerIds: string[]) {
-    const playerIdx = playerIds.indexOf(playerInfo.id);
+    const playerIdx = playerIds.indexOf(String(playerInfo.id));
     playerInfo.number = (playerIdx + 1) as 1 | 2;
     return true;
 }

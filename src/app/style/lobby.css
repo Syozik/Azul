@@ -88,11 +88,31 @@
 
 .lobby-action {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     min-height: 120px;
     justify-content: center;
+    width: 100%;
+}
+
+.lobby-option-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 180px;
+}
+
+.lobby-option-card .lobby-play-btn {
+    width: 100%;
+}
+
+.lobby-or {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #8b7a5e;
+    margin-top: 1.5rem;
 }
 
 .lobby-instruction {
@@ -101,12 +121,18 @@
     margin: 0;
 }
 
+.disconnected .lobby-play-btn {
+    font-size: 0.9rem;
+}
+
 .lobby-play-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
-    padding: 0.9rem 2.5rem;
-    font-size: 1.2rem;
+    padding: 0.9rem 2.5rem 0.9rem 2rem; /* Adjusted right padding to accommodate absolute icon */
+    font-size: 1.15rem;
     font-weight: 700;
     color: #fff;
     background: linear-gradient(135deg, #5c3d1a, #8b6a3e);
@@ -119,6 +145,21 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
     letter-spacing: 1px;
     text-transform: uppercase;
+    min-width: 180px;
+}
+
+.lobby-btn-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+.lobby-btn-group .lobby-play-btn {
+    flex: 1;
+    min-width: 180px;
+    max-width: 220px;
 }
 
 .lobby-play-btn:hover {
@@ -135,12 +176,20 @@
 }
 
 .btn-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-68%);
     font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
     transition: transform 0.3s ease;
 }
 
 .lobby-play-btn:hover .btn-icon {
-    transform: translateX(4px);
+    transform: translateY(-68%) translateX(4px);
 }
 
 /* Spinner for "Connecting..." */

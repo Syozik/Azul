@@ -32,3 +32,5 @@ export function numberOf<T>(arr: T[], fn: (el: T) => boolean): number {
     arr.forEach((el) => (res += Number(fn(el))));
     return res;
 }
+
+export const ai = Symbol("AI");

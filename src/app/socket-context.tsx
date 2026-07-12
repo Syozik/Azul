@@ -156,12 +156,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const findGame = useCallback(() => {
+    const findGame = useCallback((ai = false) => {
         const id = getPlayerId();
         const name = getPlayerName();
         if (socketRef.current && name) {
             dispatch({ type: "SEARCHING" });
-            socketRef.current.emit("find-game", { id, name });
+            socketRef.current.emit("find-game", { id, name, againstAI: ai });
             return true;
         }
         return false;

@@ -1,7 +1,10 @@
 import type { Player } from "@/backend/player";
-import type { Game } from "../backend/game-logic";
+import type { Game } from "@/backend/game-logic";
+import { ai } from "./helpers";
 
 export type ColorKey = "PURPLE" | "GREEN" | "ORANGE" | "YELLOW" | "BLUE" | "RED";
+
+export type AISymbol = typeof ai;
 
 export interface GameState {
     factories: ColorKey[][];
@@ -30,7 +33,7 @@ export interface LastGame {
 export interface PlayerSessionInfo {
     roomId: string;
     socketId: string;
-    id: string;
+    id: string | AISymbol;
     number: 1 | 2;
     deleteTimer?: ReturnType<typeof setTimeout>;
 }
@@ -101,7 +104,7 @@ type ConnectionStatus = "idle" | "loaded" | "searching" | "waiting" | "playing" 
 
 export interface SocketContextType {
     state: State;
-    findGame: () => boolean;
+    findGame: (AI?: boolean) => boolean;
     startGame: (newGame?: boolean) => void;
     sendGameAction: (action: GameAction) => void;
     changePlayerName: (newName: string) => void;

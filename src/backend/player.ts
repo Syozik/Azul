@@ -1,11 +1,11 @@
-import { BONUSES, JOKERS, TILE_COLORS } from "@/shared/consts";
+import { BONUSES, TILE_COLORS } from "@/shared/consts";
 import { initCoveredTiles, numberOf } from "@/shared/helpers";
 import { ColorKey, NotificationType, PlayerState, TileColor } from "@/shared/types";
 import { shuffle } from "./utils";
 import { Game } from "./game-logic";
 
 export class Player {
-    private readonly game: Game;
+    protected readonly game: Game;
     public playerNumber: number;
     public name: string;
     pickedTiles: ColorKey[] = [];
@@ -41,7 +41,7 @@ export class Player {
         if (!pool.includes(color)) {
             throw new Error(`Color ${color} not in the selected pool`);
         }
-        const joker: ColorKey = JOKERS[this.game.state.round - 1];
+        const joker = this.game.joker;
         if (color === joker && pool.some((color) => color !== joker)) {
             throw new Error(`Can't choose the current joker`);
         }
@@ -87,7 +87,7 @@ export class Player {
             throw new Error("This tile has already been closed");
         }
 
-        const joker = JOKERS[this.game.state.round - 1];
+        const joker = this.game.joker;
         const isCenter = color === "CENTER";
         let res: ColorKey | boolean = true;
         if (!isCenter) {

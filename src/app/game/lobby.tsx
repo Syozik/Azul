@@ -8,8 +8,14 @@ import "@/app/style/lobby.css";
 export function Lobby() {
     const { state, findGame, startGame } = useSocket();
     const [shouldAskName, setShouldAskName] = useState<boolean>(false);
+    const [onNameSubmit, setOnNameSubmit] = useState<() => void>(() => {});
 
-    const onPlay = () => setShouldAskName(!findGame());
+    const onPlay = (AI = false) => {
+        if (!findGame(AI)) {
+            setShouldAskName(true);
+            setOnNameSubmit(() => findGame(AI));
+        }
+    };
 
     return (
         <div className="lobby-container">
@@ -31,14 +37,25 @@ export function Lobby() {
 
                 {state.connectionStatus === "loaded" &&
                     (shouldAskName ? (
-                        <NamePrompt callback={findGame} />
+                        <NamePrompt callback={onNameSubmit} />
                     ) : (
                         <div className="lobby-action">
-                            <p className="lobby-instruction">Press Play to find an opponent</p>
-                            <button className="lobby-play-btn" onClick={() => onPlay()}>
-                                <span className="btn-text">Play</span>
-                                <span className="btn-icon">→</span>
-                            </button>
+                            <div className="lobby-option-card">
+                                <p className="lobby-instruction">Find an opponent</p>
+                                <button className="lobby-play-btn" onClick={() => onPlay()}>
+                                    <span className="btn-text">Play</span>
+                                    <span className="btn-icon">→</span>
+                                </button>
+                            </div>
+
+                            <span className="lobby-or">OR</span>
+                            <div className="lobby-option-card">
+                                <p className="lobby-instruction">Play against AI</p>
+                                <button className="lobby-play-btn" onClick={() => onPlay(true)}>
+                                    <span className="btn-text">Play</span>
+                                    <span className="btn-icon">→</span>
+                                </button>
+                            </div>
                         </div>
                     ))}
                 {state.connectionStatus === "waiting" && (
@@ -80,18 +97,30 @@ export function Lobby() {
                 )}
 
                 {state.connectionStatus === "disconnected" && (
-                    <div className="lobby-action">
-                        <p className="lobby-status lobby-status-error">
-                            {state.disconnectedReason}
-                        </p>
-                        <button
-                            className="lobby-play-btn"
-                            onClick={() => findGame()}
-                            id="play-again-button"
-                        >
-                            <span className="btn-text">Find New Game</span>
-                            <span className="btn-icon">↻</span>
-                        </button>
+                    <div className="lobby-action disconnected">
+                        <div>
+                            <p className="lobby-status lobby-status-error">
+                                {state.disconnectedReason}
+                            </p>
+                            <div className="lobby-btn-group">
+                                <button
+                                    className="lobby-play-btn"
+                                    onClick={() => findGame()}
+                                    id="play-again-button"
+                                >
+                                    <span className="btn-text">Find New Game</span>
+                                    <span className="btn-icon">↻</span>
+                                </button>
+                                <button
+                                    className="lobby-play-btn"
+                                    onClick={() => findGame(true)}
+                                    id="play-again-button"
+                                >
+                                    <span className="btn-text">Play against AI</span>
+                                    <span className="btn-icon">↻</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 

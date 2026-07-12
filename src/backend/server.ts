@@ -5,6 +5,8 @@ import { Game } from "./game-logic";
 import { fetchLastGame, saveGame, updatePlayerNumber } from "./utils";
 import type { PlayerInfo, PlayerSessionInfo, RoomState } from "../shared/types";
 import { randomUUID } from "crypto";
+import { ai } from "@/shared/helpers";
+import { AI } from "./ai";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOST || "0.0.0.0";
@@ -22,6 +24,12 @@ const playerInfo: Map<string, PlayerSessionInfo> = new Map(); // playerId: info
 const roomStates: Map<string, RoomState> = new Map();
 
 const socketsOnline: Set<Socket> = new Set();
+
+interface FindGameParams {
+    id: string;
+    name: string;
+    againstAI: boolean;
+}
 
 async function main() {
     await app.prepare();
@@ -137,12 +145,48 @@ async function main() {
             console.log(
                 new Date(),
                 `[Game] ${roomId} game started:
-                    ${info.id}: P${info.number}, ${opponentInfo.id}: P${opponentInfo.number}`,
+                    ${String(info.id)}: P${info.number}, ${String(opponentInfo.id)}: P${opponentInfo.number}`,
             );
         });
 
-        socket.on("find-game", async ({ id, name }: { id: string; name: string }) => {
+        socket.on("find-game", async ({ id, name, againstAI }: FindGameParams) => {
             socketToPlayerMap.set(socket.id, { id, name });
+            if (againstAI) {
+                const roomId = randomUUID();
+
+                socket.join(roomId);
+                const aiId = "AI_" + randomUUID().slice(3);
+                playerInfo.set(id, {
+                    roomId,
+                    number: 1,
+                    id,
+                    socketId: socket.id,
+                });
+
+                playerInfo.set(aiId, {
+                    roomId,
+                    number: 2,
+                    id: ai,
+                    socketId: aiId,
+                });
+
+                const game = new Game([name, ai]);
+
+                console.log(new Date(), `[Room] ${roomId} created: P1=${id}, P2=AI`);
+
+                socket.emit("game-start", {
+                    gameState: game.clientState,
+                    playerNumber: 1,
+                    roomId,
+                });
+                roomStates.set(roomId, {
+                    game,
+                    playerIds: [id, aiId],
+                    gameStarted: true,
+                });
+                console.log(new Date(), `[Game] ${roomId} game started: P1=${id}, P2=AI`);
+                return;
+            }
             if (waitingSocketId && waitingSocketId !== socket.id) {
                 const roomId = randomUUID();
                 const waitingSocket = io.sockets.sockets.get(waitingSocketId);
@@ -221,15 +265,15 @@ async function main() {
             }
         });
 
-        socket.on("game-action", async (data) => {
-            const player = socketToPlayerMap.get(socket.id)!;
-            const info = playerInfo.get(player.id);
+        socket.on("game-action", async (action) => {
+            const { id } = socketToPlayerMap.get(socket.id)!;
+            const info = playerInfo.get(id);
             if (!info) return;
 
             const game = roomStates.get(info.roomId)?.game;
             if (!game) return;
 
-            const result = game.applyAction(info.number, data);
+            const result = game.applyAction(info.number, action);
 
             if (result.error) {
                 socket.emit("game-error", { error: result.error });
@@ -238,12 +282,9 @@ async function main() {
                 return;
             }
 
-            game.updatePhase();
-
             io.to(info.roomId).emit("game-state", game.clientState);
-            if (game.state.isGameOver) {
-                await endGame(info.roomId);
-            }
+            if (game.state.isGameOver) await endGame(info.roomId);
+            else handleAITurn(info.roomId, game);
         });
 
         socket.on("end-game", async (shouldSave: boolean) => {
@@ -295,6 +336,18 @@ async function main() {
         });
     });
 
+    const handleAITurn = (roomId: string, game: Game) => {
+        const player = game.state.players[game.state.currentPlayer - 1];
+        if (player instanceof AI) {
+            setTimeout(() => {
+                player.playTurn();
+                io.to(roomId).emit("game-state", game.clientState);
+                if (game.state.isGameOver) endGame(roomId);
+                else handleAITurn(roomId, game);
+            }, 2000);
+        }
+    };
+
     httpServer.listen(port, hostname, () => {
         console.log(new Date(), `> Ready on http://${hostname}:${port}`);
     });
@@ -311,7 +364,7 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
         for (const playerId of roomState.playerIds) {
             const info = playerInfo.get(playerId);
             if (info) {
-                playerIds[info.number - 1] = info.id;
+                playerIds[info.number - 1] = String(info.id);
             }
         }
         const isGameSaved = await saveGame(
@@ -326,7 +379,7 @@ async function endGame(roomId: string, shouldSave: boolean = true) {
             console.log(new Date(), "The game hasn't been saved.");
         }
     }
-    // Clean up the other player's info and the room's game state
+    // Clean up the other player's info and the room's game action
     for (const playerId of roomState.playerIds) {
         playerInfo.delete(playerId);
     }
