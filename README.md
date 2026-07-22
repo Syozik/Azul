@@ -4,7 +4,7 @@ This is an online version of the game [Azul](<https://en.wikipedia.org/wiki/Azul
 Its 'Summer Pavilion' extension, to be precise. My girlfriend and I found it such an interesting game,
 I couldn't help but make an online version of it.
 
-You can check a demo of it on https://oneirocritically-empirical-tianna.ngrok-free.dev/ .
+You can check a demo of it on https://oneirocritically-empirical-tianna.ngrok-free.dev/ (not live currently).
 
 
 #### Rules
