@@ -92,6 +92,9 @@ export class Player {
         let res: ColorKey | boolean = true;
         if (!isCenter) {
             usedTiles = usedTiles.filter((tile) => tile === color || tile === joker);
+            if (color !== joker && usedTiles.every((tile) => tile === joker)) {
+                throw new Error("You can't use only joker for this tile");
+            }
         } else {
             const usedTilesSet = new Set(usedTiles);
             if (usedTilesSet.size > 2 || (usedTilesSet.size == 2 && !usedTilesSet.has(joker))) {
