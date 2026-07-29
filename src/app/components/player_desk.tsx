@@ -76,7 +76,7 @@ export function PlayerDesk() {
     };
 
     const onTileSelect = (tile: ColorKey, idx: number) => {
-        if (!isOwner || !isMyTurn) {
+        if (!isOwner) {
             return;
         }
         const formattedTile = `${tile}_${idx}`;
@@ -136,6 +136,14 @@ export function PlayerDesk() {
                 </div>
             </div>
             <div className="available-tiles flex flex-row flex-wrap gap-2 md:gap-5 justify-center">
+                {isOwner && !!playerTiles.length && (
+                    <span
+                        className={`box-tile reset-selected${selectedTiles.length ? "" : " disabled"}`}
+                        onClick={() => setSelectedTiles([])}
+                    >
+                        ⟲
+                    </span>
+                )}
                 {playerTiles.map((group) => (
                     <div key={group[0]} className="groupedTiles">
                         {group.map((tile, idx) => (

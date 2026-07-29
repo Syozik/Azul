@@ -1,7 +1,7 @@
 .snowflakes {
     position: relative;
     border: 5px solid rgba(88, 45, 4, 0.62);
-    background-color:antiquewhite;
+    background-color: antiquewhite;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -50,12 +50,29 @@
 }
 .own-desk .available-tiles .box-tile {
     cursor: pointer;
+
+    &.reset-selected {
+        color: rgba(88, 45, 4, 0.62);
+        font-weight: bold;
+
+        &.disabled {
+            cursor: auto;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+    }
 }
 
 @keyframes tile-select-pop {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.2); }
-    100% { transform: scale(1.15); }
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1.15);
+    }
 }
 
 .available-tiles .box-tile.selected {
