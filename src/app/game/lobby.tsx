@@ -13,7 +13,7 @@ export function Lobby() {
     const onPlay = (AI = false) => {
         if (!findGame(AI)) {
             setShouldAskName(true);
-            setOnNameSubmit(() => findGame(AI));
+            setOnNameSubmit(() => () => findGame(AI));
         }
     };
 
